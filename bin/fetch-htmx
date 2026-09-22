@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Vendor htmx and its SSE extension into public/js.
+#
+# Reads the URLs and integrity hashes off Weft::Page::Assets rather than copying
+# a version number here, and refuses to write a file whose digest disagrees. So
+# the check bites both ways: a tampered download fails, and so does a stale
+# vendored file after the pin moves. Re-run at every pin move, commit what
+# changes. See docs/development.md for why both files are fetched now.
+
+require "base64"
+require "bundler/setup"
+require "digest"
+require "fileutils"
+require "open-uri"
+
+require "weft"
+
+DESTINATION = File.expand_path("../public/js", __dir__)
+
+ASSETS = [
+  ["htmx.min.js", Weft::Page::Assets::HTMX_SRC, Weft::Page::Assets::HTMX_ATTRS[:integrity]],
+  ["sse.js", Weft::Page::Assets::HTMX_SSE_SRC, Weft::Page::Assets::HTMX_SSE_ATTRS[:integrity]]
+].freeze
+
+def integrity_of(body)
+  "sha384-#{Base64.strict_encode64(Digest::SHA384.digest(body))}"
+end
+
+FileUtils.mkdir_p(DESTINATION)
+
+failures = ASSETS.filter_map do |name, source, expected|
+  body = URI.parse(source).open(&:read)
+  actual = integrity_of(body)
+
+  if actual == expected
+    File.binwrite(File.join(DESTINATION, name), body)
+    puts "  ok  #{name}  #{body.bytesize} bytes  #{expected}"
+    nil
+  else
+    "#{name}: expected #{expected}, got #{actual}"
+  end
+end
+
+unless failures.empty?
+  warn "\nIntegrity check failed -- nothing written:"
+  failures.each { |failure| warn "  #{failure}" }
+  exit 1
+end
+
+puts "\nVendored into public/js from the hashes weft #{Weft::VERSION} pins."
