@@ -1,0 +1,42 @@
+name: CI
+
+# The same three checks bin/check runs, plus the image build, so a green run
+# here and a green run locally mean the same thing. No deploy and no secrets:
+# see docs/development.md, "Continuous Integration".
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Specs, lint, doc drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: .ruby-version
+          bundler-cache: true
+
+      # The same three bin/check runs, split so a failure names itself.
+      - run: bundle exec rspec
+      - run: bundle exec rubocop
+      - run: bundle exec bin/doc-drift-check
+
+  image:
+    name: Image builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Nothing is pushed anywhere: this only proves the Dockerfile still
+      # produces an image, which is what a deploy will later depend on.
+      - run: docker build -t weft-site .

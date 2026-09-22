@@ -1,0 +1,13 @@
+.git
+.github
+.bundle
+vendor/bundle
+tmp
+*.log
+.DS_Store
+
+# Internal design reference, never served and not needed to run the site.
+design
+
+# The specs run before the image is built, not inside it.
+spec
