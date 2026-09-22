@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>F with knobs: the column bench, closed, dark</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#141B22;color:#E4E9EA;font-family:Spectral,Georgia,"Times New Roman",serif}
+a{color:#7FA9E6}a:hover{color:#A9C6F0}
+.mono{font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace}
+.live{background:transparent;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1.5px dotted #E69A5E}
+.live:hover{color:#E69A5E}
+.flat{font:inherit;font-size:14px;padding:6px 8px;border:0;border-radius:4px;background:transparent;color:#E4E9EA;cursor:pointer}
+.flat:hover{background:#1B242D}
+.bar a{text-decoration:none;color:#B4C0CA;padding:5px 0;display:block}
+.bar a:hover{color:#E4E9EA}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #7FA9E6;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 1280px; height: 1040px; box-sizing: border-box; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #141B22;">
+
+  <header style="display: flex; align-items: center; gap: 10px; padding: 40px 80px 0; font-size: 15px; color: #98A5B0;">
+    <a href="#" style="text-decoration: none; color: #E4E9EA; font-weight: 600; font-size: 20px; margin-right: 6px;">weft</a>
+    <span>/</span><a href="#" style="text-decoration: none; color: #98A5B0;">Examples</a>
+    <span>/</span><span style="color: #E4E9EA;">Click to Edit</span>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 4px;">
+      <label for="q" style="display: flex; align-items: center; gap: 8px; padding: 6px 12px; margin-right: 8px; border: 1px solid #2B3742; border-radius: 999px; color: #98A5B0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input id="q" type="search" placeholder="Search" style="border: 0; background: transparent; font: inherit; color: inherit; width: 110px;"><span class="mono" style="font-size: 11px;">⌘K</span></label>
+      <button type="button" aria-haspopup="listbox" class="flat mono" style="font-size: 13px;">v0.2.0 ▾</button>
+      <button type="button" aria-label="Switch to light theme" class="flat" style="display: grid; place-items: center; width: 32px; height: 32px; padding: 0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></button>
+      <a href="https://github.com/rusterholz/weft" class="flat" style="text-decoration: none; font-weight: 500;">GitHub</a>
+    </div>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 176px 574px 274px; column-gap: 48px; padding: 44px 80px 32px; min-height: 0;">
+    <nav class="bar" aria-label="Examples" style="display: flex; flex-direction: column; gap: 0; font-size: 14px; padding-top: 18px;">
+      <a href="#" style="font-weight: 600; color: #E4E9EA; margin-left: -12px; padding-left: 10px; border-left: 2px solid #E69A5E;">Click to Edit</a>
+      <a href="#">Edit Row</a><a href="#">Delete Row</a><a href="#">Bulk Update</a><a href="#">Inline Validation</a><a href="#">File Upload</a><a href="#">Reset User Input</a><a href="#">Click to Load</a><a href="#">Lazy Loading</a><a href="#">Infinite Scroll</a><a href="#">Inline Expansion</a><a href="#">Active Search</a><a href="#">Value Select</a><a href="#">Tabs</a><a href="#">Tooltip</a><a href="#">Modal Dialog</a><a href="#">Browser Dialogs</a><a href="#">Keyboard Shortcuts</a><a href="#">Progress Bar</a><a href="#">Live Ticker</a><a href="#">Updating Other Content</a>
+    </nav>
+
+    <article style="display: flex; flex-direction: column; gap: 22px; font-size: 20px; line-height: 1.6;">
+      <h1 style="margin: 0 0 6px; font-weight: 500; font-size: 46px; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance;">Click to Edit</h1>
+      <p style="margin: 0;">A contact is a person in a paragraph. His name is <button type="button" class="live" aria-label="Edit first name">Joe</button> <button type="button" class="live" aria-label="Edit last name">Blow</button>, and he can be reached at <button type="button" class="live" aria-label="Edit email">joe@blow.com</button>. Each dotted word is a <code class="mono" style="font-size: 16px;">span</code> that loads an editor into its own place. The margin shows what the word you last touched declared; the bench at the foot shows what it sent.</p>
+      <p style="margin: 0;">The same declaration on a definition list, where the value is the live part and the third row is mid-edit:</p>
+      <dl style="margin: 4px 0; display: grid; grid-template-columns: 140px 1fr; column-gap: 24px;">
+        <dt style="padding: 11px 0; font-size: 15px; color: #98A5B0;">First name</dt><dd style="margin: 0; padding: 11px 0;"><button type="button" class="live">Joe</button></dd>
+        <dt style="padding: 11px 0; font-size: 15px; color: #98A5B0;">Last name</dt><dd style="margin: 0; padding: 11px 0;"><button type="button" class="live">Blow</button></dd>
+        <dt style="padding: 11px 0; font-size: 15px; color: #98A5B0;">Email</dt>
+        <dd style="margin: 0; padding: 8px 0; display: flex; gap: 12px; align-items: center;">
+          <input id="email" aria-label="Email" value="joe@blow.com" style="font: inherit; font-size: 18px; padding: 4px 6px; border: 0; border-bottom: 1.5px solid #E4E9EA; background: #1B242D; color: #E4E9EA; width: 230px;">
+          <button type="submit" style="font: inherit; font-size: 15px; padding: 7px 14px; background: #7FA9E6; color: #141B22; border: 0; border-radius: 4px; cursor: pointer;">Save</button>
+          <button type="button" style="font: inherit; font-size: 15px; background: transparent; color: #98A5B0; border: 0; cursor: pointer;">Cancel</button>
+        </dd>
+      </dl>
+      <nav aria-label="Pagination" style="margin-top: auto; display: flex; justify-content: space-between; font-size: 15px;">
+        <a href="#" style="text-decoration: none; color: #98A5B0;">← All examples</a>
+        <a href="#" style="text-decoration: none;">Next: Edit Row →</a>
+      </nav>
+    </article>
+
+    <aside aria-label="Declarations" style="display: flex; flex-direction: column; gap: 18px; font-size: 14px; line-height: 1.5; color: #98A5B0; padding-top: 14px;">
+      <span style="font-size: 13px;">Declarations · click a live word to move the highlight</span>
+      <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; margin: 0 -16px; background: #1B242D; border-radius: 6px;">
+        <span class="mono" style="font-size: 13px; color: #7FA9E6; font-weight: 500;">NameSpan</span>
+        <pre class="mono" style="margin: 0; font-size: 12px; line-height: 1.6; color: #E4E9EA; white-space: pre-wrap;">param :contact_id, :field
+span store.fetch(...)[field],
+  loads: NameEditor,
+  with: { contact_id:, field: },
+  swap: :replace, target: self</pre>
+        <span style="font-size: 12.5px;">← joe@blow.com</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span class="mono" style="font-size: 13px; color: #98A5B0; font-weight: 500;">NameEditor</span>
+        <pre class="mono" style="margin: 0; font-size: 12px; line-height: 1.6; color: #98A5B0; white-space: pre-wrap;">param :contact_id, :field
+transfers :save, to: NameSpan do |p|
+  store.update(p.contact_id,
+               p.field =&gt; p.value)
+end</pre>
+      </div>
+      <div style="font-size: 13px;">Behind both: <span class="mono">Store</span>, a per-visitor cache with a one-hour expiry. Bring your own.</div>
+      <button type="button" aria-expanded="false" class="flat" style="margin: auto -16px 0; padding: 10px 16px; border-radius: 6px 6px 0 0; background: #1F2A34; color: #E4E9EA; display: flex; align-items: center; gap: 8px; font-size: 13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="8" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Knobs ▴<span style="margin-left: auto; font-size: 12px; color: #98A5B0;">adjust NameSpan</span></button>
+    </aside>
+  </div>
+
+  <footer aria-label="Bench" class="mono" style="display: flex; align-items: center; gap: 24px; padding: 16px 80px; background: #1F2A34; font-size: 12.5px; color: #98A5B0;">
+    <span style="color: #E4E9EA;">GET /weft/name_editor?contact_id=1&amp;field=email</span>
+    <span>200 · 3 ms</span>
+    <span style="flex-grow: 1;"></span>
+    <a href="https://github.com/rusterholz/weft-site/blob/main/app/pages/click_to_edit_page.rb">open the hood: app/pages/click_to_edit_page.rb</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1040}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
