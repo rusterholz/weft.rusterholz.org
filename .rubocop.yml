@@ -1,0 +1,121 @@
+# From claude/defaults/rubocop-baseline.yml. Deviations from the baseline are
+# earned and commented; diff back against it at checkpoints.
+
+plugins:
+  - rubocop-rake
+  - rubocop-rspec
+
+require:
+  # House comment-density cops. A RuboCop plugin has to resolve inside CI's own
+  # checkout, so the file is copied in rather than required out-of-tree; the
+  # copy is byte-identical to claude/defaults/comment_density_cops.rb and its
+  # thresholds ship as defaults inside it.
+  - ./rubocop/comment_density_cops.rb
+
+AllCops:
+  # Baseline says 3.2, which is weft's supported floor. This is an application,
+  # not a gem: it runs on exactly the Ruby in .ruby-version and ships in an
+  # image built from that same version, so there is no older row to support.
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  Exclude:
+    # Restore defaults (overridden when specifying custom excludes). Without
+    # vendor/, CI's vendored bundle gets scanned and rubocop chokes on other
+    # gems' own .rubocop.yml files.
+    - ".git/**/*"
+    - "node_modules/**/*"
+    - "tmp/**/*"
+    - "vendor/**/*"
+    # Vendored copy of the shared doc-drift checker: everything below its CONFIG
+    # is verbatim from claude/defaults/doc-drift-check.rb, and that sameness is
+    # the point: a fix travels in either direction only while the two stay
+    # diffable. Styling our copy would fork it permanently for no reader's sake.
+    - "bin/doc-drift-check"
+
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
+Layout/LineLength:
+  Max: 120
+
+Lint/UselessDefaultValueArgument:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - "Rakefile"
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/ModuleLength:
+  Max: 150
+
+Naming/VariableNumber:
+  Exclude:
+    - "spec/**/*"
+
+RSpec/DescribeClass:
+  Exclude:
+    - "spec/integration/**/*"
+    # Request specs describe a visitor's path through the app, not a class.
+    - "spec/requests/**/*"
+
+RSpec/ExampleLength:
+  Max: 15
+  Exclude:
+    - "spec/integration/**/*"
+
+RSpec/MessageSpies:
+  EnforcedStyle: have_received
+
+RSpec/MultipleExpectations:
+  Max: 6
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 5
+
+RSpec/SpecFilePathFormat:
+  Exclude:
+    - "spec/integration/**/*"
+    - "spec/requests/**/*"
+
+Style/CaseEquality:
+  # === is a well-defined tool; knowing your tools beats hiding from them.
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/EmptyClassDefinition:
+  # Compact error/marker classes: Foo = Class.new(Error).
+  EnforcedStyle: class_new
+
+Style/ModuleFunction:
+  Enabled: false
+
+Style/NumericLiterals:
+  Enabled: false
+
+Style/SpecialGlobalVars:
+  EnforcedStyle: use_perl_names
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  Enabled: true
+  EnforcedStyle: single_quotes
