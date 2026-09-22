@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# The three checks a commit has to pass. CI runs the same three; until this repo
+# has a remote, running them here is the only place they run at all.
+
+echo "== rspec =="
+bundle exec rspec
+
+echo
+echo "== rubocop =="
+bundle exec rubocop
+
+echo
+echo "== doc drift =="
+bundle exec bin/doc-drift-check

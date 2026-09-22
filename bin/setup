@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+bundle install
+
+cat <<'NEXT'
+
+Ready.
+
+  bin/dev     serve the site at http://127.0.0.1:9393
+  bin/check   what has to be green before a commit
+
+NEXT

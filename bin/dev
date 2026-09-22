@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# RACK_ENV=development is what turns Zeitwerk reloading on (config/environment.rb),
+# so an edit to a page or a component takes effect on the next request without
+# bouncing the server.
+export RACK_ENV="${RACK_ENV:-development}"
+
+# Not Rack's default 9292: weft's own demo app uses that, the two get run side
+# by side, and losing the race means curl quietly answers from the other app.
+exec bundle exec puma --port "${PORT:-9393}"
