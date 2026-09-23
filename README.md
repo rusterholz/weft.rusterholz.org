@@ -39,4 +39,4 @@ bin/dev      # http://127.0.0.1:9393
 
 ## License
 
-The site's content and code are © Andy Rusterholz.
+MIT, the same as Weft itself. See [LICENSE.txt](LICENSE.txt).
