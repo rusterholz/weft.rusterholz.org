@@ -19,11 +19,12 @@ jobs:
     name: Specs, lint, doc drift
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
+      # No ruby-version here on purpose: with none given, setup-ruby reads
+      # .ruby-version, so the pin lives in one place.
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: .ruby-version
           bundler-cache: true
 
       # The same three bin/check runs, split so a failure names itself.
@@ -35,7 +36,7 @@ jobs:
     name: Image builds
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Nothing is pushed anywhere: this only proves the Dockerfile still
       # produces an image, which is what a deploy will later depend on.
