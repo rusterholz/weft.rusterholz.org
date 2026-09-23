@@ -130,9 +130,8 @@ identifier, because it is defined in the gem and not here.
 ## Continuous Integration
 
 `.github/workflows/ci.yml` runs on pushes to `main` and on every pull request.
-That pairing is deliberate rather than narrow: work happens on branches, each
-branch arrives through a PR, and checking `main` plus PRs covers every commit
-once instead of running the whole suite twice for the same code. Two jobs:
+Work happens on branches and arrives through a PR, so that pairing covers every
+commit once rather than twice. Two jobs:
 
 - **Specs, lint, doc drift.** The same three commands `bin/check` runs, split so
   a failure names itself.
@@ -145,8 +144,7 @@ native extension can resolve on your machine and fail there, which is exactly
 why the lockfile carries the `x86_64-linux` platform alongside your own. When
 you change the `Gemfile`, check the lockfile picked up both.
 
-There is no deploy job and there are no secrets. Deploying is separate work,
-and keeping credentials out of CI is deliberate rather than an oversight.
+There is no deploy job and there are no secrets. Deploying is separate work.
 
 A red run is a stop. Nothing here is flaky by design, so a failure means a real
 disagreement between your machine and a clean checkout on Linux.
@@ -156,12 +154,9 @@ disagreement between your machine and a clean checkout on Linux.
 **None of this is wired yet.** The session arrives with the store seam, the
 piece of work that gives each visitor their own expiring copy of an example's
 data. Only `spec_helper.rb` sets `SESSION_SECRET` today, and nothing reads it.
-It is written down here because the two paths have to differ by design, and
-that is easier to get right before the code exists than after.
 
-`Rack::Session::Cookie` will take the key from `SESSION_SECRET`. Worth being
-precise about what it does with it, because this site's wiring is the kind of
-thing people copy: the key is not a signing secret. `rack-session` hands it to
+`Rack::Session::Cookie` will take the key from `SESSION_SECRET`, and the key is
+not a signing secret. `rack-session` hands it to
 `Rack::Session::Encryptor`, which requires **at least 64 bytes** and splits it
 into a 32-byte cipher key plus an HMAC key, then **encrypts** the session
 payload under a random IV and authenticates the result. The whole session lives
