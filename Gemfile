@@ -12,7 +12,7 @@ gem "weft", "0.2.0"
 
 gem "puma", "~> 7.2"
 gem "rack-session", "~> 2.1" # Rack::Session::Cookie, the session seam
-gem "rouge", "~> 4.2"        # server-side highlighting for the code each example shows
+gem "rouge", "~> 5.1"        # server-side highlighting for the code each example shows
 
 group :development, :test do
   gem "rack-test", "~> 2.1"
