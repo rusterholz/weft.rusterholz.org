@@ -4,6 +4,9 @@ name: CI
 # here and a green run locally mean the same thing. No deploy and no secrets:
 # see docs/development.md, "Continuous Integration".
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -41,3 +44,22 @@ jobs:
       # Nothing is pushed anywhere: this only proves the Dockerfile still
       # produces an image, which is what a deploy will later depend on.
       - run: docker build -t weft-site .
+
+  # The one check branch protection requires. Jobs can be added or renamed
+  # above without touching the ruleset.
+  final-results:
+    name: Final Results
+    runs-on: ubuntu-latest
+    needs: [check, image]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.check.result }}" != "success" ] || \
+             [ "${{ needs.image.result }}" != "success" ]; then
+            echo "One or more jobs failed"
+            echo "  check: ${{ needs.check.result }}"
+            echo "  image: ${{ needs.image.result }}"
+            exit 1
+          fi
+          echo "All checks passed"
