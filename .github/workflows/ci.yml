@@ -4,6 +4,9 @@ name: CI
 # here and a green run locally mean the same thing. No deploy and no secrets:
 # see docs/development.md, "Continuous Integration".
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
