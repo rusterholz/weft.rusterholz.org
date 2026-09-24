@@ -151,11 +151,10 @@ disagreement between your machine and a clean checkout on Linux.
 
 ### The Session Secret Is Not a CI Secret
 
-**None of this is wired yet.** The session arrives with the store seam, the
-piece of work that gives each visitor their own expiring copy of an example's
-data. Only `spec_helper.rb` sets `SESSION_SECRET` today, and nothing reads it.
+`config.ru` assembles the session in front of the Router, and the visitor id it
+carries is what gives each visitor their own expiring copy of an example's data.
 
-`Rack::Session::Cookie` will take the key from `SESSION_SECRET`, and the key is
+`Rack::Session::Cookie` takes the key from `SESSION_SECRET`, and the key is
 not a signing secret. `rack-session` hands it to
 `Rack::Session::Encryptor`, which requires **at least 64 bytes** and splits it
 into a 32-byte cipher key plus an HMAC key, then **encrypts** the session
@@ -165,17 +164,36 @@ store at all. So a visitor can neither read their own visitor id nor forge one:
 the older signed-cookie path survives in the library only to read legacy cookies
 back.
 
-Two paths, deliberately different:
+Three paths, deliberately different:
 
-- **Production will read `ENV.fetch("SESSION_SECRET")` with no default.** An app
-  that silently boots on a hard-coded session key is a real security defect, so
-  a missing secret must be a refusal to start, loudly, rather than a fallback.
+- **The application reads `ENV.fetch("SESSION_SECRET")` with no default.** An app
+  that silently boots on a hard-coded session key is a real security defect, so a
+  missing secret is a refusal to start, loudly, rather than a fallback. Since
+  there is no default in `config.ru`, there is no default in production either.
 - **Test mode supplies a fixed throwaway value** from `spec_helper.rb`,
   unconditionally, so an exported secret cannot leak into a test run. The specs
   need *a* key, not *the* key, and making CI carry a credential to run a handful
   of request specs would be a cost with no benefit.
+- **`bin/dev` exports a throwaway value too**, for the same reason and in the same
+  spirit: in the script, where it is visibly not a secret, rather than in the
+  application, where it would quietly become production's default as well.
 
 The real secret appears for the first time at deploy, and only there.
+
+### A Secure Cookie Needs a Truthful Proxy
+
+In production the session cookie is marked `secure`, and rack-session takes that
+literally: it **withholds the cookie entirely** from any request it cannot see as
+https. A container running by hand, reached over plain http, therefore sets no
+session cookie at all, which is correct and worth knowing before it looks like a
+bug. Sending `X-Forwarded-Proto: https` brings it back.
+
+That matters once something terminates TLS in front of this app, because the app
+sees plain http from the proxy and decides from the forwarded scheme. If the
+proxy does not send one, or Rack does not trust the address it came from, every
+request looks like a brand-new visit and nobody keeps anything -- with no error
+anywhere. Check it against a real request, not a local one, the first time this
+site is deployed.
 
 ## Deploying
 

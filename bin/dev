@@ -7,6 +7,11 @@ cd "$(dirname "$0")/.."
 # bouncing the server.
 export RACK_ENV="${RACK_ENV:-development}"
 
+# config.ru fetches this with no fallback, so development needs a throwaway one
+# of its own. It lives here, out in the open, rather than as a default in the
+# application, where it would also be the default in production.
+export SESSION_SECRET="${SESSION_SECRET:-development-only-not-a-secret-development-only-not-a-secret-0000}"
+
 # Not Rack's default 9292: weft's own demo app uses that, the two get run side
 # by side, and losing the race means curl quietly answers from the other app.
 exec bundle exec puma --port "${PORT:-9393}"
