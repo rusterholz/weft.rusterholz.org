@@ -10,6 +10,7 @@ ruby file: ".ruby-version"
 # would -- never a path, a git ref, or the dev branch.
 gem "weft", "0.2.0"
 
+gem "activesupport" # app/data uses its cache and CurrentAttributes; weft's floor governs the version
 gem "puma", "~> 7.2"
 gem "rack-session", "~> 2.1" # Rack::Session::Cookie, the session seam
 gem "rouge", "~> 5.1"        # server-side highlighting for the code each example shows

@@ -3,13 +3,15 @@
 APP_ROOT = File.expand_path("..", __dir__)
 
 require "bundler/setup"
+require "active_support" # the base, before app/data cherry-picks from it
 require "weft"
 
 # Each directory under app/ is its own Zeitwerk root, so app/pages/home_page.rb
 # defines HomePage, not Pages::HomePage. This runs before Weft.configure because
 # it loads eagerly: the constants configured below have to exist by then.
 Weft.configure_autoloading(
-  paths: [File.join(APP_ROOT, "app", "pages")],
+  paths: [File.join(APP_ROOT, "app", "data"),
+          File.join(APP_ROOT, "app", "pages")],
   reload: ENV.fetch("RACK_ENV", "production") == "development"
 )
 
