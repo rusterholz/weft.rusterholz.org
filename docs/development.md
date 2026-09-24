@@ -109,6 +109,120 @@ script with a dormant branch. If you are reading `public/js` and wondering why
 The files are committed rather than fetched during the image build, so building
 the image never depends on a third-party host being reachable.
 
+## How an Example Is Built
+
+Two files per example, side by side, under one directory per documented weft
+version:
+
+```
+examples/v0.2/click_to_edit.rb        # module ClickToEdit: the components
+examples/v0.2/click_to_edit_page.rb   # ClickToEditPage: prose and composition
+```
+
+The directory name is derived at boot from the version of weft actually loaded,
+and only that one directory is on the autoload path. Move the pin without porting
+the examples and the boot says so, because the directory will not be there.
+
+**Each example is a module, and that is load-bearing.** Two of the twenty-one
+define a `ContactsTable` and two define a `PEOPLE`, while weft validates a single
+global route table. Namespacing keeps them apart and gives each component an
+unsurprising route: `ClickToEdit::ContactCard` serves at
+`/_components/click_to_edit/contact_card`.
+
+`app/data` is loaded by a second Zeitwerk loader that never reloads, because the
+store's cache lives on a class-level variable there. Reloaded, the class is a new
+object with an empty cache, and every request in development would look like a
+first visit. The price is that changing something in `app/data` needs a restart.
+
+Namespacing costs one piece of wiring, in `config/environment.rb`. Weft evicts
+classes from its route table as Zeitwerk unloads them, but Zeitwerk only reports
+the constants files are named for. An example's components live inside one of
+those, so on reload the old copies stay registered and the fresh ones collide.
+The boot file adds a second `on_unload` that reaches into the module and evicts
+what is inside it. Remove it and `bin/dev` answers every request with a route
+collision, while the specs stay green, because the test environment does not
+reload.
+
+**Components never touch the store.** The example's data class does, and exposes
+the two or three verbs its components need:
+
+```ruby
+class Contacts
+  class << self
+    def all = store.fetch
+
+    private
+
+    def store = Store.for("click_to_edit", seed: SEED)
+  end
+end
+```
+
+That is the "bring your own persistence" lesson in the shape weft's
+[application patterns](https://github.com/rusterholz/weft/blob/v0.2.0/docs/app-patterns.md)
+prescribe for service classes. The seed is declared once, where the handle is
+built, so a read and a write cannot disagree about where an example starts.
+
+**A page declares nothing but its prose and its composition.** Its URL, heading
+and document title all come from the catalog, found from the page's own class
+name, so the two can never drift. `ExamplePage` supplies the frame and calls the
+page's `walkthrough`; a page that forgets to define one says so.
+
+### The Docs' Examples Are Fragments, and a Page Is Not
+
+This is the one thing to know before porting the next example. weft's
+documentation writes each example as a standalone fragment, and shows it being
+fetched with its values in the query string: `GET /_components/contact_card?contact_id=1`.
+A page has no query string, so a component embedded in one is handed its values
+by the call site instead, and **call-site keywords are not params** in weft. They
+become HTML attributes, and weft warns when one collides with a declared param.
+
+The fix is the dual weft's DSL already documents: declare `receives` alongside
+the `param`.
+
+```ruby
+param :contact_id
+receives :contact_id
+```
+
+Now the page can write `contact_card contact_id: "1"`, the hand-off fills the
+value when the component is embedded, and the wire fills it when htmx fetches the
+component on its own. Expect to need this on the first component of most
+examples, and on no others.
+
+### Specs
+
+One request spec per example, driving the whole stack, because one spec is one
+visitor. Assert the flow a person actually walks, then assert that a second
+visitor does not see the first one's edit:
+
+```ruby
+get "/examples/click-to-edit"
+post "/_components/click_to_edit/contact_editor/save", contact_id: "1", first_name: "Joseph"
+clear_cookies
+get "/_components/click_to_edit/contact_card", contact_id: "1"   # back to Joe
+```
+
+Assert isolation against the component, not the page: a page also shows the
+example's source, which mentions the seeded values whatever the visitor has done
+to them.
+
+### Showing the Code
+
+`CodeBlock` reads the file at render time and highlights it, and every example
+goes through it, so how code is presented is one place. Two things it knows that
+are easy to get wrong again:
+
+- The path is a build argument and never a declared param. A param would put a
+  file path on the wire and make this a component that reads any file it is asked
+  for.
+- Arbre renders a tag holding a single text child on one line, and indents one
+  holding a nested tag. Inside a `<pre>` that indenting changes the code on the
+  page, so the `<code>` wrapper goes in as text.
+
+Rouge 5 supports wrapping only its three non-nesting HTML formatters, so richer
+presentation later means a formatter subclass rather than a wrapper.
+
 ## Documentation Drift
 
 ```bash

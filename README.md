@@ -3,14 +3,13 @@
 Every example that ships with [Weft](https://github.com/rusterholz/weft),
 running live, beside the code that rendered it.
 
-**This is early. Nothing is built yet** except the scaffolding and one
-placeholder page. What follows is what the site is being built to be, not a
-description of what it currently does.
+**This is early:** one of the twenty-one examples is running so far, and the site
+has no design yet. The rest arrive a batch at a time.
 
 Weft's documentation shows you what an interaction looks like in source. This
-site will run that same source and put the two side by side, so you can click
-the thing and read what made it happen. The code shown on a page is to be read
-from the file at render time, so that it cannot drift from what actually ran.
+site runs that same source and puts the two side by side, so you can click the
+thing and read what made it happen. The code shown on a page is read from the
+file at render time, so it cannot drift from what actually ran.
 
 It is a Weft application itself, which is the other half of the point: the
 catalog is built out of the framework it documents.
@@ -28,7 +27,10 @@ bin/dev      # http://127.0.0.1:9393
 
 | Path | What lives there |
 | --- | --- |
+| `examples/` | The examples themselves, one directory per documented Weft version |
 | `app/pages/` | The site's own pages |
+| `app/chrome/` | Site components, the parts pages are built from |
+| `app/data/` | Who a visitor is, and their own expiring copy of an example's data |
 | `config/` | Boot: autoloading, then Weft's configuration |
 | `public/` | Static assets, served from this origin |
 | `spec/` | Request specs, driving the whole stack |
