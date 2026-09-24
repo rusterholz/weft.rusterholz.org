@@ -6,14 +6,27 @@ require "bundler/setup"
 require "active_support" # the base, before app/data cherry-picks from it
 require "weft"
 
-# Each directory under app/ is its own Zeitwerk root, so app/pages/home_page.rb
-# defines HomePage, not Pages::HomePage. This runs before Weft.configure because
-# it loads eagerly: the constants configured below have to exist by then.
-Weft.configure_autoloading(
-  paths: [File.join(APP_ROOT, "app", "data"),
-          File.join(APP_ROOT, "app", "pages")],
+# One weft version's examples are loadable at a time: the version this site runs.
+# Move the pin without porting them and the boot says so: no such directory.
+EXAMPLES_ROOT = File.join(APP_ROOT, "examples", "v#{Weft::VERSION.split('.').first(2).join('.')}")
+
+# Each directory under app/ is its own Zeitwerk root (app/pages/home_page.rb
+# defines HomePage, not Pages::HomePage), and both calls eager-load, so the
+# constants Weft.configure names below exist by then. app/data has a loader of its
+# own and is never reloaded: the store's cache has to outlive a request.
+Weft.configure_autoloading(paths: File.join(APP_ROOT, "app", "data"))
+
+loader = Weft.configure_autoloading(
+  paths: [File.join(APP_ROOT, "app", "chrome"),
+          File.join(APP_ROOT, "app", "pages"),
+          EXAMPLES_ROOT],
   reload: ENV.fetch("RACK_ENV", "production") == "development"
 )
+
+# Zeitwerk reports only the constants files are named for; the nested ones need this.
+loader.on_unload do |_cpath, value, _abspath|
+  value.constants(false).each { |name| Weft.registry.evict(value.const_get(name, false)) } if value.is_a?(Module)
+end
 
 Weft.configure do |c|
   c.static_assets root: "/static", from: File.join(APP_ROOT, "public")

@@ -7,8 +7,17 @@ class ApplicationPage < Weft::Page
 
   SITE_NAME = "weft"
 
-  # Moves into config with the rest of the external links when the chrome lands.
+  # Move into config with the rest of the external links when the chrome lands.
   WEFT_REPO_URL = "https://github.com/rusterholz/weft"
+  SITE_REPO_URL = "https://github.com/rusterholz/weft.rusterholz.org"
 
   register_script "js/htmx.min.js"
+
+  private
+
+  # GIT_SHA is baked in at image build, so a deployed page links the code it runs.
+  def source_url(absolute_path)
+    relative = Pathname.new(absolute_path).relative_path_from(APP_ROOT)
+    "#{SITE_REPO_URL}/blob/#{ENV.fetch('GIT_SHA', 'main')}/#{relative}"
+  end
 end
