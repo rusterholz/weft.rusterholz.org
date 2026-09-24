@@ -5,6 +5,7 @@ class ClickToEditPage < ExamplePage
     introduction
     contact_card contact_id: "1"
     how_it_works
+    worth_noticing
   end
 
   private
@@ -30,10 +31,15 @@ class ClickToEditPage < ExamplePage
     para "target: self pins the swap to the component. Inside build, self is the component " \
          "instance, and a component reference as a target resolves to its DOM id, so each " \
          "fragment replaces the whole card or editor element wherever it sits in the page."
+  end
+
+  def worth_noticing
+    h2 "Worth Noticing"
     para "The two components reference each other without a cycle. transfers :save, to: " \
-         "ContactCard runs in the class body, so ContactCard has to be defined already; but " \
-         "loads: ContactEditor is not evaluated until render. Defining the display component " \
-         "first therefore breaks the loop with no forward declarations."
+         "ContactCard runs in the class body, so ContactCard has to exist by then, while " \
+         "loads: ContactEditor is not evaluated until render. Each class has a file of its own " \
+         "here, so the autoloader fetches whichever is needed first; in a single file you would " \
+         "order the definitions yourself, with the display component before the editor."
     para "Form fields pair with declared params. The editor declares first_name, last_name and " \
          "email so its fields reach the save callable as params.first_name and friends, while " \
          "contact_id rides along as a hidden input, because it is part of the component's " \

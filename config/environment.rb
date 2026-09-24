@@ -16,17 +16,12 @@ EXAMPLES_ROOT = File.join(APP_ROOT, "examples", "v#{Weft::VERSION.split('.').fir
 # own and is never reloaded: the store's cache has to outlive a request.
 Weft.configure_autoloading(paths: File.join(APP_ROOT, "app", "data"))
 
-loader = Weft.configure_autoloading(
+Weft.configure_autoloading(
   paths: [File.join(APP_ROOT, "app", "chrome"),
           File.join(APP_ROOT, "app", "pages"),
           EXAMPLES_ROOT],
   reload: ENV.fetch("RACK_ENV", "production") == "development"
 )
-
-# Zeitwerk reports only the constants files are named for; the nested ones need this.
-loader.on_unload do |_cpath, value, _abspath|
-  value.constants(false).each { |name| Weft.registry.evict(value.const_get(name, false)) } if value.is_a?(Module)
-end
 
 Weft.configure do |c|
   c.static_assets root: "/static", from: File.join(APP_ROOT, "public")

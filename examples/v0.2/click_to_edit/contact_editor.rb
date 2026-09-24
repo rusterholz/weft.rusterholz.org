@@ -1,0 +1,44 @@
+# frozen_string_literal: true
+
+module ClickToEdit
+  class ContactEditor < Weft::Component
+    builder_method :contact_editor
+
+    param :contact_id
+    param :first_name
+    param :last_name
+    param :email
+
+    transfers :save, to: ContactCard do |params|
+      Contacts.update(params.contact_id,
+                      first_name: params.first_name, last_name: params.last_name, email: params.email)
+      nil
+    end
+
+    def build(attributes = {})
+      super
+      form(action: :save) do
+        input(type: "hidden", name: "contact_id", value: params.contact_id)
+        text_field "First Name", :first_name
+        text_field "Last Name", :last_name
+        text_field "Email", :email
+        input(type: "submit", value: "Submit")
+        button "Cancel",
+               type: "button",
+               loads: ContactCard, with: { contact_id: params.contact_id },
+               swap: :replace, target: self
+      end
+    end
+
+    private
+
+    def contact = @contact ||= Contacts.find(params.contact_id)
+
+    def text_field(label_text, key)
+      div do
+        label("#{label_text} ", for: key)
+        input(type: "text", name: key, id: key, value: contact[key])
+      end
+    end
+  end
+end

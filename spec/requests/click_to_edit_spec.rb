@@ -5,11 +5,15 @@ require "cgi"
 RSpec.describe "the Click to Edit example" do
   let(:card_path) { "/_components/click_to_edit/contact_card" }
   let(:editor_path) { "/_components/click_to_edit/contact_editor" }
-  let(:source_file) { File.join(EXAMPLES_ROOT, "click_to_edit.rb") }
+  # In reading order: the data class, then the components.
+  let(:source_files) do
+    %w[contacts contact_card contact_editor].map do |stem|
+      File.join(EXAMPLES_ROOT, "click_to_edit", "#{stem}.rb")
+    end
+  end
 
-  def shown_code
-    block = last_response.body[%r{<pre>(.*?)</pre>}m, 1]
-    CGI.unescapeHTML(block.gsub(/<[^>]+>/, ""))
+  def shown_code_blocks
+    last_response.body.scan(%r{<pre>(.*?)</pre>}m).map { |block| CGI.unescapeHTML(block.first.gsub(/<[^>]+>/, "")) }
   end
 
   def save(**overrides)
@@ -92,20 +96,27 @@ RSpec.describe "the Click to Edit example" do
     expect(last_response.body).to include("joe@blow.com")
   end
 
-  # Not a sample of the code: the file, whole and unaltered. Nothing on this page
-  # can drift from the class that just rendered the card above it.
-  it "shows the example's file exactly as it is on disk, highlighted" do
+  # Not a sample of the code: every file the example is made of, whole and
+  # unaltered, one block each. Nothing here can drift from the classes that
+  # rendered the card above it.
+  it "shows each of the example's files exactly as it is on disk, in reading order" do
     get "/examples/click-to-edit"
 
-    expect(shown_code).to eq(File.read(source_file))
+    expect(shown_code_blocks).to eq(source_files.map { |file| File.read(file) })
     expect(last_response.body).to include("<span class=")
   end
 
-  it "links to the source of both the page and the example" do
+  it "labels each block with the file it read" do
     get "/examples/click-to-edit"
 
-    expect(last_response.body).to include("examples/v0.2/click_to_edit.rb")
-    expect(last_response.body).to include("examples/v0.2/click_to_edit_page.rb")
+    expect(last_response.body).to include("<code>examples/v0.2/click_to_edit/contacts.rb</code>")
+  end
+
+  it "links the source of the page and of every file the example is made of" do
+    get "/examples/click-to-edit"
+
+    expect(last_response.body).to include("/examples/v0.2/click_to_edit_page.rb")
+    expect(last_response.body).to include("/examples/v0.2/click_to_edit/contact_editor.rb")
   end
 
   it "does not route the abstract page every example inherits from" do

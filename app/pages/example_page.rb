@@ -26,7 +26,7 @@ class ExamplePage < ApplicationPage
     super
     h1 entry.title
     walkthrough
-    code_block example_source_path
+    example_source_paths.each { |path| code_block path }
     under_the_hood
   end
 
@@ -40,14 +40,22 @@ class ExamplePage < ApplicationPage
 
   def entry = self.class.entry
 
-  # Found through the constant the example defines rather than by rebuilding a
-  # path, so the link follows the code if the code ever moves.
-  def example_source_path
-    module_name = self.class.slug.tr("-", "_").camelize
-    located = Object.const_source_location(module_name)
-    raise Catalog::Unknown, "#{module_name} is not defined: is it under #{EXAMPLES_ROOT}?" unless located
+  # One file per class, found through the classes themselves rather than by
+  # listing a directory, so the pages follow the code if the code ever moves.
+  # Data first, then the components: the order someone reads them in.
+  def example_source_paths
+    classes = example_classes.sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }
+    classes.map { |klass| Object.const_source_location(klass.name).first }
+  end
 
-    located.first
+  def example_classes
+    module_name = self.class.slug.tr("-", "_").camelize
+    unless Object.const_defined?(module_name)
+      raise Catalog::Unknown, "#{module_name} is not defined: is it under #{EXAMPLES_ROOT}?"
+    end
+
+    example = Object.const_get(module_name)
+    example.constants(false).map { |name| example.const_get(name, false) }.grep(Class)
   end
 
   # `walkthrough` is the concrete page's own method, so this resolves to the file
@@ -58,7 +66,7 @@ class ExamplePage < ApplicationPage
     h2 "Under the Hood"
     ul do
       li { a "This page", href: source_url(page_source_path) }
-      li { a "The example", href: source_url(example_source_path) }
+      example_source_paths.each { |path| li { a relative_path(path), href: source_url(path) } }
     end
   end
 end

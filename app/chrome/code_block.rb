@@ -14,6 +14,7 @@ class CodeBlock < Weft::Component
   # "Showing the Code".
   def build(path, attributes = {})
     super(attributes)
+    para { code Pathname.new(path).relative_path_from(APP_ROOT).to_s }
     pre { text_node "<code>#{CodeBlock.highlight(path)}</code>".html_safe }
   end
 

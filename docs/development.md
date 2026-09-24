@@ -119,37 +119,47 @@ the image never depends on a third-party host being reachable.
 
 ## How an Example Is Built
 
-Two files per example, side by side, under one directory per documented weft
-version:
+A page file, and a directory of classes beside it, under one directory per
+documented weft version:
 
 ```
-examples/v0.2/click_to_edit.rb        # module ClickToEdit: the components
-examples/v0.2/click_to_edit_page.rb   # ClickToEditPage: prose and composition
+examples/v0.2/click_to_edit_page.rb          # ClickToEditPage: prose and composition
+examples/v0.2/click_to_edit/contacts.rb      # ClickToEdit::Contacts
+examples/v0.2/click_to_edit/contact_card.rb  # ClickToEdit::ContactCard
+examples/v0.2/click_to_edit/contact_editor.rb
 ```
 
-The directory name is derived at boot from the version of weft actually loaded,
-and only that one directory is on the autoload path. Move the pin without porting
-the examples and the boot says so, because the directory will not be there.
+The version directory's name is derived at boot from the version of weft actually
+loaded, and only that one is on the autoload path. Move the pin without porting the
+examples and the boot says so, because the directory will not be there.
 
-**Each example is a module, and that is load-bearing.** Two of the twenty-one
-define a `ContactsTable` and two define a `PEOPLE`, while weft validates a single
-global route table. Namespacing keeps them apart and gives each component an
-unsurprising route: `ClickToEdit::ContactCard` serves at
-`/_components/click_to_edit/contact_card`.
+### One Constant Per File, One Directory Per Namespace
+
+**This is the rule to get right, because everything else leans on it.** Every file
+defines exactly one constant, named for the file; every namespace is a directory.
+`ClickToEdit::ContactCard` lives at `click_to_edit/contact_card.rb` and nowhere
+else, and nothing else lives there with it.
+
+Two reasons, and the second is the one that bites.
+
+**Namespacing keeps the catalog from colliding with itself.** Two of the
+twenty-one examples define a `ContactsTable` and two define a `PEOPLE`, while weft
+validates a single global route table. The namespace keeps them apart and gives
+each component an unsurprising route: `/_components/click_to_edit/contact_card`.
+
+**Zeitwerk manages exactly what files are named for, and reloading depends on it.**
+Weft evicts a class from its route table as Zeitwerk unloads it, and Zeitwerk
+reports the constant a file is named for. Put two classes in one file and the
+second one is invisible to all of that: it is never evicted, the next reload
+registers a fresh copy at a route the stale one still holds, and every request in
+development fails with a route collision. The specs stay green throughout, because
+the test environment does not reload. Weft's own demo app follows this convention
+file for file, and so does this repo.
 
 `app/data` is loaded by a second Zeitwerk loader that never reloads, because the
 store's cache lives on a class-level variable there. Reloaded, the class is a new
 object with an empty cache, and every request in development would look like a
 first visit. The price is that changing something in `app/data` needs a restart.
-
-Namespacing costs one piece of wiring, in `config/environment.rb`. Weft evicts
-classes from its route table as Zeitwerk unloads them, but Zeitwerk only reports
-the constants files are named for. An example's components live inside one of
-those, so on reload the old copies stay registered and the fresh ones collide.
-The boot file adds a second `on_unload` that reaches into the module and evicts
-what is inside it. Remove it and `bin/dev` answers every request with a route
-collision, while the specs stay green, because the test environment does not
-reload.
 
 **Components never touch the store.** The example's data class does, and exposes
 the two or three verbs its components need:
@@ -231,9 +241,16 @@ to them.
 
 ### Showing the Code
 
-`CodeBlock` reads the file at render time and highlights it, and every example
-goes through it, so how code is presented is one place. Two things it knows that
-are easy to get wrong again:
+`CodeBlock` reads one file at render time and highlights it, and every example
+goes through it, so how code is presented is one place. A page shows **one block
+per file**, labeled with the path, in the order someone reads them: the data class
+first, then the components. The gem's docs show an example as a single block
+because markdown has nowhere to put a file boundary, not because the boundary is
+uninteresting. Here it is part of the lesson.
+
+Which files those are is asked of the classes, not of the directory, so the blocks
+follow the code if the code moves. Two things `CodeBlock` knows that are easy to
+get wrong again:
 
 - The path is a build argument and never a declared param. A param would put a
   file path on the wire and make this a component that reads any file it is asked

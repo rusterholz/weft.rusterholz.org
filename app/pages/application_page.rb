@@ -15,9 +15,10 @@ class ApplicationPage < Weft::Page
 
   private
 
+  def relative_path(absolute_path) = Pathname.new(absolute_path).relative_path_from(APP_ROOT).to_s
+
   # GIT_SHA is baked in at image build, so a deployed page links the code it runs.
   def source_url(absolute_path)
-    relative = Pathname.new(absolute_path).relative_path_from(APP_ROOT)
-    "#{SITE_REPO_URL}/blob/#{ENV.fetch('GIT_SHA', 'main')}/#{relative}"
+    "#{SITE_REPO_URL}/blob/#{ENV.fetch('GIT_SHA', 'main')}/#{relative_path(absolute_path)}"
   end
 end
