@@ -40,7 +40,7 @@ class ClickToEditPage < ExamplePage
   def worth_noticing
     h2 "Worth Noticing"
     para "The two components reference each other without a cycle. transfers :save, to: " \
-         "ContactCard runs in the class body, so ContactCard has to exist by then, while " \
+         "ContactCard runs in the class body and resolves ContactCard there and then, while " \
          "loads: ContactEditor is not evaluated until render."
     para "Form fields pair with declared params. The editor declares first_name, last_name and " \
          "email so its fields reach the save callable as params.first_name and friends, while " \

@@ -163,6 +163,12 @@ collision. The specs stay green throughout, because the test environment does no
 reload. Weft's own demo app keeps one constant per file across all sixty-seven of
 them, and so does this repo.
 
+One thing the convention buys along the way: a class body that names another of the
+example's classes, as `transfers :save, to: ContactCard` does, resolves that
+constant where it stands, and the autoloader satisfies it from the file named for
+it. So an example never has to arrange its own load order, however its classes
+refer to each other.
+
 `app/data` is loaded by a second Zeitwerk loader that never reloads, because the
 store's cache lives on a class-level variable there. Reloaded, the class is a new
 object with an empty cache, and every request in development would look like a
@@ -223,7 +229,9 @@ declaration is the switch**: weft pulls out only the keywords a component declar
 as `receives`, so one it has not declared stays with the attributes, where weft's
 own kwargs expand into the htmx wiring and anything else reaches the element as
 markup. Declaring is not bookkeeping; it decides which channel a value travels on,
-and weft warns when an undeclared keyword collides with a declared param.
+and weft warns when a keyword names a key the component declared as a `param`
+without also declaring it as `receives`, since that value is about to render as an
+attribute rather than arrive as a param.
 
 The fix is the dual weft's DSL already documents: declare `receives` alongside
 the `param`.

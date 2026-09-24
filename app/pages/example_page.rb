@@ -7,6 +7,9 @@
 class ExamplePage < ApplicationPage
   abstract!
 
+  Undescribed = Class.new(StandardError)
+  NoSuchExample = Class.new(StandardError)
+
   class << self
     def slug = Catalog.slug_for(self)
 
@@ -20,10 +23,30 @@ class ExamplePage < ApplicationPage
     # answerable from the list. On the page, since the example's files are the code.
     def describes(**phrases) = @phrases = phrases
 
+    def described_keys = (@phrases || {}).keys
+
     def phrase_for(klass)
-      (@phrases || {}).fetch(klass.name.demodulize.underscore.to_sym) do
-        raise Catalog::Unknown, "#{name} describes no #{klass.name}"
-      end
+      (@phrases || {}).fetch(key_for(klass)) { raise Undescribed, "#{name} describes no #{klass.name}" }
+    end
+
+    def key_for(klass) = klass.name.demodulize.underscore.to_sym
+
+    # Data first, then the components by name, which is the order someone reads
+    # them in. Module#constants makes no promises, so the order is made here.
+    def in_reading_order(classes)
+      classes.sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }
+    end
+
+    # grep(Class) is not reachable today, since an example holds nothing but
+    # classes; it is there so a namespace that later holds a constant of its own
+    # shows no code block for it rather than raising.
+    def example_classes
+      module_name = slug.tr("-", "_").camelize
+      raise NoSuchExample, "#{module_name} is not defined: is it under #{EXAMPLES_ROOT}?" unless
+        Object.const_defined?(module_name)
+
+      example = Object.const_get(module_name)
+      in_reading_order(example.constants(false).map { |name| example.const_get(name, false) }.grep(Class))
     end
 
     private
@@ -50,26 +73,11 @@ class ExamplePage < ApplicationPage
 
   def entry = self.class.entry
 
-  # One file per class, found through the classes themselves rather than by
-  # listing a directory, so the pages follow the code if the code ever moves.
-  # Data first, then the components: the order someone reads them in.
+  # Found through the classes themselves rather than by listing a directory, so
+  # the blocks and the links follow the code if the code ever moves.
   def example_sources
-    @example_sources ||= example_classes.
-                         sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }.
+    @example_sources ||= self.class.example_classes.
                          to_h { |klass| [klass, repo_path(Object.const_source_location(klass.name).first)] }
-  end
-
-  # grep(Class) is not reachable today, since an example holds nothing but
-  # classes; it is there so a namespace that later holds a constant of its own
-  # shows no code block for it rather than raising.
-  def example_classes
-    module_name = self.class.slug.tr("-", "_").camelize
-    unless Object.const_defined?(module_name)
-      raise Catalog::Unknown, "#{module_name} is not defined: is it under #{EXAMPLES_ROOT}?"
-    end
-
-    example = Object.const_get(module_name)
-    example.constants(false).map { |name| example.const_get(name, false) }.grep(Class)
   end
 
   # `walkthrough` is the concrete page's own method, so this resolves to the file
