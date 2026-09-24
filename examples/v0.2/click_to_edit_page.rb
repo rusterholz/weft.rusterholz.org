@@ -43,7 +43,7 @@ class ClickToEditPage < ExamplePage
          "contact_id rides along as a hidden input, because it is part of the component's " \
          "identity rather than something the user edits."
     para "It still works without JavaScript. form(action: :save) emits plain action and method " \
-         "attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Cancel " \
-         "carries type: \"button\", which is what keeps a button inside a form from submitting it."
+         "attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Note " \
+         "type: \"button\" on Cancel: inside a form, a bare button is a submit button."
   end
 end

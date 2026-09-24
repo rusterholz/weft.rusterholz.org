@@ -148,19 +148,20 @@ validates a single global route table. The namespace keeps them apart and gives
 each component an unsurprising route: `/_components/click_to_edit/contact_card`.
 
 **A constant that belongs to a class goes inside it.** An example's seed data is
-`ClickToEdit::Contacts::SEED`; a constant at module level would need a file and a
-name of its own. The same goes for anything else an example keeps beside its data.
+`ClickToEdit::Contacts::SEED`, not `ClickToEdit::SEED`, which under this rule would
+need a file and a name of its own. The same goes for anything else an example keeps
+beside its data.
 
 **Zeitwerk manages exactly what files are named for, and reloading rides on that.**
-Weft evicts a class from its route table as Zeitwerk unloads it, and Zeitwerk
-unloads the constant each file is named for. So the file boundary is what keeps the
-route table honest across a reload: one constant per file means every class is
-evicted and re-registered cleanly, every time. Weft's own demo app keeps this
-convention file for file across all sixty-seven of them, and so does this repo.
-
-If a reload in development ever answers with a route collision, that is the thing
-to look for, and the specs will not have caught it: the test environment does not
-reload.
+Grouping a few related classes in one file is ordinary Ruby, and it is what the
+gem's own docs do, a markdown page having no directories to offer. **Here it is the
+habit to drop.** Weft evicts a class from its route table as Zeitwerk unloads it,
+and Zeitwerk unloads the constant each file is named for, so a class that shares a
+file with another is never evicted: the next reload registers a fresh copy at a
+route the stale one still holds, and development answers every request with a route
+collision. The specs stay green throughout, because the test environment does not
+reload. Weft's own demo app keeps one constant per file across all sixty-seven of
+them, and so does this repo.
 
 `app/data` is loaded by a second Zeitwerk loader that never reloads, because the
 store's cache lives on a class-level variable there. Reloaded, the class is a new
@@ -209,9 +210,10 @@ or inlines that method takes every example page's URL with it. The neighboring
 This is the one thing to know before porting the next example. weft's
 documentation writes each example as a standalone fragment, and shows it being
 fetched with its values in the query string: `GET /_components/contact_card?contact_id=1`.
-A page has no query string, so a component embedded in one is handed its values
-by the call site instead, and **call-site keywords are not params** in weft. They
-become HTML attributes, and weft warns when one collides with a declared param.
+A page has no query string, so a component embedded in one is handed its values by
+the call site instead. **In most component frameworks a keyword at the call site is
+a prop; in weft it is an HTML attribute on the wrapper**, and params travel a
+channel of their own. Weft warns when such a keyword collides with a declared param.
 
 The fix is the dual weft's DSL already documents: declare `receives` alongside
 the `param`.
