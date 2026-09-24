@@ -8,6 +8,7 @@ ENV["RACK_ENV"] ||= "test"
 # into a test run. See docs/development.md, "The Session Secret Is Not a CI Secret".
 ENV["SESSION_SECRET"] = "test-only-not-a-secret".ljust(64, "0")
 
+require "active_support/testing/time_helpers"
 require "rack/test"
 
 require_relative "../config/environment"
@@ -15,8 +16,11 @@ require_relative "../config/environment"
 Dir[File.join(APP_ROOT, "spec", "support", "**", "*.rb")].each { |file| require file }
 
 RSpec.configure do |config|
+  config.include ActiveSupport::Testing::TimeHelpers
   config.include Rack::Test::Methods
   config.include RackHarness
+
+  config.after { Current.reset } # an example that sets Current leaves none behind
 
   config.disable_monkey_patching!
   config.expect_with(:rspec) { |expectations| expectations.syntax = :expect }
