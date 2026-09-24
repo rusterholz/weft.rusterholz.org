@@ -73,6 +73,25 @@ RSpec.describe "the Click to Edit example" do
     expect(last_response.body).not_to include("app/data/store.rb")
   end
 
+  # Reading and writing a contact that is not there are the same question, so
+  # they get the same answer. This file is the template for twenty more.
+  it "answers a save for a contact that does not exist the way it answers a read" do
+    save(contact_id: "does-not-exist")
+
+    expect(last_response.status).to eq(404)
+    expect(last_response.body).not_to include("KeyError")
+  end
+
+  it "leaves a field alone when the form does not send it" do
+    get "/examples/click-to-edit"
+
+    post "#{editor_path}/save", contact_id: "1", first_name: "Joseph"
+
+    expect(last_response.body).to include("Joseph")
+    expect(last_response.body).to include("Blow")
+    expect(last_response.body).to include("joe@blow.com")
+  end
+
   # Not a sample of the code: the file, whole and unaltered. Nothing on this page
   # can drift from the class that just rendered the card above it.
   it "shows the example's file exactly as it is on disk, highlighted" do
