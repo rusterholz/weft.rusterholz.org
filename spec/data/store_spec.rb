@@ -8,7 +8,7 @@ RSpec.describe Store do
   # from every read after it, which is the one worth arriving at clean.
   before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
-  def handle(example = "widgets") = described_class.for(example, seed: seed)
+  def handle(slice = "widgets") = described_class.for(slice, seed: seed)
 
   it "hands out the seed until something is written" do
     expect(handle.fetch).to eq("1" => { "name" => "Joe" })
@@ -34,13 +34,13 @@ RSpec.describe Store do
     expect(handle.fetch).to eq("1" => { "name" => "Joe" })
   end
 
-  it "keeps one example's data out of another's" do
+  it "keeps one slice out of another's way" do
     handle("widgets").update { |widgets| widgets["1"]["name"] = "Joseph" }
 
     expect(handle("gadgets").fetch).to eq("1" => { "name" => "Joe" })
   end
 
-  it "puts the seed back when an example is reset" do
+  it "puts the seed back when a slice is reset" do
     handle.update { |widgets| widgets["1"]["name"] = "Joseph" }
 
     handle.reset!

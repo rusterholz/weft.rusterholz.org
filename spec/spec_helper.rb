@@ -20,7 +20,7 @@ RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include RackHarness
 
-  config.after { Current.reset } # an example that sets Current leaves none behind
+  config.after { Current.reset } # a spec that sets Current leaves none behind
 
   config.disable_monkey_patching!
   config.expect_with(:rspec) { |expectations| expectations.syntax = :expect }
