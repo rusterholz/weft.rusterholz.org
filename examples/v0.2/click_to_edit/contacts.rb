@@ -13,8 +13,10 @@ module ClickToEdit
 
       def find(id) = contact(all, id)
 
-      # Only the fields a contact has, and only the ones this call supplied: a
-      # form that leaves a field out means "unchanged", not "blank".
+      # A form that leaves a field out means "unchanged" rather than "blank",
+      # which is compact's job. The slice guards nothing a visitor can reach,
+      # since a callable only ever sees declared params: it is there for the next
+      # data class copied from this one, whose caller may be less careful.
       def update(id, **attributes)
         store.update do |contacts|
           held = contact(contacts, id)

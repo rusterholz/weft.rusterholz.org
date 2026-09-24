@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# The document every page of this site renders inside. `abstract!` keeps it out
-# of the route table, which Weft otherwise derives from the class name.
+# The document every page renders inside; abstract! keeps it out of the route table Weft derives from class names.
 class ApplicationPage < Weft::Page
   abstract!
 
@@ -15,10 +14,9 @@ class ApplicationPage < Weft::Page
 
   private
 
-  def relative_path(absolute_path) = Pathname.new(absolute_path).relative_path_from(APP_ROOT).to_s
+  # Source files travel as paths inside this repo: shown, linked and read as one.
+  def repo_path(absolute_path) = Pathname.new(absolute_path).relative_path_from(APP_ROOT).to_s
 
   # GIT_SHA is baked in at image build, so a deployed page links the code it runs.
-  def source_url(absolute_path)
-    "#{SITE_REPO_URL}/blob/#{ENV.fetch('GIT_SHA', 'main')}/#{relative_path(absolute_path)}"
-  end
+  def source_url(repo_path) = "#{SITE_REPO_URL}/blob/#{ENV.fetch('GIT_SHA', 'main')}/#{repo_path}"
 end

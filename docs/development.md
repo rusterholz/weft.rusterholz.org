@@ -49,7 +49,7 @@ that is the tag rather than the default branch:
 <https://github.com/rusterholz/weft/blob/v0.2.0/docs/examples/click-to-edit.md>
 
 With a clone of the gem to hand, name where it is. A relative path is a trap,
-because mission work happens in a git worktree that sits somewhere else entirely:
+because work often happens in a git worktree that sits somewhere else entirely:
 
 ```bash
 git -C /path/to/weft show v0.2.0:docs/configuration.md
@@ -147,6 +147,11 @@ twenty-one examples define a `ContactsTable` and two define a `PEOPLE`, while we
 validates a single global route table. The namespace keeps them apart and gives
 each component an unsurprising route: `/_components/click_to_edit/contact_card`.
 
+**A constant that belongs to a class goes inside it.** An example's seed data is
+`ClickToEdit::Contacts::SEED`, not `ClickToEdit::SEED`, which under this rule would
+need a file of its own and a name of its own. The same goes for anything else an
+example wants to keep beside its data.
+
 **Zeitwerk manages exactly what files are named for, and reloading depends on it.**
 Weft evicts a class from its route table as Zeitwerk unloads it, and Zeitwerk
 reports the constant a file is named for. Put two classes in one file and the
@@ -165,13 +170,17 @@ first visit. The price is that changing something in `app/data` needs a restart.
 the two or three verbs its components need:
 
 ```ruby
-class Contacts
-  class << self
-    def all = store.fetch
+module ClickToEdit
+  class Contacts
+    SEED = { "1" => { first_name: "Joe", last_name: "Blow" } }.freeze
 
-    private
+    class << self
+      def all = store.fetch
 
-    def store = Store.for("click_to_edit", seed: SEED)
+      private
+
+      def store = Store.for("click_to_edit", seed: SEED)
+    end
   end
 end
 ```

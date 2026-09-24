@@ -44,10 +44,14 @@ class ExamplePage < ApplicationPage
   # listing a directory, so the pages follow the code if the code ever moves.
   # Data first, then the components: the order someone reads them in.
   def example_source_paths
-    classes = example_classes.sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }
-    classes.map { |klass| Object.const_source_location(klass.name).first }
+    @example_source_paths ||= example_classes.
+                              sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }.
+                              map { |klass| repo_path(Object.const_source_location(klass.name).first) }
   end
 
+  # grep(Class) is not reachable today, since an example holds nothing but
+  # classes; it is there so a namespace that later holds a constant of its own
+  # shows no code block for it rather than raising.
   def example_classes
     module_name = self.class.slug.tr("-", "_").camelize
     unless Object.const_defined?(module_name)
@@ -60,13 +64,13 @@ class ExamplePage < ApplicationPage
 
   # `walkthrough` is the concrete page's own method, so this resolves to the file
   # the reader is looking at rather than to this one.
-  def page_source_path = self.class.instance_method(:walkthrough).source_location.first
+  def page_source_path = repo_path(self.class.instance_method(:walkthrough).source_location.first)
 
   def under_the_hood
     h2 "Under the Hood"
     ul do
       li { a "This page", href: source_url(page_source_path) }
-      example_source_paths.each { |path| li { a relative_path(path), href: source_url(path) } }
+      example_source_paths.each { |path| li { a path, href: source_url(path) } }
     end
   end
 end

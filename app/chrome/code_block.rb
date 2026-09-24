@@ -9,18 +9,18 @@ require "rouge"
 class CodeBlock < Weft::Component
   builder_method :code_block
 
-  # The path is a build argument and never a param, and the <code> wrapper goes
-  # in as text rather than as a child tag. Both matter: see docs/development.md,
-  # "Showing the Code".
+  # Takes a path inside this repository, which is both the label and all that is
+  # needed to find the file. Never a declared param, and the <code> wrapper goes
+  # in as text: see docs/development.md, "Showing the Code".
   def build(path, attributes = {})
     super(attributes)
-    para { code Pathname.new(path).relative_path_from(APP_ROOT).to_s }
+    para { code path }
     pre { text_node "<code>#{CodeBlock.highlight(path)}</code>".html_safe }
   end
 
   class << self
     def highlight(path)
-      formatter.format(lexer.lex(File.read(path)))
+      formatter.format(lexer.lex(File.read(File.join(APP_ROOT, path))))
     end
 
     private
