@@ -5,7 +5,7 @@
 class ApplicationPage < Weft::Page
   abstract!
 
-  SITE_NAME = "Weft Examples"
+  SITE_NAME = "weft"
 
   # Moves into config with the rest of the external links when the chrome lands.
   WEFT_REPO_URL = "https://github.com/rusterholz/weft"

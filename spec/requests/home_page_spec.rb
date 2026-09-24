@@ -5,7 +5,7 @@ RSpec.describe "the placeholder home page" do
     get "/"
 
     expect(last_response.status).to eq(200)
-    expect(last_response.body).to include("<h1>Weft Examples</h1>")
+    expect(last_response.body).to include("<h1>weft</h1>")
   end
 
   # The standing constraint made executable: nothing the running site loads
@@ -30,6 +30,6 @@ RSpec.describe "the placeholder home page" do
     get "/no/such/page"
 
     expect(last_response.status).to eq(404)
-    expect(last_response.body).to include("<title>Not Found · Weft Examples</title>")
+    expect(last_response.body).to include("<title>Not Found · weft</title>")
   end
 end
