@@ -43,11 +43,17 @@ freeze the outgoing version's pages, then bump.
 
 ### Read weft's Docs at the Tag, Never From a Checkout
 
-When you need weft's documentation, read the released version of it:
+When you need weft's documentation, read the released version of it. On the web,
+that is the tag rather than the default branch:
+
+<https://github.com/rusterholz/weft/blob/v0.2.0/docs/examples/click-to-edit.md>
+
+With a clone of the gem to hand, name where it is. A relative path is a trap,
+because mission work happens in a git worktree that sits somewhere else entirely:
 
 ```bash
-git -C ../weft show v0.2.0:docs/configuration.md
-git -C ../weft show v0.2.0:docs/examples/click-to-edit.md
+git -C /path/to/weft show v0.2.0:docs/configuration.md
+git -C /path/to/weft show v0.2.0:docs/examples/click-to-edit.md
 ```
 
 This is not pedantry, and it is the rule people break first. A checkout of the
@@ -75,8 +81,10 @@ spec is one visitor.
 
 ## Assets Are Vendored, Including the Ones Nothing Uses Yet
 
-Nothing the running site loads comes from a third party. Fonts and scripts are
-served from this origin.
+Nothing the running site loads comes from a third party. Everything it asks the
+browser for is served from this origin. Today that means scripts; **no fonts are
+vendored yet**, because no page asks for one until the site has a design, and
+`bin/fetch-fonts` arrives with it.
 
 The reason is speed first. Since browsers partitioned their HTTP caches, a font
 or script on a public CDN is no longer shared between sites, so the "someone
@@ -168,6 +176,14 @@ and document title all come from the catalog, found from the page's own class
 name, so the two can never drift. `ExamplePage` supplies the frame and calls the
 page's `walkthrough`; a page that forgets to define one says so.
 
+The URL half of that reaches into the gem: `ExamplePage` overrides
+`default_page_path`, which weft declares **private**. It is the right seam, since
+it makes every subclass derive its own path with nothing to remember to call, and
+plain Ruby lets a subclass override a private method. But it is not part of weft's
+public surface, so **re-verify it whenever the pin moves**: a release that renames
+or inlines that method takes every example page's URL with it. The neighboring
+`title_declaration` override is public API and needs no such care.
+
 ### The Docs' Examples Are Fragments, and a Page Is Not
 
 This is the one thing to know before porting the next example. weft's
@@ -187,8 +203,14 @@ receives :contact_id
 
 Now the page can write `contact_card contact_id: "1"`, the hand-off fills the
 value when the component is embedded, and the wire fills it when htmx fetches the
-component on its own. Expect to need this on the first component of most
-examples, and on no others.
+component on its own.
+
+**The rule is about every component an enclosing `build` hands a value to**, not
+just the one nearest the page. Click to Edit has exactly one, so it is a thin
+illustration of a rule that gets thicker fast: an example whose page renders a
+table hands each row its record, and every one of those row components needs the
+dual if htmx is ever going to fetch one on its own. Work outwards from the page
+and ask of each component, "does a keyword at its call site supply this?"
 
 ### Specs
 
@@ -245,12 +267,17 @@ identifier, because it is defined in the gem and not here.
 
 `.github/workflows/ci.yml` runs on pushes to `main` and on every pull request.
 Work happens on branches and arrives through a PR, so that pairing covers every
-commit once rather than twice. Two jobs:
+commit once rather than twice. Three jobs:
 
 - **Specs, lint, doc drift.** The same three commands `bin/check` runs, split so
   a failure names itself.
 - **Image builds.** `docker build`, proving the Dockerfile still produces an
   image. Nothing is pushed to a registry.
+- **Final Results.** Does no work of its own: it passes only if the other two
+  passed. **This is the one status check the branch protection requires**, which
+  is why a pull request waits on a job whose name says nothing about what it ran.
+  Fanning in through one name means jobs can be added or renamed without editing
+  the ruleset.
 
 So a green run here and a green `bin/check` locally mean the same thing, with
 one difference worth knowing: **CI builds on Linux.** A dependency that needs a
