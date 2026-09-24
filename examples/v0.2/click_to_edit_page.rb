@@ -37,15 +37,13 @@ class ClickToEditPage < ExamplePage
     h2 "Worth Noticing"
     para "The two components reference each other without a cycle. transfers :save, to: " \
          "ContactCard runs in the class body, so ContactCard has to exist by then, while " \
-         "loads: ContactEditor is not evaluated until render. Each class has a file of its own " \
-         "here, so the autoloader fetches whichever is needed first; in a single file you would " \
-         "order the definitions yourself, with the display component before the editor."
+         "loads: ContactEditor is not evaluated until render."
     para "Form fields pair with declared params. The editor declares first_name, last_name and " \
          "email so its fields reach the save callable as params.first_name and friends, while " \
          "contact_id rides along as a hidden input, because it is part of the component's " \
          "identity rather than something the user edits."
     para "It still works without JavaScript. form(action: :save) emits plain action and method " \
-         "attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Note " \
-         "type: \"button\" on Cancel: inside a form, a bare button is a submit button."
+         "attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Cancel " \
+         "carries type: \"button\", which is what keeps a button inside a form from submitting it."
   end
 end

@@ -15,6 +15,6 @@ class NotFoundPage < ApplicationPage
     super
     h1 "Not Found"
     para "There is nothing at #{params.request_path}."
-    para { a "Back to the examples", href: "/" }
+    para { a "Back to UI Examples", href: "/" }
   end
 end

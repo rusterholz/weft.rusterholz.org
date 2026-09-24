@@ -148,18 +148,19 @@ validates a single global route table. The namespace keeps them apart and gives
 each component an unsurprising route: `/_components/click_to_edit/contact_card`.
 
 **A constant that belongs to a class goes inside it.** An example's seed data is
-`ClickToEdit::Contacts::SEED`, not `ClickToEdit::SEED`, which under this rule would
-need a file of its own and a name of its own. The same goes for anything else an
-example wants to keep beside its data.
+`ClickToEdit::Contacts::SEED`; a constant at module level would need a file and a
+name of its own. The same goes for anything else an example keeps beside its data.
 
-**Zeitwerk manages exactly what files are named for, and reloading depends on it.**
+**Zeitwerk manages exactly what files are named for, and reloading rides on that.**
 Weft evicts a class from its route table as Zeitwerk unloads it, and Zeitwerk
-reports the constant a file is named for. Put two classes in one file and the
-second one is invisible to all of that: it is never evicted, the next reload
-registers a fresh copy at a route the stale one still holds, and every request in
-development fails with a route collision. The specs stay green throughout, because
-the test environment does not reload. Weft's own demo app follows this convention
-file for file, and so does this repo.
+unloads the constant each file is named for. So the file boundary is what keeps the
+route table honest across a reload: one constant per file means every class is
+evicted and re-registered cleanly, every time. Weft's own demo app keeps this
+convention file for file across all sixty-seven of them, and so does this repo.
+
+If a reload in development ever answers with a route collision, that is the thing
+to look for, and the specs will not have caught it: the test environment does not
+reload.
 
 `app/data` is loaded by a second Zeitwerk loader that never reloads, because the
 store's cache lives on a class-level variable there. Reloaded, the class is a new
@@ -254,8 +255,8 @@ to them.
 goes through it, so how code is presented is one place. A page shows **one block
 per file**, labeled with the path, in the order someone reads them: the data class
 first, then the components. The gem's docs show an example as a single block
-because markdown has nowhere to put a file boundary, not because the boundary is
-uninteresting. Here it is part of the lesson.
+because markdown has nowhere to put a file boundary; here the boundary is part of
+the lesson.
 
 Which files those are is asked of the classes, not of the directory, so the blocks
 follow the code if the code moves. Two things `CodeBlock` knows that are easy to

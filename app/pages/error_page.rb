@@ -19,7 +19,7 @@ class ErrorPage < ApplicationPage
     h1 "Something Went Wrong"
     para "This page could not be rendered."
     detail if Weft.configuration.verbose_error_pages
-    para { a "Back to the examples", href: "/" }
+    para { a "Back to UI Examples", href: "/" }
   end
 
   private

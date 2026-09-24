@@ -69,7 +69,7 @@ class ExamplePage < ApplicationPage
   def under_the_hood
     h2 "Under the Hood"
     ul do
-      li { a "This page", href: source_url(page_source_path) }
+      li { a "This Page", href: source_url(page_source_path) }
       example_source_paths.each { |path| li { a path, href: source_url(path) } }
     end
   end
