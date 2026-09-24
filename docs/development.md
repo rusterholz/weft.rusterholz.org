@@ -211,9 +211,19 @@ This is the one thing to know before porting the next example. weft's
 documentation writes each example as a standalone fragment, and shows it being
 fetched with its values in the query string: `GET /_components/contact_card?contact_id=1`.
 A page has no query string, so a component embedded in one is handed its values by
-the call site instead. **In most component frameworks a keyword at the call site is
-a prop; in weft it is an HTML attribute on the wrapper**, and params travel a
-channel of their own. Weft warns when such a keyword collides with a declared param.
+the call site instead. If you have passed props before, most of that model carries
+over: **a prop that hands a child a value it could not look up for itself maps one
+to one onto a declared `receives` key.** Same intent, same direction, and weft
+pulls such a keyword out of the attributes and hands it straight to the instance.
+
+Two edges are worth knowing. A prop carrying a **callback** has no counterpart
+here: where that idiom has a child talk back to its parent through a function,
+weft has it talk back to the server through an action and a URL. And **the
+declaration is the switch**: weft pulls out only the keywords a component declares
+as `receives`, so one it has not declared stays with the attributes, where weft's
+own kwargs expand into the htmx wiring and anything else reaches the element as
+markup. Declaring is not bookkeeping; it decides which channel a value travels on,
+and weft warns when an undeclared keyword collides with a declared param.
 
 The fix is the dual weft's DSL already documents: declare `receives` alongside
 the `param`.

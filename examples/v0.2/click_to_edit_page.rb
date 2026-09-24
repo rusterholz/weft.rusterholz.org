@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class ClickToEditPage < ExamplePage
+  describes contacts: "where a visitor's contact is kept, standing in for your database",
+            contact_card: "the contact at rest, and the button that opens it for editing",
+            contact_editor: "the form in its editable expanded view"
+
   def walkthrough
     introduction
     contact_card contact_id: "1"

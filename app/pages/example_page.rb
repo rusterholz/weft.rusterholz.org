@@ -16,6 +16,16 @@ class ExamplePage < ApplicationPage
     # subclass its own, with nothing to remember to call.
     def title_declaration = "#{entry.title} · #{ApplicationPage::SITE_NAME}"
 
+    # Each of the example's classes in a phrase, so "which piece do I want?" is
+    # answerable from the list. On the page, since the example's files are the code.
+    def describes(**phrases) = @phrases = phrases
+
+    def phrase_for(klass)
+      (@phrases || {}).fetch(klass.name.demodulize.underscore.to_sym) do
+        raise Catalog::Unknown, "#{name} describes no #{klass.name}"
+      end
+    end
+
     private
 
     # Weft would derive "/click_to_edit"; the catalog owns these paths.
@@ -26,7 +36,7 @@ class ExamplePage < ApplicationPage
     super
     h1 entry.title
     walkthrough
-    example_source_paths.each { |path| code_block path }
+    example_sources.each_value { |path| code_block path }
     under_the_hood
   end
 
@@ -43,10 +53,10 @@ class ExamplePage < ApplicationPage
   # One file per class, found through the classes themselves rather than by
   # listing a directory, so the pages follow the code if the code ever moves.
   # Data first, then the components: the order someone reads them in.
-  def example_source_paths
-    @example_source_paths ||= example_classes.
-                              sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }.
-                              map { |klass| repo_path(Object.const_source_location(klass.name).first) }
+  def example_sources
+    @example_sources ||= example_classes.
+                         sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }.
+                         to_h { |klass| [klass, repo_path(Object.const_source_location(klass.name).first)] }
   end
 
   # grep(Class) is not reachable today, since an example holds nothing but
@@ -70,7 +80,9 @@ class ExamplePage < ApplicationPage
     h2 "Under the Hood"
     ul do
       li { a "This Page", href: source_url(page_source_path) }
-      example_source_paths.each { |path| li { a path, href: source_url(path) } }
+      example_sources.each do |klass, path|
+        li { a "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", href: source_url(path) }
+      end
     end
   end
 end

@@ -119,6 +119,15 @@ RSpec.describe "the Click to Edit example" do
     expect(last_response.body).to include("/examples/v0.2/click_to_edit/contact_editor.rb")
   end
 
+  # A path answers "where is it", not "which one do I want", so each link names
+  # the class and says what it is for.
+  it "names each piece of the example and says what it is" do
+    get "/examples/click-to-edit"
+
+    expect(last_response.body).to include("ContactEditor -- the form in its editable expanded view")
+    expect(last_response.body).to include("Contacts -- where a visitor")
+  end
+
   it "does not route the abstract page every example inherits from" do
     get "/example"
 
