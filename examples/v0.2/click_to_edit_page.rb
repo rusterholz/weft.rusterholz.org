@@ -33,7 +33,7 @@ class ClickToEditPage < ExamplePage
     h2 "How It Works"
     prose <<~TEXT
       Every button here hands this piece of the page to another component, and that is what
-      transfers declares. The card's Edit button transfers to the editor; the editor's Submit
+      transfers declares. The card's Edit button transfers to the editor; the editor's Save
       and Cancel transfer back to the card. The server renders the component taking over, and
       it replaces the one that declared the transfer, wherever that sits in the page.
 
@@ -42,8 +42,8 @@ class ClickToEditPage < ExamplePage
       they declare method: :get and are honest GETs, while save keeps the default, a POST.
 
       A button or a form names its transfer with action:, and Weft fills in the rest: the URL,
-      the verb, the params to send along, and where the response lands. That is why nothing
-      here spells out a URL or a target.
+      the verb and where the response lands, and for a button, the params too. That is why
+      nothing here spells out a URL or a target.
     TEXT
   end
 
@@ -55,9 +55,7 @@ class ClickToEditPage < ExamplePage
       contact_id rides along as a hidden input, because it is part of the component's
       identity rather than something the user edits.
 
-      Saving still works without JavaScript. form(action: :save) emits plain action and method
-      attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Note
-      type: "button" on Cancel: inside a form, a bare button is a submit button.
+      Note type: "button" on Cancel: inside a form, a bare button is a submit button.
     TEXT
   end
 end

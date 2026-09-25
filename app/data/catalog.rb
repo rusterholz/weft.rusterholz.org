@@ -21,7 +21,7 @@ class Catalog
   Unknown = Class.new(StandardError)
 
   ENTRIES = [
-    Entry["click-to-edit", "Click to Edit", "Swap a read-only view for an edit form in place -- loads: + transfers"],
+    Entry["click-to-edit", "Click to Edit", "Swap a read-only view for an edit form in place -- transfers"],
     Entry["edit-row", "Edit Row", "The same pattern per table row"],
     Entry["delete-row", "Delete Row", "Remove a row with a confirmation -- dismisses"],
     Entry["bulk-update", "Bulk Update", "One form updating many rows -- performs + array params"],
