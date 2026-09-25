@@ -254,9 +254,12 @@ and ask of each component, "does a keyword at its call site supply this?"
 
 ### Specs
 
-One request spec per example, driving the whole stack, because one spec is one
-visitor. Assert the flow a person actually walks, then assert that a second
-visitor does not see the first one's edit:
+Two layers. **Unit specs** render each class directly, `ContactCard.render(contact_id: "1")`
+or `ClickToEditPage.render`, against the real store with `Current.visitor` set,
+and assert what it renders: one file per class, under `spec/examples/` in the same
+layout as the example. **One request spec per example** drives the whole stack,
+because one spec is one visitor. Assert the flow a person actually walks, then
+assert that a second visitor does not see the first one's edit:
 
 ```ruby
 get "/examples/click-to-edit"

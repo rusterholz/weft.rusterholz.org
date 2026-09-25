@@ -1,20 +1,8 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-
 RSpec.describe "the Click to Edit example" do
   let(:card_path) { "/_components/click_to_edit/contact_card" }
   let(:editor_path) { "/_components/click_to_edit/contact_editor" }
-  # In reading order: the data class, then the components.
-  let(:source_files) do
-    %w[contacts contact_card contact_editor].map do |stem|
-      File.join(EXAMPLES_ROOT, "click_to_edit", "#{stem}.rb")
-    end
-  end
-
-  def shown_code_blocks
-    Nokogiri::HTML5(last_response.body).css("pre").map(&:text)
-  end
 
   def save(**overrides)
     post "#{editor_path}/save",
@@ -27,13 +15,6 @@ RSpec.describe "the Click to Edit example" do
     expect(last_response.status).to eq(200)
     expect(last_response.body).to include("Joe")
     expect(last_response.body).to include("joe@blow.com")
-  end
-
-  it "takes its heading and its title from the catalog" do
-    get "/examples/click-to-edit"
-
-    expect(last_response.body).to include("<h1>Click to Edit</h1>")
-    expect(last_response.body).to include("<title>Click to Edit · weft</title>")
   end
 
   it "walks a visitor from the card to the editor and back to an edited card" do
@@ -94,38 +75,6 @@ RSpec.describe "the Click to Edit example" do
     expect(last_response.body).to include("Joseph")
     expect(last_response.body).to include("Blow")
     expect(last_response.body).to include("joe@blow.com")
-  end
-
-  # Not a sample of the code: every file the example is made of, whole and
-  # unaltered, one block each. Nothing here can drift from the classes that
-  # rendered the card above it.
-  it "shows each of the example's files exactly as it is on disk, in reading order" do
-    get "/examples/click-to-edit"
-
-    expect(shown_code_blocks).to eq(source_files.map { |file| File.read(file) })
-    expect(last_response.body).to include("<span class=")
-  end
-
-  it "labels each block with the file it read" do
-    get "/examples/click-to-edit"
-
-    expect(last_response.body).to include("<code>examples/v0.2/click_to_edit/contacts.rb</code>")
-  end
-
-  it "links the source of the page and of every file the example is made of" do
-    get "/examples/click-to-edit"
-
-    expect(last_response.body).to include("/examples/v0.2/click_to_edit_page.rb")
-    expect(last_response.body).to include("/examples/v0.2/click_to_edit/contact_editor.rb")
-  end
-
-  # A path answers "where is it", not "which one do I want", so each link names
-  # the class and says what it is for.
-  it "names each piece of the example and says what it is" do
-    get "/examples/click-to-edit"
-
-    expect(last_response.body).to include("ContactEditor -- the form in its editable expanded view")
-    expect(last_response.body).to include("Contacts -- where a visitor")
   end
 
   it "does not route the abstract page every example inherits from" do

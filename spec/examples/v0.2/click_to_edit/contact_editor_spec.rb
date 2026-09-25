@@ -1,0 +1,47 @@
+# frozen_string_literal: true
+
+require "nokogiri"
+require "securerandom"
+
+RSpec.describe ClickToEdit::ContactEditor do
+  before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+
+  let(:editor) { Nokogiri::HTML5.fragment(described_class.render(contact_id: "1")).at("div") }
+  let(:form) { editor.at("form") }
+
+  def field_values
+    form.css("input[type=text]").to_h { |input| [input["name"], input["value"]] }
+  end
+
+  it "fills each field from the visitor's store" do
+    ClickToEdit::Contacts.update("1", email: "joseph@blow.com")
+
+    expect(field_values).to eq("first_name" => "Joe", "last_name" => "Blow", "email" => "joseph@blow.com")
+  end
+
+  it "labels each field for its input" do
+    labels = form.css("label").to_h { |label| [label["for"], label.text.strip] }
+
+    expect(labels).to eq("first_name" => "First Name", "last_name" => "Last Name", "email" => "Email")
+  end
+
+  it "carries the contact it edits as a hidden field" do
+    expect(form.at("input[type=hidden]").to_h).to include("name" => "contact_id", "value" => "1")
+  end
+
+  it "saves over htmx and, without JavaScript, as a plain form post" do
+    save_path = "/_components/click_to_edit/contact_editor/save"
+
+    expect(form.to_h).to include("hx-post" => save_path, "action" => save_path, "method" => "post",
+                                 "hx-target" => "#click-to-edit-contact-editor-1", "hx-swap" => "outerHTML")
+  end
+
+  it "cancels with a button that cannot submit the form" do
+    cancel = form.at("button")
+
+    expect(cancel.text).to eq("Cancel")
+    expect(cancel["type"]).to eq("button")
+    expect(cancel["hx-get"]).to eq("/_components/click_to_edit/contact_card?contact_id=1")
+    expect(cancel["hx-target"]).to eq("#click-to-edit-contact-editor-1")
+  end
+end
