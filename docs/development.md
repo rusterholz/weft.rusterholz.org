@@ -287,9 +287,10 @@ Which files those are is asked of the classes, not of the directory, so the bloc
 follow the code if the code moves. Two things `CodeBlock` knows that are easy to
 get wrong again:
 
-- The path is a build argument and never a declared param. A param would put a
-  file path on the wire and make this a component that reads any file it is asked
-  for.
+- The path is handed over at the call site, `code_block path: ...`, through
+  `receives`, and is never a declared `param`. A param would put a file path on
+  the wire, and since any param makes a component routable, this would become an
+  endpoint that reads any file it is asked for.
 - Arbre renders a tag holding a single text child on one line, and indents one
   holding a nested tag. Inside a `<pre>` that indenting changes the code on the
   page, so the `<code>` wrapper goes in as text.

@@ -59,7 +59,7 @@ class ExamplePage < ApplicationPage
     super
     h1 entry.title
     walkthrough
-    example_sources.each_value { |path| code_block path }
+    example_sources.each_value { |path| code_block path: path }
     under_the_hood
   end
 
