@@ -5,7 +5,7 @@ module ClickToEdit
     builder_method :contact_card
 
     # Two doors for one value: the page hands the contact over when it renders
-    # the card, and the wire carries it when htmx fetches the card on its own.
+    # the card, and the wire carries it when the card renders in answer to a request.
     param :contact_id
     receives :contact_id
     derives(:contact) { |p| Contacts.find(p.contact_id) }
