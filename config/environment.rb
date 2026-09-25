@@ -11,6 +11,7 @@ require "weft"
 EXAMPLES_ROOT = File.join(APP_ROOT, "examples", "v#{Weft::VERSION.split('.').first(2).join('.')}")
 
 WEFT_REPO_URL = "https://github.com/rusterholz/weft"
+WEFT_CHANGELOG_URL = "#{WEFT_REPO_URL}/blob/v#{Weft::VERSION}/CHANGELOG.md".freeze
 SITE_REPO_URL = "https://github.com/rusterholz/weft.rusterholz.org"
 
 # Each directory under app/ is its own Zeitwerk root (app/pages/home_page.rb

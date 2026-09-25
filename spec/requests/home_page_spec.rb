@@ -31,6 +31,13 @@ RSpec.describe "the home page" do
     expect(last_response.status).to eq(200)
   end
 
+  it "serves the stylesheet the page points at" do
+    get "/static/css/site.css"
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include("--ground")
+  end
+
   # The title is the discriminator: the gem ships its own not-found document, so
   # asserting on generic wording would pass even with our page unwired.
   it "answers an unknown path with the site's own not-found page" do

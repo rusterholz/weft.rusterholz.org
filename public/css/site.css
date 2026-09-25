@@ -1,0 +1,152 @@
+/*
+ * weft.rusterholz.org: cyanotype on linen.
+ *
+ * Three tones and nothing else gets a fill: ground for reading, tint for the
+ * highlighted declaration, bench for anything that touches the wire. Copper
+ * marks live elements only. Faces and sizes are tokens, so trying another is
+ * an edit here (and a line in bin/fetch-fonts).
+ */
+
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-italic-400.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spline Sans Mono"; src: url("../fonts/spline-sans-mono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spline Sans Mono"; src: url("../fonts/spline-sans-mono-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+
+:root {
+  --face-text: "Spectral", Georgia, "Times New Roman", serif;
+  --face-mono: "Spline Sans Mono", ui-monospace, Menlo, monospace;
+
+  --size-article: 20px;
+  --size-h1: 46px;
+  --size-bar: 14px;
+  --size-margin: 14px;
+  --size-header: 15px;
+  --size-code: 13px;
+  --size-bench: 12.5px;
+
+  --ground: #EEF0EA;
+  --ink: #1B2733;
+  --prussian: #1E4E8C;
+  --prussian-hover: #163B6B;
+  --copper: #CB7A33;
+  --muted: #5A6670;
+  --bar-ink: #3F4E5B;
+  --tint: #E3E7E1;
+  --bench: #DCE1DB;
+  --hairline: #D5DAD2;
+  --field: #F6F7F3;
+  --field-rule: #C5CCC3;
+
+  color-scheme: light;
+}
+
+/* The dark values twice: once for a visitor who chose dark, once for one who
+   chose nothing and whose system is dark. */
+:root[data-theme="dark"] {
+  --ground: #141B22;
+  --ink: #E4E9EA;
+  --prussian: #7FA9E6;
+  --prussian-hover: #A9C6F0;
+  --copper: #E69A5E;
+  --muted: #98A5B0;
+  --bar-ink: #B4C0CA;
+  --tint: #1B242D;
+  --bench: #1F2A34;
+  --hairline: #2B3742;
+  --field: #1B242D;
+  --field-rule: #2B3742;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --ground: #141B22;
+    --ink: #E4E9EA;
+    --prussian: #7FA9E6;
+    --prussian-hover: #A9C6F0;
+    --copper: #E69A5E;
+    --muted: #98A5B0;
+    --bar-ink: #B4C0CA;
+    --tint: #1B242D;
+    --bench: #1F2A34;
+    --hairline: #2B3742;
+    --field: #1B242D;
+    --field-rule: #2B3742;
+
+    color-scheme: dark;
+  }
+}
+
+/* ---- The frame ---- */
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--face-text);
+}
+
+a { color: var(--prussian); }
+a:hover { color: var(--prussian-hover); }
+
+:is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--prussian);
+  outline-offset: 2px;
+}
+
+code, pre, kbd { font-family: var(--face-mono); }
+
+.flat {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+.flat:hover { background: var(--tint); color: var(--ink); }
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 80px 0;
+  font-size: var(--size-header);
+  color: var(--muted);
+}
+
+.site-header nav[aria-label="Breadcrumb"] { display: flex; align-items: baseline; gap: 10px; }
+.site-header nav a { color: var(--muted); text-decoration: none; }
+.site-header nav a:hover { color: var(--ink); }
+.site-header nav [aria-current="page"] { color: var(--ink); }
+.site-header .wordmark { color: var(--ink); font-weight: 600; font-size: 20px; margin-right: 6px; }
+
+.site-header .widgets { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.site-header .widgets a.flat { font-weight: 500; }
+
+main {
+  padding: 44px 80px 32px;
+  font-size: var(--size-article);
+  line-height: 1.6;
+}
+
+.bench {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 80px;
+  background: var(--bench);
+  font-family: var(--face-mono);
+  font-size: var(--size-bench);
+  color: var(--muted);
+}
+.bench .bench-request { flex-grow: 1; color: var(--ink); }
