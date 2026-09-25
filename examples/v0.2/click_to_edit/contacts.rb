@@ -14,7 +14,7 @@ module ClickToEdit
       def find(id) = contact(all, id)
 
       # A form that leaves a field out means "unchanged" rather than "blank",
-      # which is compact's job. The slice guards nothing a visitor can reach,
+      # which is compact's job. Hash#slice guards nothing a visitor can reach,
       # since a callable only ever sees declared params: it is there for the next
       # data class copied from this one, whose caller may be less careful.
       def update(id, **attributes)

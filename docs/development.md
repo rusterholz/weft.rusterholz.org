@@ -195,8 +195,10 @@ end
 
 That is the "bring your own persistence" lesson in the shape weft's
 [application patterns](https://github.com/rusterholz/weft/blob/v0.2.0/docs/app-patterns.md)
-prescribe for service classes. The seed is declared once, where the handle is
-built, so a read and a write cannot disagree about where an example starts.
+prescribe for service classes. `Store.for` hands back the example's
+`Store::ExampleSlice`: that example's data for the current visitor. The seed is
+declared once, where the slice is asked for, so a read and a write cannot
+disagree about where an example starts.
 
 **A page declares nothing but its prose and its composition.** Its URL, heading
 and document title all come from the catalog, found from the page's own class

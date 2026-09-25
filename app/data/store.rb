@@ -5,14 +5,13 @@ require "active_support/core_ext/numeric/bytes"
 require "active_support/core_ext/numeric/time"
 require "active_support/core_ext/object/deep_dup"
 
-# Where the examples keep their data: a cache, per visitor, on a timer.
+# Where the examples keep their data: a cache that forgets, since no example's
+# data outlives its visitor (one browser session; see VisitorScope).
 #
-# Storage that is allowed to forget is what this site needs, since no example's
-# data outlives its visitor, so the expiry is the feature and not a limitation.
-# One entry holds one whole slice, a slice being all that one example keeps for
-# one visitor, which reduces a reset to the single delete every cache store has.
-# Two costs, accepted: a memory cache is per *process*, and read-modify-write is
-# not atomic.
+# Each example a visitor touches gets an ExampleSlice: all of that example's
+# data, for that visitor alone, as one cache entry. So one visitor's edits never
+# reach another's, and resetting an example is one delete. Two costs: a memory
+# cache is per *process*, and read-modify-write is not atomic.
 class Store
   TTL = 2.hours
   MAX_BYTES = 32.megabytes
@@ -20,9 +19,9 @@ class Store
   NoVisitor = Class.new(StandardError)
 
   class << self
-    # A handle on one slice for the visitor in scope; `seed` is that slice's start.
-    def for(slice, seed: {})
-      Handle.new(cache, key_for(slice), seed)
+    # The example's slice for the visitor in scope, holding `seed` until written.
+    def for(example, seed: {})
+      ExampleSlice.new(cache, key_for(example), seed)
     end
 
     private
@@ -32,16 +31,16 @@ class Store
       @cache ||= ActiveSupport::Cache::MemoryStore.new(expires_in: TTL, size: MAX_BYTES)
     end
 
-    def key_for(slice)
+    def key_for(example)
       raise NoVisitor, "No visitor in scope: is VisitorScope in the stack?" unless Current.visitor
 
-      "#{Current.visitor}/#{slice}"
+      "#{Current.visitor}/#{example}"
     end
   end
 
-  # One slice. An example's data class holds one of these and exposes the few
-  # verbs its components need; components never hold one.
-  class Handle
+  # One example's data for one visitor. An example's data class holds one of
+  # these and exposes the few verbs its components need; components never do.
+  class ExampleSlice
     def initialize(cache, key, seed)
       @cache = cache
       @key = key
