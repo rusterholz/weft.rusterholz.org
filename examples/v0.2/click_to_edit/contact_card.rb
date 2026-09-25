@@ -8,6 +8,7 @@ module ClickToEdit
     # the card, and the wire carries it when htmx fetches the card on its own.
     param :contact_id
     receives :contact_id
+    derives(:contact) { |p| Contacts.find(p.contact_id) }
 
     def build(attributes = {})
       super
@@ -21,12 +22,10 @@ module ClickToEdit
 
     private
 
-    def contact = @contact ||= Contacts.find(params.contact_id)
-
     def field(label_text, key)
       div do
         strong "#{label_text}: "
-        text_node contact[key]
+        text_node params.contact[key]
       end
     end
   end

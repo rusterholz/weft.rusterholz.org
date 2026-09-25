@@ -8,6 +8,7 @@ module ClickToEdit
     param :first_name
     param :last_name
     param :email
+    derives(:contact) { |p| Contacts.find(p.contact_id) }
 
     transfers :save, to: ContactCard do |params|
       Contacts.update(params.contact_id,
@@ -32,12 +33,10 @@ module ClickToEdit
 
     private
 
-    def contact = @contact ||= Contacts.find(params.contact_id)
-
     def text_field(label_text, key)
       div do
         label("#{label_text} ", for: key)
-        input(type: "text", name: key, id: key, value: contact[key])
+        input(type: "text", name: key, id: key, value: params.contact[key])
       end
     end
   end
