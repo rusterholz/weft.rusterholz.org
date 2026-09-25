@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
-RSpec.describe "the placeholder home page" do
+RSpec.describe "the home page" do
   it "serves a document at the site root" do
     get "/"
 
     expect(last_response.status).to eq(200)
-    expect(last_response.body).to include("<h1>Weft Examples</h1>")
+    expect(last_response.body).to include("<h1>weft</h1>")
+  end
+
+  it "lists the examples that are running, and only those" do
+    get "/"
+
+    expect(last_response.body).to include(%(<a href="/examples/click-to-edit">Click to Edit</a>))
+    expect(last_response.body).not_to include("/examples/live-ticker")
   end
 
   # The standing constraint made executable: nothing the running site loads
@@ -30,6 +37,6 @@ RSpec.describe "the placeholder home page" do
     get "/no/such/page"
 
     expect(last_response.status).to eq(404)
-    expect(last_response.body).to include("<title>Not Found · Weft Examples</title>")
+    expect(last_response.body).to include("<title>Not Found · weft</title>")
   end
 end

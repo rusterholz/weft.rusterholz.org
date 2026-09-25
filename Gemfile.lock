@@ -34,6 +34,10 @@ GEM
       prism (~> 1.5)
     mustermann (3.1.1)
     nio4r (2.7.5)
+    nokogiri (1.19.4-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.19.4-x86_64-linux-gnu)
+      racc (~> 1.4)
     parallel (2.2.0)
     parser (3.3.12.0)
       ast (~> 2.4.1)
@@ -116,11 +120,12 @@ GEM
     zeitwerk (2.8.3)
 
 PLATFORMS
-  ruby
   x86_64-darwin-24
   x86_64-linux
 
 DEPENDENCIES
+  activesupport
+  nokogiri (~> 1.18)
   puma (~> 7.2)
   rack-session (~> 2.1)
   rack-test (~> 2.1)

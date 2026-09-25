@@ -12,7 +12,7 @@ RSpec.describe "the branded error page" do
     get ExplodingPage.page_path
 
     expect(last_response.status).to eq(500)
-    expect(last_response.body).to include("<title>Something Went Wrong · Weft Examples</title>")
+    expect(last_response.body).to include("<title>Something Went Wrong · weft</title>")
   end
 
   it "shows the exception where verbose error pages are on" do

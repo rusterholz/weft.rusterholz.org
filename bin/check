@@ -2,8 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# The three checks a commit has to pass. CI runs the same three; until this repo
-# has a remote, running them here is the only place they run at all.
+# The three checks a commit has to pass. CI runs the same three on every pull
+# request, so a green run here means what a green run there means.
 
 echo "== rspec =="
 bundle exec rspec
