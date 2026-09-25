@@ -15,39 +15,50 @@ class ClickToEditPage < ExamplePage
   private
 
   def introduction
-    para "A read-only view of a record with an Edit button. Clicking swaps an editable form into " \
-         "its place; saving, or canceling, swaps the read-only view back. No page navigation, and " \
-         "no JavaScript beyond what Weft already ships."
-    para "This is Weft's take on htmx's click-to-edit example, and the shape is the same: the UI " \
-         "moves between two states, and each state is a server-rendered fragment. In Weft, each " \
-         "state is simply a component."
-    para "The contact below is yours alone. Every visitor gets their own copy of it, and it is " \
-         "thrown away a couple of hours later, so edit it freely."
+    prose <<~TEXT
+      A read-only view of a record with an Edit button. Clicking swaps an editable form into
+      its place; saving, or canceling, swaps the read-only view back. No page navigation, and
+      no JavaScript beyond what Weft already ships.
+
+      This is Weft's take on htmx's click-to-edit example, and the shape is the same: the UI
+      moves between two states, and each state is a server-rendered fragment. In Weft, each
+      state is simply a component.
+
+      The contact below is yours alone. Every visitor gets their own copy of it, and it is
+      thrown away a couple of hours later, so edit it freely.
+    TEXT
   end
 
   def how_it_works
     h2 "How It Works"
-    para "Reads and writes get different verbs. Opening the editor changes nothing on the server, " \
-         "so the Edit button is a loads:, a plain GET that fetches the editor component and swaps " \
-         "it over the card. Cancel is the same thing pointed back at the card. Saving does change " \
-         "something, so it is a transfers: a POST that runs the write, then renders the card, " \
-         "which is the natural thing to see after saving, in the editor's place."
-    para "target: self pins the swap to the component. Inside build, self is the component " \
-         "instance, and a component reference as a target resolves to its DOM id, so each " \
-         "fragment replaces the whole card or editor element wherever it sits in the page."
+    prose <<~TEXT
+      Reads and writes get different verbs. Opening the editor changes nothing on the server,
+      so the Edit button is a loads:, a plain GET that fetches the editor component and swaps
+      it over the card. Cancel is the same thing pointed back at the card. Saving does change
+      something, so it is a transfers: a POST that runs the write, then renders the card,
+      which is the natural thing to see after saving, in the editor's place.
+
+      target: self pins the swap to the component. Inside build, self is the component
+      instance, and a component reference as a target resolves to its DOM id, so each
+      fragment replaces the whole card or editor element wherever it sits in the page.
+    TEXT
   end
 
   def worth_noticing
     h2 "Worth Noticing"
-    para "The two components reference each other without a cycle. transfers :save, to: " \
-         "ContactCard runs in the class body and resolves ContactCard there and then, while " \
-         "loads: ContactEditor is not evaluated until render."
-    para "Form fields pair with declared params. The editor declares first_name, last_name and " \
-         "email so its fields reach the save callable as params.first_name and friends, while " \
-         "contact_id rides along as a hidden input, because it is part of the component's " \
-         "identity rather than something the user edits."
-    para "It still works without JavaScript. form(action: :save) emits plain action and method " \
-         "attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Note " \
-         "type: \"button\" on Cancel: inside a form, a bare button is a submit button."
+    prose <<~TEXT
+      The two components reference each other without a cycle. transfers :save, to:
+      ContactCard runs in the class body and resolves ContactCard there and then, while
+      loads: ContactEditor is not evaluated until render.
+
+      Form fields pair with declared params. The editor declares first_name, last_name and
+      email so its fields reach the save callable as params.first_name and friends, while
+      contact_id rides along as a hidden input, because it is part of the component's
+      identity rather than something the user edits.
+
+      It still works without JavaScript. form(action: :save) emits plain action and method
+      attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Note
+      type: "button" on Cancel: inside a form, a bare button is a submit button.
+    TEXT
   end
 end
