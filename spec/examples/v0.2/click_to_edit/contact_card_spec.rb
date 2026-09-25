@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "json"
 require "nokogiri"
 require "securerandom"
 
@@ -29,11 +30,12 @@ RSpec.describe ClickToEdit::ContactCard do
     expect(card["id"]).to eq("click-to-edit-contact-card-1")
   end
 
-  it "opens the editor for the same contact in its own place" do
+  it "hands its place to the editor with a GET, for the same contact" do
     button = card.at("button")
 
     expect(button.text).to eq("Click To Edit")
-    expect(button["hx-get"]).to eq("/_components/click_to_edit/contact_editor?contact_id=1")
+    expect(button["hx-get"]).to eq("/_components/click_to_edit/contact_card/edit")
+    expect(JSON.parse(button["hx-vals"])).to eq("contact_id" => "1")
     expect(button["hx-target"]).to eq("#click-to-edit-contact-card-1")
     expect(button["hx-swap"]).to eq("outerHTML")
   end

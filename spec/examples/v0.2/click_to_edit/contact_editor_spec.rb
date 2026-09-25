@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "json"
 require "nokogiri"
 require "securerandom"
 
@@ -37,11 +38,16 @@ RSpec.describe ClickToEdit::ContactEditor do
   end
 
   it "cancels with a button that cannot submit the form" do
+    expect(form.at("button").text).to eq("Cancel")
+    expect(form.at("button")["type"]).to eq("button")
+  end
+
+  it "hands its place back to the card with a GET, for the same contact" do
     cancel = form.at("button")
 
-    expect(cancel.text).to eq("Cancel")
-    expect(cancel["type"]).to eq("button")
-    expect(cancel["hx-get"]).to eq("/_components/click_to_edit/contact_card?contact_id=1")
+    expect(cancel["hx-get"]).to eq("/_components/click_to_edit/contact_editor/cancel")
+    expect(JSON.parse(cancel["hx-vals"])).to include("contact_id" => "1")
     expect(cancel["hx-target"]).to eq("#click-to-edit-contact-editor-1")
+    expect(cancel["hx-swap"]).to eq("outerHTML")
   end
 end

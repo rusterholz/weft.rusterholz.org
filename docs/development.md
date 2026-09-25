@@ -167,7 +167,8 @@ One thing the convention buys along the way: a class body that names another of 
 example's classes, as `transfers :save, to: ContactCard` does, resolves that
 constant where it stands, and the autoloader satisfies it from the file named for
 it. So an example never has to arrange its own load order, however its classes
-refer to each other.
+refer to each other: the card and the editor each name the other, and they load
+in either order, lazily or eagerly.
 
 `app/data` is loaded by a second Zeitwerk loader that never reloads, because the
 store's cache lives on a class-level variable there. Reloaded, the class is a new

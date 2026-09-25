@@ -19,7 +19,7 @@ RSpec.describe "the Click to Edit example" do
 
   it "walks a visitor from the card to the editor and back to an edited card" do
     get "/examples/click-to-edit"
-    get editor_path, contact_id: "1"
+    get "#{card_path}/edit", contact_id: "1"
     expect(last_response.body).to include('value="Joe"')
 
     save
@@ -27,6 +27,28 @@ RSpec.describe "the Click to Edit example" do
     expect(last_response.body).to include("Joseph")
     get card_path, contact_id: "1"
     expect(last_response.body).to include("Joseph")
+  end
+
+  it "cancels from the editor back to the card, unchanged" do
+    get "/examples/click-to-edit"
+    get "#{card_path}/edit", contact_id: "1"
+
+    # As htmx sends it: the editor's unset params serialize as JSON null, which reaches the wire as "null".
+    get "#{editor_path}/cancel", contact_id: "1", first_name: "null", last_name: "null", email: "null"
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include('id="click-to-edit-contact-card-1"')
+    expect(last_response.body).to include("Joe")
+    expect(last_response.body).not_to include("<form")
+  end
+
+  # Edit and Cancel change nothing, so they are GETs; only saving is a POST.
+  it "answers Edit and Cancel only as GETs" do
+    post "#{card_path}/edit", contact_id: "1"
+    expect(last_response.status).to eq(404)
+
+    post "#{editor_path}/cancel", contact_id: "1"
+    expect(last_response.status).to eq(404)
   end
 
   it "keeps the edit for the visitor who made it" do

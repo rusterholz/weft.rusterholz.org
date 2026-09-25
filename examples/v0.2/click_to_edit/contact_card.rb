@@ -10,14 +10,14 @@ module ClickToEdit
     receives :contact_id
     derives(:contact) { |p| Contacts.find(p.contact_id) }
 
+    transfers :edit, to: ContactEditor, method: :get
+
     def build(attributes = {})
       super
       field "First Name", :first_name
       field "Last Name", :last_name
       field "Email", :email
-      button "Click To Edit",
-             loads: ContactEditor, with: { contact_id: params.contact_id },
-             swap: :replace, target: self
+      button "Click To Edit", action: :edit
     end
 
     private

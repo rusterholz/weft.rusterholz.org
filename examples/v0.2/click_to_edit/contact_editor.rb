@@ -16,6 +16,8 @@ module ClickToEdit
       nil
     end
 
+    transfers :cancel, to: ContactCard, method: :get
+
     def build(attributes = {})
       super
       form(action: :save) do
@@ -24,10 +26,7 @@ module ClickToEdit
         text_field "Last Name", :last_name
         text_field "Email", :email
         input(type: "submit", value: "Submit")
-        button "Cancel",
-               type: "button",
-               loads: ContactCard, with: { contact_id: params.contact_id },
-               swap: :replace, target: self
+        button "Cancel", type: "button", action: :cancel
       end
     end
 
