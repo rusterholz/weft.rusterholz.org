@@ -32,31 +32,30 @@ class ClickToEditPage < ExamplePage
   def how_it_works
     h2 "How It Works"
     prose <<~TEXT
-      Reads and writes get different verbs. Opening the editor changes nothing on the server,
-      so the Edit button is a loads:, a plain GET that fetches the editor component and swaps
-      it over the card. Cancel is the same thing pointed back at the card. Saving does change
-      something, so it is a transfers: a POST that runs the write, then renders the card,
-      which is the natural thing to see after saving, in the editor's place.
+      Every button here hands this piece of the page to another component, and that is what
+      transfers declares. The card's Edit button transfers to the editor; the editor's Submit
+      and Cancel transfer back to the card. The server renders the component taking over, and
+      it replaces the one that declared the transfer, wherever that sits in the page.
 
-      target: self pins the swap to the component. Inside build, self is the component
-      instance, and a component reference as a target resolves to its DOM id, so each
-      fragment replaces the whole card or editor element wherever it sits in the page.
+      Saving also writes. The editor's transfers :save block updates the contact first, so the
+      card it hands back to shows the edit. Edit and Cancel change nothing on the server, so
+      they declare method: :get and are honest GETs, while save keeps the default, a POST.
+
+      A button or a form names its transfer with action:, and Weft fills in the rest: the URL,
+      the verb, the params to send along, and where the response lands. That is why nothing
+      here spells out a URL or a target.
     TEXT
   end
 
   def worth_noticing
     h2 "Worth Noticing"
     prose <<~TEXT
-      The two components reference each other without a cycle. transfers :save, to:
-      ContactCard runs in the class body and resolves ContactCard there and then, while
-      loads: ContactEditor is not evaluated until render.
-
       Form fields pair with declared params. The editor declares first_name, last_name and
       email so its fields reach the save callable as params.first_name and friends, while
       contact_id rides along as a hidden input, because it is part of the component's
       identity rather than something the user edits.
 
-      It still works without JavaScript. form(action: :save) emits plain action and method
+      Saving still works without JavaScript. form(action: :save) emits plain action and method
       attributes alongside the htmx wiring, so the save degrades to an ordinary POST. Note
       type: "button" on Cancel: inside a form, a bare button is a submit button.
     TEXT
