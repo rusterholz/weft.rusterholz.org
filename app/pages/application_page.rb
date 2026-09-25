@@ -9,10 +9,6 @@ class ApplicationPage < Weft::Page
 
   SITE_NAME = "weft"
 
-  # Move into config with the rest of the external links when the chrome lands.
-  WEFT_REPO_URL = "https://github.com/rusterholz/weft"
-  SITE_REPO_URL = "https://github.com/rusterholz/weft.rusterholz.org"
-
   register_script "js/htmx.min.js"
 
   private
