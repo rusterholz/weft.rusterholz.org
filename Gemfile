@@ -16,6 +16,7 @@ gem "rack-session", "~> 2.1" # Rack::Session::Cookie, the session seam
 gem "rouge", "~> 5.1"        # server-side highlighting for the code each example shows
 
 group :development, :test do
+  gem "nokogiri", "~> 1.18"
   gem "rack-test", "~> 2.1"
   gem "rspec", "~> 3.13"
   gem "rubocop", "~> 1.66"

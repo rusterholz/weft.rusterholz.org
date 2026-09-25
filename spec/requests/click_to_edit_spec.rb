@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "cgi"
+require "nokogiri"
 
 RSpec.describe "the Click to Edit example" do
   let(:card_path) { "/_components/click_to_edit/contact_card" }
@@ -13,7 +13,7 @@ RSpec.describe "the Click to Edit example" do
   end
 
   def shown_code_blocks
-    last_response.body.scan(%r{<pre>(.*?)</pre>}m).map { |block| CGI.unescapeHTML(block.first.gsub(/<[^>]+>/, "")) }
+    Nokogiri::HTML5(last_response.body).css("pre").map(&:text)
   end
 
   def save(**overrides)
