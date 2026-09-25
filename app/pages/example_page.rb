@@ -3,10 +3,12 @@
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/string/inflections"
 
-# The frame every example page renders in: heading, the page's own walkthrough,
-# the code that produced it, and links to the source of both. A concrete example
-# page therefore declares nothing but its prose and its composition, taking its
-# URL, heading and title from the catalog by way of its own class name.
+# The frame every example page renders in: the list of examples down the left,
+# the article (heading, the page's own walkthrough, the code that produced it,
+# links to the source of both) and the declarations margin on the right. A
+# concrete example page therefore declares nothing but its prose and its
+# composition, taking its URL, heading and title from the catalog by way of its
+# own class name.
 class ExamplePage < ApplicationPage
   abstract!
 
@@ -17,10 +19,10 @@ class ExamplePage < ApplicationPage
 
   def build(attributes = {})
     super
-    h1 entry.title
-    walkthrough
-    example_sources.each_value { |path| code_block path: path }
-    under_the_hood
+    @content.add_class("example-layout")
+    examples_bar current: entry.slug
+    shown = article { article_body }
+    declarations components: components, at_rest: components_in(shown), behind: data_classes
   end
 
   # Without this, a page that forgot to write one would render nothing and say
@@ -30,6 +32,27 @@ class ExamplePage < ApplicationPage
   end
 
   private
+
+  def article_body
+    h1 entry.title
+    walkthrough
+    example_sources.each_value { |path| code_block path: path }
+    under_the_hood
+    pagination
+  end
+
+  def trail = [[SITE_NAME, "/"], ["UI Examples", "/"], [entry.title, nil]]
+
+  def components = self.class.example_classes.select { |klass| klass < Weft::Component }
+
+  def data_classes = (self.class.example_classes - components).to_h { |klass| [klass, self.class.phrase_for(klass)] }
+
+  # The example's components as the article renders them before anyone clicks.
+  def components_in(element)
+    element.children.flat_map do |child|
+      [(child.class if components.include?(child.class)), *components_in(child)].compact
+    end.uniq
+  end
 
   # Found through the classes themselves rather than by listing a directory, so
   # the blocks and the links follow the code if the code ever moves.
@@ -49,6 +72,15 @@ class ExamplePage < ApplicationPage
       example_sources.each do |klass, path|
         li { a "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", href: source_url(path) }
       end
+    end
+  end
+
+  # Previous and next walk the running examples; the way back to all of them is always there.
+  def pagination
+    previous, following = Catalog.neighbors_of(entry.slug)
+    nav "aria-label": "Pagination", class: "pagination" do
+      a "← #{previous ? "Previous: #{previous.title}" : 'All UI Examples'}", href: previous&.path || "/"
+      a "Next: #{following.title} →", href: following.path if following
     end
   end
 

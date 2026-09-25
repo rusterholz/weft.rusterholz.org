@@ -34,6 +34,23 @@ RSpec.describe Catalog do
     expect { described_class.find("no-such-example") }.to raise_error(Catalog::Unknown, /no-such-example/)
   end
 
+  describe ".neighbors_of" do
+    let(:running) { %w[click-to-edit delete-row tabs].map { |slug| described_class.find(slug) } }
+
+    it "finds the running examples either side, skipping the ones to come" do
+      expect(described_class.neighbors_of("delete-row", among: running).map(&:slug)).to eq(%w[click-to-edit tabs])
+    end
+
+    it "has nothing before the first or after the last" do
+      expect(described_class.neighbors_of("click-to-edit", among: running).first).to be_nil
+      expect(described_class.neighbors_of("tabs", among: running).last).to be_nil
+    end
+
+    it "walks the running examples unless told otherwise" do
+      expect(described_class.neighbors_of("click-to-edit")).to eq([nil, nil])
+    end
+  end
+
   it "derives a page's slug from the page's own name" do
     expect(described_class.slug_for(ClickToEditPage)).to eq("click-to-edit")
   end

@@ -139,6 +139,168 @@ main {
   line-height: 1.6;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- An example page: the bar, the article, the margin ---- */
+
+main.example-layout {
+  display: grid;
+  grid-template-columns: 176px 574px 274px;
+  column-gap: 48px;
+}
+
+.examples-bar {
+  display: flex;
+  flex-direction: column;
+  padding-top: 18px;
+  font-size: var(--size-bar);
+  line-height: 1.5;
+}
+.examples-bar .entry { display: block; padding: 5px 0; color: var(--bar-ink); text-decoration: none; }
+.examples-bar a.entry:hover { color: var(--ink); }
+.examples-bar .entry.current {
+  margin-left: -12px;
+  padding-left: 10px;
+  border-left: 2px solid var(--copper);
+  color: var(--ink);
+  font-weight: 600;
+}
+.examples-bar .entry.coming { color: var(--muted); opacity: 0.7; }
+
+main.example-layout > article {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+article > * { margin: 0; }
+
+h1 {
+  margin: 0 0 6px;
+  font-weight: 500;
+  font-size: var(--size-h1);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
+
+.pagination {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--size-header);
+}
+.pagination a { text-decoration: none; }
+.pagination a:first-child { color: var(--muted); }
+
+/* H's column bench will sit absolutely inside this column, its foot on the
+   article's pagination line: keep the column a positioning context that
+   stretches the full height of the row. */
+.declarations {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 14px;
+  font-size: var(--size-margin);
+  line-height: 1.5;
+  color: var(--muted);
+}
+.declarations .heading { font-size: 13px; }
+.declaration { display: flex; flex-direction: column; gap: 6px; }
+.declaration .name { font-family: var(--face-mono); font-size: 13px; font-weight: 500; }
+.declaration pre { margin: 0; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+.declaration pre .line { display: block; min-height: 1lh; padding-left: 4ch; text-indent: -4ch; }
+.declaration.at-rest { margin: 0 -16px; padding: 14px 16px; background: var(--tint); border-radius: 6px; }
+.declaration.at-rest .name { color: var(--prussian); }
+.declaration.at-rest pre { color: var(--ink); }
+.declarations .behind { font-size: 13px; }
+.declarations .behind code { font-size: 12px; }
+
+/* ---- Code, in cyanotype: ink, blues and grey; copper stays for live marks ---- */
+
+article pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: var(--size-code);
+  line-height: 1.55;
+  tab-size: 2;
+}
+article p:has(+ pre) { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+article p:has(+ pre) code { font-size: 13px; }
+article :not(pre) > code { font-size: 0.8em; }
+
+pre code { color: var(--ink); }
+pre code :is(.k, .kd, .kp, .kr, .kn, .kc) { color: var(--prussian); }
+pre code :is(.nc, .no, .nn) { color: var(--ink); font-weight: 500; }
+pre code :is(.nf, .nb) { color: var(--ink); }
+pre code :is(.ss, .s, .s1, .s2, .sd, .sx, .si, .dl, .mi, .mf) {
+  color: color-mix(in oklab, var(--prussian) 70%, var(--muted));
+}
+pre code :is(.c, .c1, .cm, .cp, .cs) { color: var(--muted); font-style: italic; }
+pre code :is(.o, .p) { color: var(--muted); }
+
+/* ---- The live example, as the article hosts it ---- */
+
+/* Whatever htmx wires is live, and wears the dotted copper underline. */
+article :is(button, a, span)[hx-get],
+article :is(button, a, span)[hx-post] {
+  padding: 0;
+  border: 0;
+  border-bottom: 1.5px dotted var(--copper);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+article :is(button, a, span)[hx-get]:hover,
+article :is(button, a, span)[hx-post]:hover { color: var(--copper); }
+
+article form { display: flex; flex-direction: column; gap: 10px; }
+article form label { display: inline-block; width: 140px; font-size: 15px; color: var(--muted); }
+article input[type="text"] {
+  width: 260px;
+  padding: 4px 6px;
+  border: 0;
+  border-bottom: 1.5px solid var(--ink);
+  background: var(--field);
+  font: inherit;
+  font-size: 18px;
+  color: var(--ink);
+}
+article input[type="submit"] {
+  align-self: flex-start;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--prussian);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ground);
+  cursor: pointer;
+}
+article form button[hx-get] { align-self: flex-start; font-size: 15px; color: var(--muted); }
+article div > strong { display: inline-block; width: 140px; font-size: 15px; font-weight: 400; color: var(--muted); }
+
+/* Narrower than the three columns: one column until the mobile layout lands. */
+@media (max-width: 1279px) {
+  .site-header, main, .bench { padding-left: 24px; padding-right: 24px; }
+}
+@media (max-width: 1167px) {
+  main.example-layout { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
+  .examples-bar { display: none; }
+}
+
 .bench {
   display: flex;
   align-items: center;

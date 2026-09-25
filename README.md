@@ -3,8 +3,8 @@
 Every example that ships with [Weft](https://github.com/rusterholz/weft),
 running live, beside the code that rendered it.
 
-**This is early:** one of the twenty-one examples is running so far, and the site
-has no design yet. The rest arrive a batch at a time.
+**This is early:** one of the twenty-one examples is running so far. The rest
+arrive a batch at a time.
 
 Weft's documentation shows you what an interaction looks like in source. This
 site runs that same source and puts the two side by side, so you can click the

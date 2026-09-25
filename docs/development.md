@@ -314,6 +314,19 @@ get wrong again:
 Rouge 5 supports wrapping only its three non-nesting HTML formatters, so richer
 presentation later means a formatter subclass rather than a wrapper.
 
+### The Declarations Margin
+
+The margin beside an example lists each component's class-body declarations,
+and it reads them out of the component's file with Prism, Ruby's own parser: a
+declaration is any bare call in the class body except `builder_method` and the
+visibility keywords. So the margin shows the file's own text, blocks included,
+and cannot say anything the running class does not. An example needs nothing
+extra for it; what the page declares with `describes` about the data class
+closes the column.
+
+The components the article renders before anyone clicks are the tinted ones,
+found by walking the article as built rather than by the page saying so.
+
 ## Documentation Drift
 
 ```bash

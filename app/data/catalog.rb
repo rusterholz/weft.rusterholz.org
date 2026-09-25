@@ -54,6 +54,13 @@ class Catalog
       ENTRIES.find { |entry| entry.slug == slug } || raise(Unknown, "No example with the slug #{slug.inspect}")
     end
 
+    # The entries before and after this one, nil at either end: what a page's
+    # previous and next links walk, which is the running examples only.
+    def neighbors_of(slug, among: ENTRIES.select(&:live?))
+      index = among.index { |entry| entry.slug == slug }
+      [index.positive? ? among[index - 1] : nil, among[index + 1]]
+    end
+
     # A page's slug comes from its own class name, so a page declares nothing but
     # its prose and its composition. It has to be a slug the catalog knows: a page
     # named for an example nobody listed would route at a URL nothing links to.

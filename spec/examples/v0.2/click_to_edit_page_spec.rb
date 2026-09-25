@@ -42,14 +42,14 @@ RSpec.describe ClickToEditPage do
   # unaltered, one block each. Nothing here can drift from the classes that
   # rendered the card above it.
   it "shows each of the example's files exactly as it is on disk, in reading order" do
-    shown = page.css("pre").map(&:text)
+    shown = page.css("article pre").map(&:text)
 
     expect(shown).to eq(source_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
-    expect(page.css("pre span[class]")).not_to be_empty
+    expect(page.css("article pre span[class]")).not_to be_empty
   end
 
   it "labels each block with the file it read" do
-    labels = page.css("pre").map { |pre| pre.previous_element.at("code").text.strip }
+    labels = page.css("article pre").map { |pre| pre.previous_element.at("code").text.strip }
 
     expect(labels).to eq(source_paths)
   end
