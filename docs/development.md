@@ -14,6 +14,12 @@ bin/check     # specs, lint, doc drift
 `bin/dev` runs with `RACK_ENV=development`, which turns on Zeitwerk reloading:
 edit a page and the next request picks it up without bouncing the server.
 
+It runs Puma on a single thread. Every request reloads the code before it is
+served, static files included, and two reloads running at once leave constants
+half-defined: a page whose stylesheet, fonts and scripts load in parallel gets
+some of them back as errors. One thread serializes the reloads. Production does
+not reload, so the restriction is development's alone.
+
 It serves on 9393 rather than Rack's default 9292, because weft's own demo app
 uses 9292 and the two get run side by side. When they collide the symptom is
 confusing rather than obvious: the server that lost the race exits, and your
