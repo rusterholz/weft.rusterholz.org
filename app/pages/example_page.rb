@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/module/delegation"
+
 # The frame every example page renders in: heading, the page's own walkthrough,
 # the code that produced it, and links to the source of both. A concrete example
 # page therefore declares nothing but its prose and its composition, taking its
@@ -10,13 +12,29 @@ class ExamplePage < ApplicationPage
   Undescribed = Class.new(StandardError)
   NoSuchExample = Class.new(StandardError)
 
+  delegate :entry, to: :class, private: true
+
+  def build(attributes = {})
+    super
+    h1 entry.title
+    walkthrough
+    example_sources.each_value { |path| code_block path: path }
+    under_the_hood
+  end
+
+  # Without this, a page that forgot to write one would render nothing and say
+  # nothing about it.
+  def walkthrough
+    raise NotImplementedError, "#{self.class} needs a walkthrough"
+  end
+
   class << self
     def slug = Catalog.slug_for(self)
 
     def entry = Catalog.find(slug)
 
-    # Overriding the derivation rather than declaring a value gives every
-    # subclass its own, with nothing to remember to call.
+    # Each example's browser title comes from its catalog entry, so no example
+    # page declares a `title` of its own.
     def title_declaration = "#{entry.title} · #{ApplicationPage::SITE_NAME}"
 
     # Each of the example's classes in a phrase, so "which piece do I want?" is
@@ -37,16 +55,13 @@ class ExamplePage < ApplicationPage
       classes.sort_by { |klass| [klass < Weft::Component ? 1 : 0, klass.name] }
     end
 
-    # grep(Class) is not reachable today, since an example holds nothing but
-    # classes; it is there so a namespace that later holds a constant of its own
-    # shows no code block for it rather than raising.
     def example_classes
       module_name = slug.tr("-", "_").camelize
       raise NoSuchExample, "#{module_name} is not defined: is it under #{EXAMPLES_ROOT}?" unless
         Object.const_defined?(module_name)
 
       example = Object.const_get(module_name)
-      in_reading_order(example.constants(false).map { |name| example.const_get(name, false) }.grep(Class))
+      in_reading_order(example.constants(false).map { |name| example.const_get(name, false) })
     end
 
     private
@@ -55,23 +70,7 @@ class ExamplePage < ApplicationPage
     def default_page_path = entry.path
   end
 
-  def build(attributes = {})
-    super
-    h1 entry.title
-    walkthrough
-    example_sources.each_value { |path| code_block path: path }
-    under_the_hood
-  end
-
-  # Without this, a page that forgot to write one would render nothing and say
-  # nothing about it.
-  def walkthrough
-    raise NotImplementedError, "#{self.class} needs a walkthrough"
-  end
-
   private
-
-  def entry = self.class.entry
 
   # Found through the classes themselves rather than by listing a directory, so
   # the blocks and the links follow the code if the code ever moves.
