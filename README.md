@@ -34,7 +34,7 @@ bin/dev      # http://127.0.0.1:9393
 | `config/` | Boot: autoloading, then Weft's configuration |
 | `public/` | Static assets, served from this origin |
 | `spec/` | Request specs, driving the whole stack |
-| `bin/` | Setup, the dev server, the checks, and the asset fetcher |
+| `bin/` | Setup, the dev server, the checks, and the asset fetchers |
 | `rubocop/` | House lint rules this project loads |
 | `design/` | Internal design reference, never served |
 | `docs/development.md` | Setup, testing, and the rules this repo keeps |

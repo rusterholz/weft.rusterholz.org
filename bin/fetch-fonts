@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#
+# Vendor the site's woff2 files into public/fonts, from Google Fonts' CSS API.
+#
+# Both families are OFL-1.1, which permits redistribution; public/fonts/LICENSE.md
+# records where each file came from. Fetched here, at development time, and
+# committed: the running site never asks a third party for its type.
+#
+# One request per weight: a single weight comes back as a small static
+# instance, where a range can come back as the whole variable font. Only the
+# `latin` subset is kept.
+#
+# To try another face, change its line in FACES, re-run, and rename the
+# family in public/css/site.css. Commit whatever changes.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+DEST=public/fonts
+mkdir -p "$DEST"
+
+# Google serves woff2 only to user agents it believes can read it.
+UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+# <file stem> <css2 family spec>
+FACES=(
+  "spectral-400            Spectral:wght@400"
+  "spectral-italic-400     Spectral:ital,wght@1,400"
+  "spectral-500            Spectral:wght@500"
+  "spectral-600            Spectral:wght@600"
+  "spline-sans-mono-400    Spline+Sans+Mono:wght@400"
+  "spline-sans-mono-500    Spline+Sans+Mono:wght@500"
+)
+
+fetch() {
+  local stem="$1" family="$2" url
+  url=$(curl -sS --fail -A "$UA" "https://fonts.googleapis.com/css2?family=${family}&display=swap" |
+    awk '/\/\* latin \*\//{f=1} f&&/src:/{match($0,/https:[^)]*/); print substr($0,RSTART,RLENGTH); exit}')
+
+  if [ -z "$url" ]; then
+    echo "  FAILED: no latin woff2 for ${family}" >&2
+    return 1
+  fi
+
+  curl -sS --fail "$url" -o "$DEST/$stem.woff2"
+  printf '  %-28s %7s bytes\n' "$stem.woff2" "$(wc -c < "$DEST/$stem.woff2" | tr -d ' ')"
+}
+
+echo "Fetching fonts into $DEST"
+for face in "${FACES[@]}"; do
+  # shellcheck disable=SC2086 # the line splits into its two fields on purpose
+  fetch $face
+done
+
+echo
+printf 'Total: %s bytes\n' "$(cat "$DEST"/*.woff2 | wc -c | tr -d ' ')"

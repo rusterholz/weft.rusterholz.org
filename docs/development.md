@@ -82,9 +82,7 @@ spec is one visitor.
 ## Assets Are Vendored, Including the Ones Nothing Uses Yet
 
 Nothing the running site loads comes from a third party. Everything it asks the
-browser for is served from this origin. Today that means scripts; **no fonts are
-vendored yet**, because no page asks for one until the site has a design, and
-`bin/fetch-fonts` arrives with it.
+browser for is served from this origin: htmx, and the fonts.
 
 The reason is speed first. Since browsers partitioned their HTTP caches, a font
 or script on a public CDN is no longer shared between sites, so the "someone
@@ -113,6 +111,17 @@ early because both files come from the same two constants in the same gem, so
 fetching them together keeps `bin/fetch-htmx` a single honest act rather than a
 script with a dormant branch. If you are reading `public/js` and wondering why
 `sse.js` is there and unreferenced: that is why, and it is expected.
+
+```bash
+bin/fetch-fonts
+```
+
+That vendors the site's faces into `public/fonts` from Google Fonts' CSS API:
+one request per weight, keeping only the Latin subset, which returns a small
+static file rather than a whole variable font. Each face is one line in the
+script, so trying a different one is an edit, a re-run and a rename in
+`public/css/site.css`. `public/fonts/LICENSE.md` records where each file came
+from.
 
 The files are committed rather than fetched during the image build, so building
 the image never depends on a third-party host being reachable.
