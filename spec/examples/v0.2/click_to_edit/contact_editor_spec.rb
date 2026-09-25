@@ -30,6 +30,10 @@ RSpec.describe ClickToEdit::ContactEditor do
     expect(form.at("input[type=hidden]").to_h).to include("name" => "contact_id", "value" => "1")
   end
 
+  it "submits with a Save button" do
+    expect(form.css("input[type=submit]").map { |input| input["value"] }).to eq(["Save"])
+  end
+
   it "saves over htmx and, without JavaScript, as a plain form post" do
     save_path = "/_components/click_to_edit/contact_editor/save"
 

@@ -25,7 +25,7 @@ module ClickToEdit
         text_field "First Name", :first_name
         text_field "Last Name", :last_name
         text_field "Email", :email
-        input(type: "submit", value: "Submit")
+        input(type: "submit", value: "Save")
         button "Cancel", type: "button", action: :cancel
       end
     end
