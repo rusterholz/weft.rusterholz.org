@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/core_ext/module/delegation"
+require "active_support/core_ext/string/inflections"
 
 # The frame every example page renders in: heading, the page's own walkthrough,
 # the code that produced it, and links to the source of both. A concrete example

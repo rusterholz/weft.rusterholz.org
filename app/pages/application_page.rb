@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/core_ext/string/filters"
+require "pathname"
 
 # The document every page renders inside; abstract! keeps it out of the route table Weft derives from class names.
 class ApplicationPage < Weft::Page
