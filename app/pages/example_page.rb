@@ -29,6 +29,29 @@ class ExamplePage < ApplicationPage
     raise NotImplementedError, "#{self.class} needs a walkthrough"
   end
 
+  private
+
+  # Found through the classes themselves rather than by listing a directory, so
+  # the blocks and the links follow the code if the code ever moves.
+  def example_sources
+    @example_sources ||= self.class.example_classes.
+                         to_h { |klass| [klass, repo_path(Object.const_source_location(klass.name).first)] }
+  end
+
+  # `walkthrough` is the concrete page's own method, so this resolves to the file
+  # the reader is looking at rather than to this one.
+  def page_source_path = repo_path(self.class.instance_method(:walkthrough).source_location.first)
+
+  def under_the_hood
+    h2 "Under the Hood"
+    ul do
+      li { a "This Page", href: source_url(page_source_path) }
+      example_sources.each do |klass, path|
+        li { a "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", href: source_url(path) }
+      end
+    end
+  end
+
   class << self
     def slug = Catalog.slug_for(self)
 
@@ -69,28 +92,5 @@ class ExamplePage < ApplicationPage
 
     # Weft would derive "/click_to_edit"; the catalog owns these paths.
     def default_page_path = entry.path
-  end
-
-  private
-
-  # Found through the classes themselves rather than by listing a directory, so
-  # the blocks and the links follow the code if the code ever moves.
-  def example_sources
-    @example_sources ||= self.class.example_classes.
-                         to_h { |klass| [klass, repo_path(Object.const_source_location(klass.name).first)] }
-  end
-
-  # `walkthrough` is the concrete page's own method, so this resolves to the file
-  # the reader is looking at rather than to this one.
-  def page_source_path = repo_path(self.class.instance_method(:walkthrough).source_location.first)
-
-  def under_the_hood
-    h2 "Under the Hood"
-    ul do
-      li { a "This Page", href: source_url(page_source_path) }
-      example_sources.each do |klass, path|
-        li { a "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", href: source_url(path) }
-      end
-    end
   end
 end

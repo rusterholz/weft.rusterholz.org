@@ -3,11 +3,12 @@
 require "rack/request"
 require "securerandom"
 
+# Rack middleware, used in config.ru right after the session cookie middleware.
 # Gives every visitor an opaque id and publishes it on Current for one request.
 # That id is the whole of this site's identity, and it is what namespaces a
-# visitor's copy of an example's data in the Store. It lives in the session,
-# which is an encrypted cookie (see config.ru), so a visitor can neither read
-# their own id nor forge anyone else's: hence the session middleware ahead.
+# visitor's copy of an example's data in the Store. It lives in the session, an
+# encrypted cookie, so a visitor can neither read their own id nor forge anyone
+# else's.
 class VisitorScope
   SESSION_KEY = "visitor"
 

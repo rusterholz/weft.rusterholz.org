@@ -20,15 +20,15 @@ class CodeBlock < Weft::Component
     pre { text_node "<code>#{highlight}</code>".html_safe }
   end
 
-  class << self
-    def formatter = Rouge::Formatters::HTML.new
-
-    def lexer = Rouge::Lexers::Ruby.new
-  end
-
   private
 
   def highlight
     self.class.formatter.format(self.class.lexer.lex(File.read(File.join(APP_ROOT, params.path))))
+  end
+
+  class << self
+    def formatter = Rouge::Formatters::HTML.new
+
+    def lexer = Rouge::Lexers::Ruby.new
   end
 end
