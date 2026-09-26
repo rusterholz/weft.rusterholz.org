@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+
 # Every form that writes carries the session's token, and a POST without it is
 # refused before it reaches a component: so another site cannot make a visitor's
 # browser save, choose or reset on their behalf.

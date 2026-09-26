@@ -9,9 +9,9 @@ require "rouge"
 class CodeBlock < Weft::Component
   builder_method :code_block
 
-  # A path inside this repository, all that is needed to find the file; the
-  # call site names it where the reader sees it. Handed over, never on the wire, and the <code>
-  # wrapper goes in as text: see docs/development.md, "Showing the Code".
+  # A path inside this repository, all that is needed to find the file; the call
+  # site names it where the reader sees it. Handed over, never on the wire, and the
+  # <code> wrapper goes in as text: see docs/development.md, "Showing the Code".
   receives :path
 
   def build(attributes = {})
