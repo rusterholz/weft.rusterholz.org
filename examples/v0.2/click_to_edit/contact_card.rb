@@ -8,9 +8,12 @@ module ClickToEdit
     # the card, and the wire carries it when the card renders in answer to a request.
     param :contact_id
     receives :contact_id
-    derives(:contact) { |p| Contacts.find(p.contact_id) }
+    derives(:contact) do |p|
+      Contacts.find(p.contact_id)
+    end
 
-    transfers :edit, to: ContactEditor, method: :get
+    transfers :edit, to: ContactEditor,
+                     method: :get
 
     def build(attributes = {})
       super

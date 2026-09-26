@@ -8,9 +8,12 @@ RSpec.describe Declarations do
       expect(described_class.of(ClickToEdit::ContactCard)).to eq(<<~RUBY.chomp)
         param :contact_id
         receives :contact_id
-        derives(:contact) { |p| Contacts.find(p.contact_id) }
+        derives(:contact) do |p|
+          Contacts.find(p.contact_id)
+        end
 
-        transfers :edit, to: ContactEditor, method: :get
+        transfers :edit, to: ContactEditor,
+                         method: :get
       RUBY
     end
 
@@ -18,7 +21,9 @@ RSpec.describe Declarations do
       expect(described_class.of(ClickToEdit::ContactEditor)).to include(<<~RUBY.chomp)
         transfers :save, to: ContactCard do |params|
           Contacts.update(params.contact_id,
-                          first_name: params.first_name, last_name: params.last_name, email: params.email)
+                          first_name: params.first_name,
+                          last_name: params.last_name,
+                          email: params.email)
           nil
         end
       RUBY

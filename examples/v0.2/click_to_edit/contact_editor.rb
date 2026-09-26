@@ -8,11 +8,15 @@ module ClickToEdit
     param :first_name
     param :last_name
     param :email
-    derives(:contact) { |p| Contacts.find(p.contact_id) }
+    derives(:contact) do |p|
+      Contacts.find(p.contact_id)
+    end
 
     transfers :save, to: ContactCard do |params|
       Contacts.update(params.contact_id,
-                      first_name: params.first_name, last_name: params.last_name, email: params.email)
+                      first_name: params.first_name,
+                      last_name: params.last_name,
+                      email: params.email)
       nil
     end
 
