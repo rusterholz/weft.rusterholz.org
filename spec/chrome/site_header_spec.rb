@@ -15,7 +15,9 @@ RSpec.describe SiteHeader do
       form.css("input[type=hidden]").to_h { |input| [input["name"], input["value"]] }
     end
 
-    expect(toggles).to eq([{ "theme" => "dark", "return_to" => "/examples/click-to-edit" },
+    offered = toggles.map { |fields| fields.except("authenticity_token") }
+
+    expect(offered).to eq([{ "theme" => "dark", "return_to" => "/examples/click-to-edit" },
                            { "theme" => "light", "return_to" => "/examples/click-to-edit" }])
   end
 

@@ -19,7 +19,7 @@ RSpec.describe "redirects built from a request's own values" do
 
   it "never carry a control character, from the theme toggle, with htmx or without" do
     payloads.product([{}, { "HTTP_HX_REQUEST" => "true" }]).each do |return_to, headers|
-      post "/_components/theme_toggle/choose", { theme: "dark", return_to: return_to }, headers
+      post_form "/_components/theme_toggle/choose", { theme: "dark", return_to: return_to }, headers
 
       expect(redirect_targets.join).not_to match(/[\x00-\x1f\x7f]/), return_to.inspect
     end

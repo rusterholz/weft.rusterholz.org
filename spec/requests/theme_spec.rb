@@ -15,14 +15,14 @@ RSpec.describe "choosing a theme" do
   end
 
   it "keeps the visitor's choice, page after page" do
-    post choose, theme: "dark", return_to: "/examples/click-to-edit"
+    post_form choose, theme: "dark", return_to: "/examples/click-to-edit"
 
     expect(theme_on("/")).to eq("dark")
     expect(theme_on("/examples/click-to-edit")).to eq("dark")
   end
 
   it "keeps one visitor's choice from another" do
-    post choose, theme: "dark", return_to: "/"
+    post_form choose, theme: "dark", return_to: "/"
 
     with_session(:other) { expect(theme_on("/")).to be_nil }
     expect(theme_on("/")).to eq("dark")
@@ -36,20 +36,20 @@ RSpec.describe "choosing a theme" do
   end
 
   it "sends the visitor back to the page they chose it on" do
-    post choose, theme: "light", return_to: "/examples/click-to-edit"
+    post_form choose, theme: "light", return_to: "/examples/click-to-edit"
 
     expect(last_response).to be_redirect
     expect(last_response.headers["location"]).to end_with("/examples/click-to-edit")
   end
 
   it "sends htmx back the same way, as a full navigation" do
-    post choose, { theme: "light", return_to: "/examples/click-to-edit" }, "HTTP_HX_REQUEST" => "true"
+    post_form choose, { theme: "light", return_to: "/examples/click-to-edit" }, "HTTP_HX_REQUEST" => "true"
 
     expect(last_response.headers["hx-redirect"]).to eq("/examples/click-to-edit")
   end
 
   it "never sends anyone off the site" do
-    post choose, theme: "light", return_to: "//elsewhere.example/phish"
+    post_form choose, theme: "light", return_to: "//elsewhere.example/phish"
 
     expect(last_response.headers["location"]).to end_with("example.org/")
   end
@@ -66,7 +66,7 @@ RSpec.describe "choosing a theme" do
   end
 
   it "ignores a theme it does not offer" do
-    post choose, theme: "sepia", return_to: "/"
+    post_form choose, theme: "sepia", return_to: "/"
 
     expect(theme_on("/")).to be_nil
   end

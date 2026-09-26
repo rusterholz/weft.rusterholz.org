@@ -3,6 +3,8 @@
 require "nokogiri"
 
 RSpec.describe ThemeToggle do
+  before { Current.csrf_token = "this-visitors-token" }
+
   let(:toggle) do
     html = Weft::Context.new({}, nil, wire_params: {}) do
       theme_toggle theme: "dark", return_to: "/examples/click-to-edit"
@@ -17,10 +19,11 @@ RSpec.describe ThemeToggle do
     expect(form["method"]).to eq("post")
   end
 
-  it "carries the theme it offers and the page to come back to" do
+  it "carries the theme it offers, the page to come back to and the visitor's CSRF token" do
     fields = toggle.css("input[type=hidden]").to_h { |input| [input["name"], input["value"]] }
 
-    expect(fields).to eq("theme" => "dark", "return_to" => "/examples/click-to-edit")
+    expect(fields).to eq("theme" => "dark", "return_to" => "/examples/click-to-edit",
+                         "authenticity_token" => "this-visitors-token")
   end
 
   it "names what the button does for someone who cannot see the icon" do

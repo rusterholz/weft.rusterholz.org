@@ -6,11 +6,11 @@ RSpec.describe "resetting an example" do
 
   before do
     get "/examples/click-to-edit"
-    post "/_components/click_to_edit/contact_editor/save", contact_id: "1", first_name: "Joseph"
+    post_form "/_components/click_to_edit/contact_editor/save", contact_id: "1", first_name: "Joseph"
   end
 
   it "puts the visitor's copy back as it started, and returns to the example" do
-    post reset, slug: "click-to-edit"
+    post_form reset, slug: "click-to-edit"
 
     expect(last_response).to be_redirect
     expect(last_response.headers["location"]).to end_with("/examples/click-to-edit")
@@ -22,10 +22,10 @@ RSpec.describe "resetting an example" do
   it "resets only the visitor who asked" do
     with_session(:other) do
       get "/examples/click-to-edit"
-      post "/_components/click_to_edit/contact_editor/save", contact_id: "1", first_name: "Josephine"
+      post_form "/_components/click_to_edit/contact_editor/save", contact_id: "1", first_name: "Josephine"
     end
 
-    post reset, slug: "click-to-edit"
+    post_form reset, slug: "click-to-edit"
 
     with_session(:other) do
       get card, contact_id: "1"
@@ -34,13 +34,13 @@ RSpec.describe "resetting an example" do
   end
 
   it "answers an example that does not exist as not found" do
-    post reset, slug: "no-such-example"
+    post_form reset, slug: "no-such-example"
 
     expect(last_response.status).to eq(404)
   end
 
   it "answers an example that is not running yet as not found" do
-    post reset, slug: "tabs"
+    post_form reset, slug: "tabs"
 
     expect(last_response.status).to eq(404)
   end

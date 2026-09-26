@@ -15,6 +15,7 @@ class ResetExample < Weft::Component
   def build(attributes = {})
     super(attributes.merge(class: "reset-example"))
     form(action: :reset) do
+      input type: "hidden", name: "authenticity_token", value: Current.csrf_token
       input type: "hidden", name: "slug", value: params.slug
       button "Reset This Example", type: "submit", class: "flat"
     end

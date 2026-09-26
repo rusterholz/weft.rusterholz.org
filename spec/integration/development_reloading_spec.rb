@@ -20,7 +20,9 @@ RSpec.describe "serving in development, where every request reloads the code" do
       seen = []
       browser.get "/examples/click-to-edit"
       seen << browser.last_response.status
-      browser.post "/_components/click_to_edit/contact_editor/save", contact_id: "1", first_name: "Joseph"
+      token = browser.last_response.body[/name="authenticity_token" value="([^"]+)"/, 1]
+      browser.post "/_components/click_to_edit/contact_editor/save",
+                   contact_id: "1", first_name: "Joseph", authenticity_token: token
       seen << browser.last_response.status
       browser.get "/_components/click_to_edit/contact_card", contact_id: "1"
       seen << browser.last_response.status << browser.last_response.body.include?("Joseph")

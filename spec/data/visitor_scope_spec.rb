@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "rack/mock_request"
+require "rack/protection"
+
 RSpec.describe VisitorScope do
   let(:session) { {} }
   let(:seen) { {} }
@@ -11,6 +14,7 @@ RSpec.describe VisitorScope do
     lambda do |_env|
       seen[:visitor] = Current.visitor
       seen[:request] = Current.request
+      seen[:csrf_token] = Current.csrf_token
       [200, {}, ["ok"]]
     end
   end
@@ -48,13 +52,27 @@ RSpec.describe VisitorScope do
     expect(session["visitor"]).to eq("a-returning-visitor")
   end
 
-  it "clears the visitor and the request once the request is over" do
+  it "publishes a CSRF token that this session's writes are accepted with, and no other's" do
+    call
+    write = lambda do |with_session|
+      env = Rack::MockRequest.env_for("/", method: "POST", params: { authenticity_token: seen[:csrf_token] })
+      env["rack.session"] = with_session
+      Rack::Protection::AuthenticityToken.new(nil).accepts?(env)
+    end
+
+    expect(write.call(session)).to be(true)
+    expect(write.call({})).to be_falsey
+  end
+
+  it "clears the visitor, the request and the token once the request is over" do
     call
 
     expect(seen[:visitor]).not_to be_nil
     expect(seen[:request]).to be_a(Rack::Request)
+    expect(seen[:csrf_token]).not_to be_nil
     expect(Current.visitor).to be_nil
     expect(Current.request).to be_nil
+    expect(Current.csrf_token).to be_nil
   end
 
   it "clears them even when the request fails" do
@@ -62,6 +80,7 @@ RSpec.describe VisitorScope do
 
     expect(Current.visitor).to be_nil
     expect(Current.request).to be_nil
+    expect(Current.csrf_token).to be_nil
   end
 
   it "says what is wrong when no session middleware ran ahead of it" do

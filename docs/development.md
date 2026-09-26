@@ -436,6 +436,22 @@ Three paths, deliberately different:
 
 The real secret appears for the first time at deploy, and only there.
 
+### Every Form That Writes Carries the Session's Token
+
+`Rack::Protection::AuthenticityToken` sits between the session and
+`VisitorScope`, and answers `403` to any POST without the session's CSRF token,
+before weft sees it. `VisitorScope` publishes the token as `Current.csrf_token`,
+and each form that writes carries it in one hidden field:
+
+```ruby
+input type: "hidden", name: "authenticity_token", value: Current.csrf_token
+```
+
+That one field serves both transports, since htmx sends a form's fields and so
+does a plain submit. This is the recipe from weft 0.2.0's `docs/app-patterns.md`.
+A new form that writes needs the line; a GET action does not. In request specs,
+`post_form` fetches a token the way a browser would and posts with it.
+
 ### A Secure Cookie Needs a Truthful Proxy
 
 In production the session cookie is marked `secure`, and rack-session takes that
@@ -447,8 +463,9 @@ bug. Sending `X-Forwarded-Proto: https` brings it back.
 That matters once something terminates TLS in front of this app, because the app
 sees plain http from the proxy and decides from the forwarded scheme. If the
 proxy does not send one, or Rack does not trust the address it came from, every
-request looks like a brand-new visit and nobody keeps anything -- with no error
-anywhere. Check it against a real request, not a local one, the first time this
+request looks like a brand-new visit and nobody keeps anything, and every form
+post is refused with a `403`, since its token belongs to a session the cookie
+never carried back. Check it against a real request, not a local one, the first time this
 site is deployed.
 
 ## Deploying
