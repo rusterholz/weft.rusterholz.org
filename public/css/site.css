@@ -361,8 +361,7 @@ h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
 .declaration.at-rest pre { color: var(--ink); }
 .declarations .behind { font-size: 13px; }
 .declarations .behind code { font-size: 12px; }
-.declarations .behind p { margin: 0; }
-.reset-example form { margin: 8px 0 0 -8px; }
+.reset-example form { display: block; margin: -20px 0 0 -8px; }
 .reset-example .flat { font-size: 13px; color: var(--prussian); }
 
 .callout {

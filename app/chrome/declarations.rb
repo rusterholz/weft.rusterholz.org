@@ -17,7 +17,6 @@ class Declarations < Weft::Component
   receives :components
   receives :at_rest
   receives :behind
-  receives :slug
 
   NOT_WEFT = %i[builder_method private protected public].freeze
   BEHIND = { 1 => "Behind it", 2 => "Behind both" }.freeze
@@ -41,10 +40,7 @@ class Declarations < Weft::Component
   end
 
   def behind
-    div class: "behind" do
-      para { text_node behind_sentence }
-      reset_example slug: params.slug
-    end
+    div(class: "behind") { text_node behind_sentence }
   end
 
   # As one text node: Arbre indents a nested tag, and inside a sentence the indent shows.

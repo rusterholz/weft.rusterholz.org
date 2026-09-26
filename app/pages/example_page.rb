@@ -23,7 +23,7 @@ class ExamplePage < ApplicationPage
     @content.add_class("example-layout")
     examples_bar current: entry.slug
     shown = article { article_body }
-    declarations components: components, at_rest: components_in(shown), behind: data_classes, slug: entry.slug
+    declarations components: components, at_rest: components_in(shown), behind: data_classes
   end
 
   # Without this, a page that forgot to write one would render nothing and say
@@ -36,6 +36,7 @@ class ExamplePage < ApplicationPage
 
   def article_body
     h1 entry.title
+    reset_example slug: entry.slug
     walkthrough
     under_the_hood
     pagination

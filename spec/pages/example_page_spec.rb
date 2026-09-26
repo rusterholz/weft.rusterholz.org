@@ -29,8 +29,17 @@ RSpec.describe ExamplePage do
     end
 
     it "closes the margin on the example's data class, in the page's own words" do
-      expect(page.at("aside > .behind p").text).
+      expect(page.at("aside").element_children.last.text).
         to eq("Behind both: Contacts, where a visitor's contact is kept, standing in for your database.")
+    end
+
+    it "offers to reset the whole example right under its title" do
+      reset = page.at("article > h1").next_element
+
+      expect(reset.at("form")["action"]).to eq("/_components/reset_example/reset")
+      expect(reset.at("input[name=slug]")["value"]).to eq("click-to-edit")
+      expect(reset.at("button").text).to eq("Reset This Example")
+      expect(page.css(".reset-example").size).to eq(1)
     end
 
     # Prev and next walk the running examples only; there is no next one yet.
