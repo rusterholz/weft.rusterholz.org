@@ -229,6 +229,14 @@ public surface, so **re-verify it whenever the pin moves**: a release that renam
 or inlines that method takes every example page's URL with it. The neighboring
 `title_declaration` override is public API and needs no such care.
 
+The full list of weft internals this site overrides, to re-check at every pin move:
+
+- `default_page_path`, in `ExamplePage`: every example page's URL.
+- `weft_dom_id`, in `CodeBlock`, `Callout` and `SearchResults`: weft names a
+  component's element from its class and first param, which would give every code
+  block and every callout the same id and put the typed search into an id. A
+  release that stops asking this method would bring the duplicates back.
+
 When a page needs to tell the reader something prominent, such as a name a later
 weft changes, or a rough edge they will meet on this version, it wraps the prose
 in a `callout`. There is one kind, and the words carry the meaning:

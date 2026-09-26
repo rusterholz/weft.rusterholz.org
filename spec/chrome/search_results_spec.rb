@@ -24,6 +24,10 @@ RSpec.describe SearchResults do
     expect(tabs.text).to include("coming")
   end
 
+  it "keeps what was typed out of its id, which a space or a quote would make invalid" do
+    expect(results(%(tab "x)).attr("id")).to eq("search-results")
+  end
+
   it "says so when nothing matches" do
     expect(results("sortable").at("p").text).to eq('No example matches "sortable".')
   end
