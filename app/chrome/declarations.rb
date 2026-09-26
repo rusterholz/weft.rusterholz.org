@@ -36,16 +36,8 @@ class Declarations < Weft::Component
   def block_for(klass)
     div class: ["declaration", ("at-rest" if params.at_rest.include?(klass))].compact.join(" ") do
       span klass.name.demodulize, class: "name"
-      pre { text_node lines_of(klass) }
+      pre self.class.of(klass)
     end
-  end
-
-  # A line to a span, so a long one wraps under a hanging indent rather than
-  # back to the margin's edge. As one text node, since Arbre would indent the spans.
-  def lines_of(klass)
-    self.class.of(klass).lines(chomp: true).map do |line|
-      "<span class=\"line\">#{ERB::Util.html_escape(line)}</span>"
-    end.join.html_safe
   end
 
   def behind

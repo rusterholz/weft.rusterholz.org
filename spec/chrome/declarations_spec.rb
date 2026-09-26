@@ -55,10 +55,8 @@ RSpec.describe Declarations do
       expect(margin.css(".declaration.at-rest .name").map(&:text)).to eq(%w[ContactCard])
     end
 
-    it "shows each block's declarations as its file writes them, a line at a time" do
-      lines = margin.css(".declaration pre").first.css(".line").map(&:text)
-
-      expect(lines.join("\n")).to eq(described_class.of(ClickToEdit::ContactCard))
+    it "shows each block's declarations as its file writes them" do
+      expect(margin.css(".declaration pre").first.text).to eq(described_class.of(ClickToEdit::ContactCard))
     end
 
     it "closes with what the components stand on" do

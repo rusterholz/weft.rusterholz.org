@@ -323,11 +323,29 @@ h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
   color: var(--muted);
 }
 .declarations .heading { font-size: 13px; }
-.declaration { display: flex; flex-direction: column; gap: 6px; }
+.declaration { --block-ground: var(--ground); display: flex; flex-direction: column; gap: 6px; }
 .declaration .name { font-family: var(--face-mono); font-size: 13px; font-weight: 500; }
-.declaration pre { margin: 0; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
-.declaration pre .line { display: block; min-height: 1lh; padding-left: 4ch; text-indent: -4ch; }
-.declaration.at-rest { margin: 0 -16px; padding: 14px 16px; background: var(--tint); border-radius: 6px; }
+
+/* Lines keep the file's breaks and scroll sideways. A shade on the right edge
+   says there is more: the cover rides the end of the content (local) and hides
+   the shade (fixed to the box) once the end is in view, or when nothing overflows. */
+.declaration pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+  background:
+    linear-gradient(to left, var(--block-ground) 40%, transparent) right / 28px 100% no-repeat local,
+    linear-gradient(to left, color-mix(in oklab, var(--ink) 12%, transparent), transparent) right / 12px 100% no-repeat scroll;
+}
+.declaration.at-rest {
+  --block-ground: var(--tint);
+  margin: 0 -16px;
+  padding: 14px 16px;
+  background: var(--tint);
+  border-radius: 6px;
+}
 .declaration.at-rest .name { color: var(--prussian); }
 .declaration.at-rest pre { color: var(--ink); }
 .declarations .behind { font-size: 13px; }
