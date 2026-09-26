@@ -300,6 +300,17 @@ h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
 .declarations .behind { font-size: 13px; }
 .declarations .behind code { font-size: 12px; }
 
+.callout {
+  padding: 14px 18px;
+  border-left: 2px solid var(--copper);
+  border-radius: 0 6px 6px 0;
+  background: var(--tint);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.callout > p { margin: 0; }
+.callout > p + p { margin-top: 10px; }
+
 /* ---- Code, in cyanotype: ink, blues and grey; copper stays for live marks ---- */
 
 article pre {

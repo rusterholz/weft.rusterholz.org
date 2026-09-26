@@ -229,6 +229,21 @@ public surface, so **re-verify it whenever the pin moves**: a release that renam
 or inlines that method takes every example page's URL with it. The neighboring
 `title_declaration` override is public API and needs no such care.
 
+When a page needs to tell the reader something prominent, such as a name a later
+weft changes, or a rough edge they will meet on this version, it wraps the prose
+in a `callout`. There is one kind, and the words carry the meaning:
+
+```ruby
+callout do
+  prose <<~TEXT
+    If you run this example yourself, Weft logs a warning ...
+  TEXT
+end
+```
+
+Say what a later weft plans only where something is scheduled; otherwise "Weft
+plans to improve" is as far as it goes.
+
 ### The Docs' Examples Are Fragments, and a Page Is Not
 
 This is the one thing to know before porting the next example. weft's

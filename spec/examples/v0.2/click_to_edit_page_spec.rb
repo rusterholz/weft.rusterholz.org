@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/string/filters"
 require "nokogiri"
 require "securerandom"
 
@@ -29,6 +30,17 @@ RSpec.describe ClickToEditPage do
     expect(card.text).to include("Joseph")
     expect(card.at("button")).not_to be_nil
     expect(card.xpath("following::h2").first.text).to eq("How It Works")
+  end
+
+  it "warns about the log line, right after the contact it comes from" do
+    callout = page.at("#click-to-edit-contact-card-1").next_element
+
+    expect(callout["class"]).to eq("callout")
+    expect(callout.text.squish).to eq(
+      "If you run this example yourself, Weft logs a warning the first time you click Edit, Cancel or Save, " \
+      "and on every click in development, where classes reload. It's harmless, and Weft plans to improve " \
+      "how this case is handled."
+    )
   end
 
   it "introduces the example in prose before the contact" do
