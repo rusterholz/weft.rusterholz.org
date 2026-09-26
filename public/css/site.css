@@ -132,6 +132,17 @@ code, pre, kbd { font-family: var(--face-mono); }
 
 .site-header .widgets { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .site-header .widgets a.flat { font-weight: 500; }
+.site-header .widgets form { margin: 0; }
+.flat.icon { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; }
+
+/* Show the toggle that changes something: the other theme from the one in force. */
+#theme-toggle-light,
+:root[data-theme="dark"] #theme-toggle-dark { display: none; }
+:root[data-theme="dark"] #theme-toggle-light { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) #theme-toggle-dark { display: none; }
+  :root:not([data-theme]) #theme-toggle-light { display: block; }
+}
 
 main {
   padding: 44px 80px 32px;

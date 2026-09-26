@@ -12,5 +12,9 @@ module Theme
       chosen = Current.request&.session&.[](SESSION_KEY)
       chosen if CHOICES.include?(chosen)
     end
+
+    def choose(theme)
+      Current.request.session[SESSION_KEY] = theme if CHOICES.include?(theme)
+    end
   end
 end

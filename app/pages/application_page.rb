@@ -20,7 +20,7 @@ class ApplicationPage < Weft::Page
 
   def build(attributes = {})
     super(attributes.merge("data-theme": Theme.current).compact)
-    site_header trail: trail
+    site_header trail: trail, return_to: Current.request&.fullpath || "/"
     @content = main
     within(@content.parent) { bench source_path: page_source_path }
   end
