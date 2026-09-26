@@ -61,9 +61,9 @@ RSpec.describe ApplicationPage do
     end
 
     it "opens the hood on the page's own file" do
-      hood = rendered.css("footer a").find { |link| link.text.start_with?("open the hood") }
+      hood = rendered.css("footer a").find { |link| link.text.start_with?("Open the Hood") }
 
-      expect(hood.text).to eq("open the hood: spec/pages/application_page_spec.rb")
+      expect(hood.text).to eq("Open the Hood: spec/pages/application_page_spec.rb")
     end
   end
 

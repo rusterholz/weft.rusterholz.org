@@ -14,6 +14,6 @@ class Bench < Weft::Component
     super(attributes.merge(class: "bench", "aria-label": "Bench"))
     span class: "bench-request"
     a "weft #{Weft::VERSION}", href: WEFT_CHANGELOG_URL
-    a "open the hood: #{params.source_path}", href: Source.url(params.source_path), class: "hood"
+    a "Open the Hood: #{params.source_path}", href: Source.url(params.source_path), class: "hood"
   end
 end

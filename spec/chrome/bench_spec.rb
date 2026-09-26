@@ -11,9 +11,9 @@ RSpec.describe Bench do
   end
 
   it "opens the hood on the page's own source" do
-    link = bench.css("a").find { |a| a.text.start_with?("open the hood") }
+    link = bench.css("a").find { |a| a.text.start_with?("Open the Hood") }
 
-    expect(link.text).to eq("open the hood: #{path}")
+    expect(link.text).to eq("Open the Hood: #{path}")
     expect(link["href"]).to eq("#{SITE_REPO_URL}/blob/main/#{path}")
   end
 
