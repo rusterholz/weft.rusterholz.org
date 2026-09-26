@@ -16,6 +16,9 @@ RSpec.describe LocalPath do
     "a space" => "/ //evil.example/",
     "a null byte" => "/\u0000x",
     "a delete character" => "/\u007fx",
+    "a byte that is not UTF-8" => "/\xFF".dup.force_encoding(Encoding::UTF_8),
+    "a C1 next-line control" => "/\u0085x",
+    "a line separator" => "/ x",
     "nothing at all" => nil,
     "an empty string" => ""
   }.each do |what, path|
