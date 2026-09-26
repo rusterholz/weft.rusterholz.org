@@ -29,6 +29,9 @@
   --main-foot: 32px;
   --bench-height: 52px;
 
+  --col-gap: 48px;
+  --gutter: 80px;
+
   --ground: #EEF0EA;
   --ink: #1B2733;
   --prussian: #1E4E8C;
@@ -122,7 +125,7 @@ code, pre, kbd { font-family: var(--face-mono); }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 40px 80px 0;
+  padding: 40px var(--gutter) 0;
   font-size: var(--size-header);
   color: var(--muted);
 }
@@ -210,8 +213,16 @@ code, pre, kbd { font-family: var(--face-mono); }
   :root:not([data-theme]) #theme-toggle-light { display: block; }
 }
 
+/* The columns are 176 / 574 / 274 where the grid is 1120px wide, at a 1280px
+   window, and share every pixel past that: the article and the margin most of
+   it, the bar a little. */
 main {
-  padding: 44px 80px var(--main-foot);
+  --columns:
+    calc(176px + (100% - 1120px) * 0.06)
+    calc(574px + (100% - 1120px) * 0.5)
+    calc(274px + (100% - 1120px) * 0.44);
+
+  padding: 44px var(--gutter) var(--main-foot);
   font-size: var(--size-article);
   line-height: 1.6;
 }
@@ -229,8 +240,8 @@ main {
 
 main.single-column {
   display: grid;
-  grid-template-columns: 176px 574px;
-  column-gap: 48px;
+  grid-template-columns: var(--columns);
+  column-gap: var(--col-gap);
   align-content: start;
 }
 main.single-column > * { grid-column: 2; margin: 0 0 22px; }
@@ -247,8 +258,8 @@ main.single-column > * { grid-column: 2; margin: 0 0 22px; }
 
 main.example-layout {
   display: grid;
-  grid-template-columns: 176px 574px 274px;
-  column-gap: 48px;
+  grid-template-columns: var(--columns);
+  column-gap: var(--col-gap);
 }
 
 /* The side columns scroll with the article until they run out, then hold while
@@ -433,7 +444,7 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
 
 /* Narrower than the three columns: one column until the mobile layout lands. */
 @media (max-width: 1279px) {
-  .site-header, main, .bench { padding-left: 24px; padding-right: 24px; }
+  :root { --gutter: 24px; }
 }
 @media (max-width: 1167px) {
   main.example-layout, main.single-column { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
@@ -448,7 +459,7 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
   gap: 24px;
   box-sizing: border-box;
   height: var(--bench-height);
-  padding: 0 80px;
+  padding: 0 var(--gutter);
   background: var(--bench);
   font-family: var(--face-mono);
   font-size: var(--size-bench);
