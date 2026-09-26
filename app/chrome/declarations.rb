@@ -17,6 +17,7 @@ class Declarations < Weft::Component
   receives :components
   receives :at_rest
   receives :behind
+  receives :slug
 
   NOT_WEFT = %i[builder_method private protected public].freeze
   BEHIND = { 1 => "Behind it", 2 => "Behind both" }.freeze
@@ -47,13 +48,19 @@ class Declarations < Weft::Component
     end.join.html_safe
   end
 
-  # As one text node: Arbre indents a nested tag, and inside a sentence the indent shows.
   def behind
+    div class: "behind" do
+      para { text_node behind_sentence }
+      reset_example slug: params.slug
+    end
+  end
+
+  # As one text node: Arbre indents a nested tag, and inside a sentence the indent shows.
+  def behind_sentence
     notes = params.behind.map do |klass, phrase|
       "<code>#{ERB::Util.html_escape(klass.name.demodulize)}</code>, #{ERB::Util.html_escape(phrase)}."
     end
-    lead = BEHIND.fetch(params.components.size, "Behind them all")
-    div(class: "behind") { text_node "#{lead}: #{notes.join(' ')}".html_safe }
+    "#{BEHIND.fetch(params.components.size, 'Behind them all')}: #{notes.join(' ')}".html_safe
   end
 
   class << self

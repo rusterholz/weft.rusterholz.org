@@ -22,7 +22,7 @@ class ExamplePage < ApplicationPage
     @content.add_class("example-layout")
     examples_bar current: entry.slug
     shown = article { article_body }
-    declarations components: components, at_rest: components_in(shown), behind: data_classes
+    declarations components: components, at_rest: components_in(shown), behind: data_classes, slug: entry.slug
   end
 
   # Without this, a page that forgot to write one would render nothing and say
@@ -85,6 +85,16 @@ class ExamplePage < ApplicationPage
   end
 
   class << self
+    # Every data class of a running example back to its seed, for this visitor;
+    # answers the page's path. A slug that is not a running example is not found.
+    def reset!(slug)
+      entry = Catalog.entries.find { |candidate| candidate.slug == slug && candidate.live? }
+      raise Weft::NotFound, "No running example #{slug.inspect}" unless entry
+
+      Object.const_get(entry.page_name).example_classes.select { |klass| klass.respond_to?(:reset!) }.each(&:reset!)
+      entry.path
+    end
+
     def slug = Catalog.slug_for(self)
 
     def entry = Catalog.find(slug)

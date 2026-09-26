@@ -29,7 +29,7 @@ RSpec.describe ExamplePage do
     end
 
     it "closes the margin on the example's data class, in the page's own words" do
-      expect(page.at("aside").element_children.last.text).
+      expect(page.at("aside > .behind p").text).
         to eq("Behind both: Contacts, where a visitor's contact is kept, standing in for your database.")
     end
 

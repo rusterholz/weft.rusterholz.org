@@ -36,7 +36,7 @@ RSpec.describe Declarations do
     let(:margin) do
       html = Weft::Context.new({}, nil, wire_params: {}) do
         declarations components: [ClickToEdit::ContactCard, ClickToEdit::ContactEditor],
-                     at_rest: [ClickToEdit::ContactCard],
+                     at_rest: [ClickToEdit::ContactCard], slug: "click-to-edit",
                      behind: { ClickToEdit::Contacts => "where a visitor's contact is kept" }
       end.to_s
       Nokogiri::HTML5.fragment(html).at("aside")
@@ -57,7 +57,15 @@ RSpec.describe Declarations do
     end
 
     it "closes with what the components stand on" do
-      expect(margin.element_children.last.text).to eq("Behind both: Contacts, where a visitor's contact is kept.")
+      expect(margin.at(".behind p").text).to eq("Behind both: Contacts, where a visitor's contact is kept.")
+    end
+
+    it "offers to put the visitor's copy of it back as it started" do
+      form = margin.at(".behind form")
+
+      expect(form["action"]).to eq("/_components/reset_example/reset")
+      expect(form.at("input[name=slug]")["value"]).to eq("click-to-edit")
+      expect(form.at("button").text).to eq("Reset This Example")
     end
   end
 end

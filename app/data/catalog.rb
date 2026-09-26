@@ -15,7 +15,9 @@ class Catalog
 
     # Asking the page classes beats keeping a list, which could say yes to a
     # page that is not there.
-    def live? = Object.const_defined?("#{slug.tr('-', '_').camelize}Page")
+    def live? = Object.const_defined?(page_name)
+
+    def page_name = "#{slug.tr('-', '_').camelize}Page"
   end
 
   Unknown = Class.new(StandardError)

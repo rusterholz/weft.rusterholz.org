@@ -13,6 +13,8 @@ module ClickToEdit
 
       def find(id) = contact(all, id)
 
+      def reset! = store.reset!
+
       # A form that leaves a field out means "unchanged" rather than "blank",
       # which is compact's job. Hash#slice guards nothing a visitor can reach,
       # since a callable only ever sees declared params: it is there for the next
