@@ -42,6 +42,20 @@ RSpec.describe ApplicationPage do
       expect(rendered(session: { "theme" => "sepia" }).at("html")["data-theme"]).to be_nil
     end
 
+    def return_to_after(method, path)
+      Current.request = Rack::Request.new(Rack::MockRequest.env_for(path, method: method, "rack.session" => {}))
+      Nokogiri::HTML5(page_class.render).at("#theme-toggle-dark input[name=return_to]")["value"]
+    end
+
+    it "brings a theme choice back to the page it was made on" do
+      expect(return_to_after("GET", "/examples/click-to-edit?x=1")).to eq("/examples/click-to-edit?x=1")
+    end
+
+    # A page answering a POST sits at the action's address, which is no page to come back to.
+    it "brings a theme choice made on a page answering a POST back home" do
+      expect(return_to_after("POST", "/_components/click_to_edit/contact_editor/save")).to eq("/")
+    end
+
     it "opens the hood on the page's own file" do
       hood = rendered.css("footer a").find { |link| link.text.start_with?("open the hood") }
 
