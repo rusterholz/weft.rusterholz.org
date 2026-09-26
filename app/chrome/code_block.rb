@@ -9,16 +9,18 @@ require "rouge"
 class CodeBlock < Weft::Component
   builder_method :code_block
 
-  # A path inside this repository, which is both the label and all that is
-  # needed to find the file. Handed over, never on the wire, and the <code>
-  # wrapper goes in as text: see docs/development.md, "Showing the Code".
+  # A path inside this repository, all that is needed to find the file; the call
+  # site names it where the reader sees it. Handed over, never on the wire, and the
+  # <code> wrapper goes in as text: see docs/development.md, "Showing the Code".
   receives :path
 
   def build(attributes = {})
     super
-    para { code params.path }
     pre { text_node "<code>#{highlight}</code>".html_safe }
   end
+
+  # Weft would give every block the one id its class name yields; a page shows several.
+  def weft_dom_id = "code-#{params.path.gsub(/[^a-z0-9]+/i, '-')}"
 
   private
 

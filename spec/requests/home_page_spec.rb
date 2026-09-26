@@ -5,13 +5,13 @@ RSpec.describe "the home page" do
     get "/"
 
     expect(last_response.status).to eq(200)
-    expect(last_response.body).to include("<h1>weft</h1>")
+    expect(last_response.body).to include("<title>weft</title>")
   end
 
-  it "lists the examples that are running, and only those" do
+  it "links the examples that are running, and only those" do
     get "/"
 
-    expect(last_response.body).to include(%(<a href="/examples/click-to-edit">Click to Edit</a>))
+    expect(last_response.body).to include(%(href="/examples/click-to-edit"))
     expect(last_response.body).not_to include("/examples/live-ticker")
   end
 
@@ -29,6 +29,13 @@ RSpec.describe "the home page" do
     get "/static/js/htmx.min.js"
 
     expect(last_response.status).to eq(200)
+  end
+
+  it "serves the stylesheet the page points at" do
+    get "/static/css/site.css"
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include("--ground")
   end
 
   # The title is the discriminator: the gem ships its own not-found document, so

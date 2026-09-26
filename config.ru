@@ -2,6 +2,7 @@
 
 require_relative "config/environment"
 
+require "rack/protection"
 require "rack/session"
 
 # Weft ships no session handling, on purpose: identity is the application's to
@@ -15,6 +16,9 @@ use Rack::Session::Cookie,
     same_site: :lax,
     secure: ENV.fetch("RACK_ENV", "production") == "production",
     httponly: true
+
+# Weft actions are plain POSTs, so any site could forge one; refuse those lacking the session's token.
+use Rack::Protection::AuthenticityToken
 
 use VisitorScope
 

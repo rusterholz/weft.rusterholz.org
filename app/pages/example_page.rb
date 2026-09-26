@@ -3,10 +3,12 @@
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/string/inflections"
 
-# The frame every example page renders in: heading, the page's own walkthrough,
-# the code that produced it, and links to the source of both. A concrete example
-# page therefore declares nothing but its prose and its composition, taking its
-# URL, heading and title from the catalog by way of its own class name.
+# The frame every example page renders in: the list of examples down the left,
+# the article (heading, the page's own walkthrough, the code that produced it,
+# links to the source of both) and the declarations margin on the right. A
+# concrete example page therefore declares nothing but its prose and its
+# composition, taking its URL, heading and title from the catalog by way of its
+# own class name.
 class ExamplePage < ApplicationPage
   abstract!
 
@@ -17,10 +19,11 @@ class ExamplePage < ApplicationPage
 
   def build(attributes = {})
     super
-    h1 entry.title
-    walkthrough
-    example_sources.each_value { |path| code_block path: path }
-    under_the_hood
+    @content.remove_class("single-column")
+    @content.add_class("example-layout")
+    examples_bar current: entry.slug
+    shown = article { article_body }
+    declarations components: components, at_rest: components_in(shown), behind: data_classes
   end
 
   # Without this, a page that forgot to write one would render nothing and say
@@ -30,6 +33,31 @@ class ExamplePage < ApplicationPage
   end
 
   private
+
+  # Frames what a walkthrough renders live, setting it apart from the prose;
+  # whatever the live component swaps in lands inside.
+  def live(&) = div(class: "live-example", &)
+
+  def article_body
+    h1 entry.title
+    reset_example slug: entry.slug
+    walkthrough
+    pieces_you_need
+    pagination
+  end
+
+  def trail = [[SITE_NAME, "/"], ["UI Examples", "/"], [entry.title, nil]]
+
+  def components = self.class.example_classes.select { |klass| klass < Weft::Component }
+
+  def data_classes = (self.class.example_classes - components).to_h { |klass| [klass, self.class.phrase_for(klass)] }
+
+  # The example's components as the article renders them before anyone clicks.
+  def components_in(element)
+    element.children.flat_map do |child|
+      [(child.class if components.include?(child.class)), *components_in(child)].compact
+    end.uniq
+  end
 
   # Found through the classes themselves rather than by listing a directory, so
   # the blocks and the links follow the code if the code ever moves.
@@ -42,17 +70,46 @@ class ExamplePage < ApplicationPage
   # the reader is looking at rather than to this one.
   def page_source_path = repo_path(self.class.instance_method(:walkthrough).source_location.first)
 
-  def under_the_hood
-    h2 "Under the Hood"
-    ul do
-      li { a "This Page", href: source_url(page_source_path) }
-      example_sources.each do |klass, path|
-        li { a "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", href: source_url(path) }
+  # The pieces you need, in reading order and then this page: each named and
+  # described, its whole file folded away under its path, and the file on GitHub.
+  def pieces_you_need
+    h2 "Pieces You Need"
+    ul class: "pieces" do
+      example_sources.merge(self.class => page_source_path).each do |klass, path|
+        li(class: "piece") { piece(klass, path) }
       end
     end
   end
 
+  def piece(klass, path)
+    para "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", class: "about"
+    details do
+      summary path
+      code_block path: path
+    end
+    a "View on GitHub", href: source_url(path)
+  end
+
+  # Previous and next walk the running examples; the first one's "previous" is the list of all of them.
+  def pagination
+    previous, following = Catalog.neighbors_of(entry.slug)
+    nav "aria-label": "Pagination", class: "pagination" do
+      a "← #{previous ? "Previous: #{previous.title}" : 'All UI Examples'}", href: previous&.path || "/"
+      a "Next: #{following.title} →", href: following.path if following
+    end
+  end
+
   class << self
+    # Every data class of a running example back to its seed, for this visitor;
+    # answers the page's path. A slug that is not a running example is not found.
+    def reset!(slug)
+      entry = Catalog.entries.find { |candidate| candidate.slug == slug && candidate.live? }
+      raise Weft::NotFound, "No running example #{slug.inspect}" unless entry
+
+      Object.const_get(entry.page_name).example_classes.select { |klass| klass.respond_to?(:reset!) }.each(&:reset!)
+      entry.path
+    end
+
     def slug = Catalog.slug_for(self)
 
     def entry = Catalog.find(slug)
@@ -61,8 +118,8 @@ class ExamplePage < ApplicationPage
     # page declares a `title` of its own.
     def title_declaration = "#{entry.title} · #{ApplicationPage::SITE_NAME}"
 
-    # Each of the example's classes in a phrase, so "which piece do I want?" is
-    # answerable from the list. On the page, since the example's files are the code.
+    # Each of the example's classes, and the page, in a phrase: "which piece do
+    # I want?" answered on the page, since the example's files are the code.
     def describes(**phrases) = @phrases = phrases
 
     def described_keys = (@phrases || {}).keys

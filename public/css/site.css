@@ -1,0 +1,483 @@
+/*
+ * weft.rusterholz.org: cyanotype on linen.
+ *
+ * Three tones and nothing else gets a fill: ground for reading, tint for the
+ * highlighted declaration, bench for anything that touches the wire. Copper
+ * marks live elements only. Faces and sizes are tokens, so trying another is
+ * an edit here (and a line in bin/fetch-fonts).
+ */
+
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-italic-400.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("../fonts/spectral-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spline Sans Mono"; src: url("../fonts/spline-sans-mono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Spline Sans Mono"; src: url("../fonts/spline-sans-mono-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+
+:root {
+  --face-text: "Spectral", Georgia, "Times New Roman", serif;
+  --face-mono: "Spline Sans Mono", ui-monospace, Menlo, monospace;
+
+  --size-article: 20px;
+  --size-h1: 46px;
+  --size-bar: 14px;
+  --size-margin: 14px;
+  --size-header: 15px;
+  --size-code: 13px;
+  --size-bench: 12.5px;
+
+  --main-foot: 32px;
+  --bench-height: 52px;
+
+  --col-gap: 48px;
+  /* 80px from a 1280px window; below that each side gives up half of every pixel
+     lost, down to 24px at 1168px, so the grid holds at 1120px through that range
+     and never widens as the window narrows. */
+  --gutter: clamp(24px, 24px + (100vw - 1168px) / 2, 80px);
+
+  --ground: #EEF0EA;
+  --ink: #1B2733;
+  --prussian: #1E4E8C;
+  --prussian-hover: #163B6B;
+  --copper: #CB7A33;
+  --muted: #5A6670;
+  --bar-ink: #3F4E5B;
+  --tint: #E3E7E1;
+  --bench: #DCE1DB;
+  --hairline: #D5DAD2;
+  --field: #F6F7F3;
+  --field-rule: #C5CCC3;
+
+  color-scheme: light;
+}
+
+/* The dark values twice: once for a visitor who chose dark, once for one who
+   chose nothing and whose system is dark. */
+:root[data-theme="dark"] {
+  --ground: #141B22;
+  --ink: #E4E9EA;
+  --prussian: #7FA9E6;
+  --prussian-hover: #A9C6F0;
+  --copper: #E69A5E;
+  --muted: #98A5B0;
+  --bar-ink: #B4C0CA;
+  --tint: #1B242D;
+  --bench: #1F2A34;
+  --hairline: #2B3742;
+  --field: #1B242D;
+  --field-rule: #2B3742;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --ground: #141B22;
+    --ink: #E4E9EA;
+    --prussian: #7FA9E6;
+    --prussian-hover: #A9C6F0;
+    --copper: #E69A5E;
+    --muted: #98A5B0;
+    --bar-ink: #B4C0CA;
+    --tint: #1B242D;
+    --bench: #1F2A34;
+    --hairline: #2B3742;
+    --field: #1B242D;
+    --field-rule: #2B3742;
+
+    color-scheme: dark;
+  }
+}
+
+/* ---- The frame ---- */
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--face-text);
+}
+
+a { color: var(--prussian); }
+a:hover { color: var(--prussian-hover); }
+
+:is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--prussian);
+  outline-offset: 2px;
+}
+
+code, pre, kbd { font-family: var(--face-mono); }
+
+.flat {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+.flat:hover { background: var(--tint); color: var(--ink); }
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 40px var(--gutter) 0;
+  font-size: var(--size-header);
+  color: var(--muted);
+}
+
+.site-header nav[aria-label="Breadcrumb"] { display: flex; align-items: baseline; gap: 10px; }
+.site-header nav a { color: var(--muted); text-decoration: none; }
+.site-header nav a:hover { color: var(--ink); }
+.site-header nav [aria-current="page"] { color: var(--ink); }
+.site-header .wordmark { color: var(--ink); font-weight: 600; font-size: 20px; margin-right: 6px; }
+
+.site-header .widgets { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.site-header .widgets a.flat { font-weight: 500; }
+.site-header .widgets form { margin: 0; }
+.site-search { position: relative; margin-right: 8px; }
+.site-search .pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  color: var(--muted);
+}
+.site-search input {
+  width: 140px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--ink);
+}
+.site-search input:focus { outline: none; }
+.site-search .pill:focus-within { border-color: var(--prussian); }
+
+/* Open while the search has focus or the pointer is over it, and only with
+   something in it. Hover counts because Safari does not focus a link on click,
+   so focus alone would close the panel before the click lands. */
+.search-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 2;
+  width: 340px;
+  padding: 8px;
+  background: var(--ground);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(27, 39, 51, 0.12);
+  font-size: 15px;
+}
+.site-search:is(:focus-within, :hover) .search-panel:has(li, p) { display: block; }
+.search-panel ul { margin: 0; padding: 0; list-style: none; }
+.search-panel :is(a, .coming) { display: block; padding: 6px 8px; border-radius: 4px; text-decoration: none; }
+.search-panel a:hover, .search-panel a:focus-visible { background: var(--tint); }
+.search-panel .title { display: block; color: var(--ink); }
+.search-panel .summary { display: block; font-size: 13px; color: var(--muted); }
+.search-panel .coming .title { color: var(--muted); }
+.search-panel p { margin: 6px 8px; color: var(--muted); }
+
+.picker { position: relative; display: inline-flex; align-items: center; margin: 0; }
+.picker::after { content: "▾"; position: absolute; right: 8px; font-size: 11px; color: var(--muted); pointer-events: none; }
+.picker select {
+  appearance: none;
+  padding: 6px 22px 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--face-mono);
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.picker select:hover { background-color: var(--tint); }
+/* The wrapper's title is the explanation, so the pointer has to reach it. */
+.picker select:disabled { pointer-events: none; opacity: 1; color: var(--ink); }
+.picker noscript .flat { font-size: 13px; }
+.flat.icon { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; }
+
+/* Show the toggle that changes something: the other theme from the one in force. */
+#theme-toggle-light,
+:root[data-theme="dark"] #theme-toggle-dark { display: none; }
+:root[data-theme="dark"] #theme-toggle-light { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) #theme-toggle-dark { display: none; }
+  :root:not([data-theme]) #theme-toggle-light { display: block; }
+}
+
+/* The columns are 176 / 574 / 274 where the grid is 1120px wide, at any window
+   from 1168px to 1280px, and share every pixel past that: the bar a little, the
+   article twice what the margin gets, so however wide the window the margin
+   stays about half the article. */
+main {
+  --columns:
+    calc(176px + (100% - 1120px) * 0.06)
+    calc(574px + (100% - 1120px) * 0.63)
+    calc(274px + (100% - 1120px) * 0.31);
+
+  padding: 44px var(--gutter) var(--main-foot);
+  font-size: var(--size-article);
+  line-height: 1.6;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Any other page: one column, on the article's line ---- */
+
+main.single-column {
+  display: grid;
+  grid-template-columns: var(--columns);
+  column-gap: var(--col-gap);
+  align-content: start;
+}
+main.single-column > * { grid-column: 2; margin: 0 0 22px; }
+
+.index { margin: 12px 0 0; padding: 0; list-style: none; }
+.index li { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; padding: 10px 0; }
+.index a { text-decoration: none; }
+.index .title { font-size: var(--size-article); }
+.index li:not(:has(a)) .title { color: var(--muted); }
+.index .coming { align-self: baseline; font-family: var(--face-mono); font-size: 12px; color: var(--muted); }
+.index .summary { grid-column: 1 / -1; font-size: 15px; line-height: 1.5; color: var(--muted); }
+
+/* ---- An example page: the bar, the article, the margin ---- */
+
+main.example-layout {
+  display: grid;
+  grid-template-columns: var(--columns);
+  column-gap: var(--col-gap);
+}
+
+/* The side columns scroll with the article until they run out, then hold while
+   it goes on. Stuck to the viewport's bottom, kept inside the row, and at least
+   as tall as what the viewport shows above the bench at the page's end: a
+   column that fits holds near the top, one that does not holds once its end is
+   in view. */
+main.example-layout > :is(.examples-bar, .declarations) {
+  position: sticky;
+  bottom: 0;
+  align-self: end;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--main-foot) - var(--bench-height));
+}
+
+.examples-bar {
+  display: flex;
+  flex-direction: column;
+  padding-top: 18px;
+  font-size: var(--size-bar);
+  line-height: 1.5;
+}
+.examples-bar .entry { display: block; padding: 5px 0; color: var(--bar-ink); text-decoration: none; }
+.examples-bar a.entry:hover { color: var(--ink); }
+.examples-bar .entry.current {
+  margin-left: -12px;
+  padding-left: 10px;
+  border-left: 2px solid var(--copper);
+  color: var(--ink);
+  font-weight: 600;
+}
+.examples-bar .entry.coming { color: var(--muted); opacity: 0.7; }
+
+main.example-layout > article {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+article > * { margin: 0; }
+
+h1 {
+  margin: 0 0 6px;
+  font-weight: 500;
+  font-size: var(--size-h1);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
+
+.pagination {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--size-header);
+}
+.pagination a { text-decoration: none; }
+.pagination a:first-child { color: var(--muted); }
+
+/* H's column bench will sit absolutely inside this column, its foot on the
+   column's: sticky keeps the column a positioning context, and the foot meets
+   the article's pagination line once the page is scrolled to its end. */
+.declarations {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 14px;
+  font-size: var(--size-margin);
+  line-height: 1.5;
+  color: var(--muted);
+}
+.declarations .heading { font-size: 13px; }
+.declaration { --block-ground: var(--ground); display: flex; flex-direction: column; gap: 6px; }
+.declaration .name { font-family: var(--face-mono); font-size: 13px; font-weight: 500; }
+
+/* Lines keep the file's breaks and scroll sideways. A shade on the right edge
+   says there is more: the cover rides the end of the content (local) and hides
+   the shade (fixed to the box) once the end is in view, or when nothing overflows. */
+.declaration pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+  background:
+    linear-gradient(to left, var(--block-ground) 40%, transparent) right / 28px 100% no-repeat local,
+    linear-gradient(to left, color-mix(in oklab, var(--ink) 12%, transparent), transparent) right / 12px 100% no-repeat scroll;
+}
+.declaration.at-rest {
+  --block-ground: var(--tint);
+  margin: 0 -16px;
+  padding: 14px 16px;
+  background: var(--tint);
+  border-radius: 6px;
+}
+.declaration.at-rest .name { color: var(--prussian); }
+.declaration.at-rest pre { color: var(--ink); }
+.declarations .behind { font-size: 13px; }
+.declarations .behind code { font-size: 12px; }
+.reset-example form { display: block; margin: -20px 0 0 -8px; }
+.reset-example .flat { font-size: 13px; color: var(--prussian); }
+
+/* The live component, set apart from the prose: the search pill's line, no fill. */
+.live-example {
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 20px 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.callout {
+  padding: 14px 18px;
+  border-left: 2px solid var(--copper);
+  border-radius: 0 6px 6px 0;
+  background: var(--tint);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.callout > p { margin: 0; }
+.callout > p + p { margin-top: 10px; }
+
+/* ---- Code, in cyanotype: ink, blues and gray; copper stays for live marks ---- */
+
+article pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: var(--size-code);
+  line-height: 1.55;
+  tab-size: 2;
+}
+.pieces { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 18px; }
+.piece .about { margin: 0; }
+.piece details { margin: 6px 0 4px; }
+.piece summary { cursor: pointer; font-family: var(--face-mono); font-size: 13px; color: var(--muted); }
+.piece summary:hover { color: var(--ink); }
+.piece details[open] pre { margin-top: 12px; }
+.piece > a { font-size: 15px; }
+article :not(pre) > code { font-size: 0.8em; }
+
+pre code { color: var(--ink); }
+pre code :is(.k, .kd, .kp, .kr, .kn, .kc) { color: var(--prussian); }
+pre code :is(.nc, .no, .nn) { color: var(--ink); font-weight: 500; }
+pre code :is(.nf, .nb) { color: var(--ink); }
+pre code :is(.ss, .s, .s1, .s2, .sd, .sx, .si, .dl, .mi, .mf) {
+  color: color-mix(in oklab, var(--prussian) 70%, var(--muted));
+}
+pre code :is(.c, .c1, .cm, .cp, .cs) { color: var(--muted); font-style: italic; }
+pre code :is(.o, .p) { color: var(--muted); }
+
+/* ---- The live example, as the article hosts it ---- */
+
+/* Whatever htmx wires is live, and wears the dotted copper underline. */
+article :is(button, a, span)[hx-get],
+article :is(button, a, span)[hx-post] {
+  padding: 0;
+  border: 0;
+  border-bottom: 1.5px dotted var(--copper);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+article :is(button, a, span)[hx-get]:hover,
+article :is(button, a, span)[hx-post]:hover { color: var(--copper); }
+
+article form { display: flex; flex-direction: column; gap: 10px; }
+article form label { display: inline-block; width: 140px; font-size: 15px; color: var(--muted); }
+article input[type="text"] {
+  width: 260px;
+  padding: 4px 6px;
+  border: 0;
+  border-bottom: 1.5px solid var(--ink);
+  background: var(--field);
+  font: inherit;
+  font-size: 18px;
+  color: var(--ink);
+}
+article input[type="submit"] {
+  align-self: flex-start;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--prussian);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ground);
+  cursor: pointer;
+}
+article form button[hx-get] { align-self: flex-start; font-size: 15px; color: var(--muted); }
+article div > strong { display: inline-block; width: 140px; font-size: 15px; font-weight: 400; color: var(--muted); }
+
+/* Narrower than the three columns: one column until the mobile layout lands. */
+@media (max-width: 1167px) {
+  main.example-layout, main.single-column { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
+  main.single-column > * { grid-column: 1; }
+  .examples-bar { display: none; }
+  main.example-layout > .declarations { position: relative; min-height: 0; align-self: start; }
+}
+
+.bench {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-sizing: border-box;
+  height: var(--bench-height);
+  padding: 0 var(--gutter);
+  background: var(--bench);
+  font-family: var(--face-mono);
+  font-size: var(--size-bench);
+  color: var(--muted);
+}
+.bench .bench-request { flex-grow: 1; color: var(--ink); }

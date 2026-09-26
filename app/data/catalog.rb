@@ -15,7 +15,9 @@ class Catalog
 
     # Asking the page classes beats keeping a list, which could say yes to a
     # page that is not there.
-    def live? = Object.const_defined?("#{slug.tr('-', '_').camelize}Page")
+    def live? = Object.const_defined?(page_name)
+
+    def page_name = "#{slug.tr('-', '_').camelize}Page"
   end
 
   Unknown = Class.new(StandardError)
@@ -52,6 +54,19 @@ class Catalog
 
     def find(slug)
       ENTRIES.find { |entry| entry.slug == slug } || raise(Unknown, "No example with the slug #{slug.inspect}")
+    end
+
+    # Entries whose title or summary holds the text, ignoring case.
+    def matching(text)
+      needle = text.downcase
+      ENTRIES.select { |entry| "#{entry.title} #{entry.summary}".downcase.include?(needle) }
+    end
+
+    # The entries before and after this one, nil at either end: what a page's
+    # previous and next links walk, which is the running examples only.
+    def neighbors_of(slug, among: ENTRIES.select(&:live?))
+      index = among.index { |entry| entry.slug == slug }
+      [index.positive? ? among[index - 1] : nil, among[index + 1]]
     end
 
     # A page's slug comes from its own class name, so a page declares nothing but

@@ -10,6 +10,10 @@ require "weft"
 # Move the pin without porting them and the boot says so: no such directory.
 EXAMPLES_ROOT = File.join(APP_ROOT, "examples", "v#{Weft::VERSION.split('.').first(2).join('.')}")
 
+WEFT_REPO_URL = "https://github.com/rusterholz/weft"
+WEFT_CHANGELOG_URL = "#{WEFT_REPO_URL}/blob/v#{Weft::VERSION}/CHANGELOG.md".freeze
+SITE_REPO_URL = "https://github.com/rusterholz/weft.rusterholz.org"
+
 # Each directory under app/ is its own Zeitwerk root (app/pages/home_page.rb
 # defines HomePage, not Pages::HomePage), and both calls eager-load, so the
 # constants Weft.configure names below exist by then. app/data has a loader of its

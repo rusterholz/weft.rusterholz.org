@@ -14,4 +14,8 @@ export SESSION_SECRET="${SESSION_SECRET:-development-only-not-a-secret-developme
 
 # Not Rack's default 9292: weft's own demo app uses that, the two get run side
 # by side, and losing the race means curl quietly answers from the other app.
-exec bundle exec puma --port "${PORT:-9393}"
+#
+# One thread: every request reloads the code first, static files included, and
+# two reloads at once leave constants half-defined, so a page's fonts and scripts
+# fetched in parallel fail with NameErrors.
+exec bundle exec puma --port "${PORT:-9393}" --threads 1:1

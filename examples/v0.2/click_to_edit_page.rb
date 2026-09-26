@@ -3,11 +3,14 @@
 class ClickToEditPage < ExamplePage
   describes contacts: "where a visitor's contact is kept, standing in for your database",
             contact_card: "the contact at rest, and the button that opens it for editing",
-            contact_editor: "the form in its editable expanded view"
+            contact_editor: "the form in its editable expanded view",
+            click_to_edit_page: "a page to put it on (yours needs only the contact_card call; " \
+                                "the rest is this walkthrough)"
 
   def walkthrough
     introduction
-    contact_card contact_id: "1"
+    live { contact_card contact_id: "1" }
+    log_warning
     how_it_works
     worth_noticing
   end
@@ -27,6 +30,16 @@ class ClickToEditPage < ExamplePage
       The contact below is yours alone. Every visitor gets their own copy of it, and it is
       thrown away a couple of hours later, so edit it freely.
     TEXT
+  end
+
+  def log_warning
+    callout do
+      prose <<~TEXT
+        If you run this example yourself, Weft logs a warning the first time you click Edit, Cancel
+        or Save, and on every click in development, where classes reload. It's harmless, and Weft
+        plans to improve how this case is handled.
+      TEXT
+    end
   end
 
   def how_it_works

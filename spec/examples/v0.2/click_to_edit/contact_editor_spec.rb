@@ -27,7 +27,13 @@ RSpec.describe ClickToEdit::ContactEditor do
   end
 
   it "carries the contact it edits as a hidden field" do
-    expect(form.at("input[type=hidden]").to_h).to include("name" => "contact_id", "value" => "1")
+    expect(form.at("input[type=hidden][name=contact_id]").to_h).to include("value" => "1")
+  end
+
+  it "carries the visitor's CSRF token as a hidden field" do
+    Current.csrf_token = "this-visitors-token"
+
+    expect(form.at("input[type=hidden][name=authenticity_token]")["value"]).to eq("this-visitors-token")
   end
 
   it "submits with a Save button" do

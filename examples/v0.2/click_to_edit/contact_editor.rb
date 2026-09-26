@@ -8,19 +8,25 @@ module ClickToEdit
     param :first_name
     param :last_name
     param :email
-    derives(:contact) { |p| Contacts.find(p.contact_id) }
+    derives(:contact) do |p|
+      Contacts.find(p.contact_id)
+    end
 
     transfers :save, to: ContactCard do |params|
       Contacts.update(params.contact_id,
-                      first_name: params.first_name, last_name: params.last_name, email: params.email)
+                      first_name: params.first_name,
+                      last_name: params.last_name,
+                      email: params.email)
       nil
     end
 
-    transfers :cancel, to: ContactCard, method: :get
+    transfers :cancel, to: ContactCard,
+                       method: :get
 
     def build(attributes = {})
       super
       form(action: :save) do
+        authenticity_token
         input(type: "hidden", name: "contact_id", value: params.contact_id)
         text_field "First Name", :first_name
         text_field "Last Name", :last_name

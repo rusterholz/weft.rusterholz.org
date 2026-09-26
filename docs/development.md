@@ -14,6 +14,12 @@ bin/check     # specs, lint, doc drift
 `bin/dev` runs with `RACK_ENV=development`, which turns on Zeitwerk reloading:
 edit a page and the next request picks it up without bouncing the server.
 
+It runs Puma on a single thread. Every request reloads the code before it is
+served, static files included, and two reloads running at once leave constants
+half-defined: a page whose stylesheet, fonts and scripts load in parallel gets
+some of them back as errors. One thread serializes the reloads. Production does
+not reload, so the restriction is development's alone.
+
 It serves on 9393 rather than Rack's default 9292, because weft's own demo app
 uses 9292 and the two get run side by side. When they collide the symptom is
 confusing rather than obvious: the server that lost the race exits, and your
@@ -82,9 +88,7 @@ spec is one visitor.
 ## Assets Are Vendored, Including the Ones Nothing Uses Yet
 
 Nothing the running site loads comes from a third party. Everything it asks the
-browser for is served from this origin. Today that means scripts; **no fonts are
-vendored yet**, because no page asks for one until the site has a design, and
-`bin/fetch-fonts` arrives with it.
+browser for is served from this origin: htmx, and the fonts.
 
 The reason is speed first. Since browsers partitioned their HTTP caches, a font
 or script on a public CDN is no longer shared between sites, so the "someone
@@ -113,6 +117,17 @@ early because both files come from the same two constants in the same gem, so
 fetching them together keeps `bin/fetch-htmx` a single honest act rather than a
 script with a dormant branch. If you are reading `public/js` and wondering why
 `sse.js` is there and unreferenced: that is why, and it is expected.
+
+```bash
+bin/fetch-fonts
+```
+
+That vendors the site's faces into `public/fonts` from Google Fonts' CSS API:
+one request per weight, keeping only the Latin subset, which returns a small
+static file rather than a whole variable font. Each face is one line in the
+script, so trying a different one is an edit, a re-run and a rename in
+`public/css/site.css`. `public/fonts/LICENSE.md` records where each file came
+from.
 
 The files are committed rather than fetched during the image build, so building
 the image never depends on a third-party host being reachable.
@@ -204,7 +219,9 @@ disagree about where an example starts.
 **A page declares nothing but its prose and its composition.** Its URL, heading
 and document title all come from the catalog, found from the page's own class
 name, so the two can never drift. `ExamplePage` supplies the frame and calls the
-page's `walkthrough`; a page that forgets to define one says so.
+page's `walkthrough`; a page that forgets to define one says so. The walkthrough
+wraps what it renders live in `live { ... }`, which frames it apart from the prose;
+whatever the component swaps in stays inside the frame.
 
 The URL half of that reaches into the gem: `ExamplePage` overrides
 `default_page_path`, which weft declares **private**. It is the right seam, since
@@ -213,6 +230,33 @@ plain Ruby lets a subclass override a private method. But it is not part of weft
 public surface, so **re-verify it whenever the pin moves**: a release that renames
 or inlines that method takes every example page's URL with it. The neighboring
 `title_declaration` override is public API and needs no such care.
+
+The full list of weft internals this site overrides, to re-check at every pin move:
+
+- `default_page_path`, in `ExamplePage`: every example page's URL.
+- `weft_dom_id`, in `CodeBlock`, `Callout` and `SearchResults`: weft names a
+  component's element from its class and first param, which would give every code
+  block and every callout the same id and put the typed search into an id. A
+  release that stops asking this method would bring the duplicates back.
+- The same rule, relied on rather than overridden, in `ThemeToggle`: the
+  stylesheet shows one of the two toggles by the ids weft derives for them,
+  `#theme-toggle-dark` and `#theme-toggle-light`. A release that names elements
+  differently leaves both toggles showing, or neither.
+
+When a page needs to tell the reader something prominent, such as a name a later
+weft changes, or a rough edge they will meet on this version, it wraps the prose
+in a `callout`. There is one kind, and the words carry the meaning:
+
+```ruby
+callout do
+  prose <<~TEXT
+    If you run this example yourself, Weft logs a warning ...
+  TEXT
+end
+```
+
+Say what a later weft plans only where something is scheduled; otherwise "Weft
+plans to improve" is as far as it goes.
 
 ### The Docs' Examples Are Fragments, and a Page Is Not
 
@@ -278,13 +322,17 @@ to them.
 ### Showing the Code
 
 `CodeBlock` reads one file at render time and highlights it, and every example
-goes through it, so how code is presented is one place. A page shows **one block
-per file**, labeled with the path, in the order someone reads them: the data class
-first, then the components. The gem's docs show an example as a single block
-because markdown has nowhere to put a file boundary; here the boundary is part of
-the lesson.
+goes through it, so how code is presented is one place. A page's "Pieces You
+Need" lists **one piece per file**, in the order someone reads them: the data
+class first, then the components, then the page itself. Each piece names its
+class and what it is for, holds the whole file folded away under its path, and
+links the file on GitHub. The phrases come from the page's `describes`, which
+names the page's own class beside the example's, and a spec holds every live
+page to describing exactly those. The gem's docs show an example as a single
+block because markdown has nowhere to put a file boundary; here the boundary is
+part of the lesson.
 
-Which files those are is asked of the classes, not of the directory, so the blocks
+Which files those are is asked of the classes, not of the directory, so the pieces
 follow the code if the code moves. Two things `CodeBlock` knows that are easy to
 get wrong again:
 
@@ -298,6 +346,19 @@ get wrong again:
 
 Rouge 5 supports wrapping only its three non-nesting HTML formatters, so richer
 presentation later means a formatter subclass rather than a wrapper.
+
+### The Declarations Margin
+
+The margin beside an example lists each component's class-body declarations,
+and it reads them out of the component's file with Prism, Ruby's own parser: a
+declaration is any bare call in the class body except `builder_method` and the
+visibility keywords. So the margin shows the file's own text, blocks included,
+and cannot say anything the running class does not. An example needs nothing
+extra for it; what the page declares with `describes` about the data class
+closes the column.
+
+The components the article renders before anyone clicks are the tinted ones,
+found by walking the article as built rather than by the page saying so.
 
 ## Documentation Drift
 
@@ -375,6 +436,27 @@ Three paths, deliberately different:
 
 The real secret appears for the first time at deploy, and only there.
 
+### Every Form That Writes Carries the Session's Token
+
+`Rack::Protection::AuthenticityToken` sits between the session and
+`VisitorScope`, and answers `403` to any POST without the session's CSRF token,
+before weft sees it. `VisitorScope` publishes the token as `Current.csrf_token`,
+and each form that writes carries it in one hidden field, rendered by the
+`AuthenticityTokenField` component:
+
+```ruby
+form(action: :save) do
+  authenticity_token
+  # ...the form's own fields
+end
+```
+
+That one field serves both transports, since htmx sends a form's fields and so
+does a plain submit. This is the recipe from weft 0.2.0's `docs/app-patterns.md`,
+with its hidden input folded into a component as the guide suggests. A new form
+that writes needs the line; a GET action does not. In request specs,
+`post_form` fetches a token the way a browser would and posts with it.
+
 ### A Secure Cookie Needs a Truthful Proxy
 
 In production the session cookie is marked `secure`, and rack-session takes that
@@ -386,8 +468,9 @@ bug. Sending `X-Forwarded-Proto: https` brings it back.
 That matters once something terminates TLS in front of this app, because the app
 sees plain http from the proxy and decides from the forwarded scheme. If the
 proxy does not send one, or Rack does not trust the address it came from, every
-request looks like a brand-new visit and nobody keeps anything -- with no error
-anywhere. Check it against a real request, not a local one, the first time this
+request looks like a brand-new visit and nobody keeps anything, and every form
+post is refused with a `403`, since its token belongs to a session the cookie
+never carried back. Check it against a real request, not a local one, the first time this
 site is deployed.
 
 ## Deploying
