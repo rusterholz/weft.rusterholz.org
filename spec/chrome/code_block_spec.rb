@@ -24,6 +24,10 @@ RSpec.describe CodeBlock do
     expect(rendered(path: path).css("pre > code span[class]")).not_to be_empty
   end
 
+  it "takes its id from the file it shows, so a page of blocks can link each one" do
+    expect(rendered(path: path).at("div")["id"]).to eq("code-examples-v0-2-click-to-edit-contacts-rb")
+  end
+
   it "refuses to render without a path" do
     expect { rendered }.to raise_error(Weft::NotReceived)
   end

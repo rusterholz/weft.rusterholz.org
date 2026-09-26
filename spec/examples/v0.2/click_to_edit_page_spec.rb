@@ -48,6 +48,12 @@ RSpec.describe ClickToEditPage do
     expect(page.css("article pre span[class]")).not_to be_empty
   end
 
+  it "gives no two elements the same id" do
+    ids = page.css("[id]").map { |element| element["id"] }
+
+    expect(ids.tally.select { |_id, count| count > 1 }).to be_empty
+  end
+
   it "labels each block with the file it read" do
     labels = page.css("article pre").map { |pre| pre.previous_element.at("code").text.strip }
 

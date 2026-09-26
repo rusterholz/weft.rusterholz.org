@@ -20,6 +20,9 @@ class CodeBlock < Weft::Component
     pre { text_node "<code>#{highlight}</code>".html_safe }
   end
 
+  # Weft would give every block the one id its class name yields; a page shows several.
+  def weft_dom_id = "code-#{params.path.gsub(/[^a-z0-9]+/i, '-')}"
+
   private
 
   def highlight
