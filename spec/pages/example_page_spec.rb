@@ -51,6 +51,28 @@ RSpec.describe ExamplePage do
     end
   end
 
+  describe "an example whose files call none of the site's own components" do
+    # Stubbed first, so the fixture's definitions reopen constants RSpec takes away afterwards.
+    before do
+      stub_const("Tabs", Module.new)
+      stub_const("TabsPage", Class.new(described_class))
+      load File.join(APP_ROOT, "spec", "fixtures", "tabs_example.rb")
+      Current.visitor = "visitor-#{SecureRandom.hex(4)}"
+    end
+
+    after { [TabsPage, Tabs::TabStrip].each { |klass| Weft.registry.evict(klass) } }
+
+    it "lists its pieces, the page last, and no glue after them" do
+      page = Nokogiri::HTML5(TabsPage.render)
+      items = page.css("h2:contains('Pieces You Need') + ul > li")
+
+      expect(items.map { |item| item.at(".about").text }).to eq(
+        ["Panes -- the panes", "TabStrip -- the strip over them", "TabsPage -- a page to put it on"]
+      )
+      expect(page.css(".glue")).to be_empty
+    end
+  end
+
   # Asked of the ordering directly, not of a rendered page: Module#constants
   # happens to answer in the right order in this process, so a page would render
   # correctly with nothing ordering it at all.

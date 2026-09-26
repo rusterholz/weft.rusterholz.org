@@ -332,6 +332,13 @@ page to describing exactly those. The gem's docs show an example as a single
 block because markdown has nowhere to put a file boundary; here the boundary is
 part of the lesson.
 
+After the page comes the glue: the site's own components the example's files
+call, such as the CSRF token field, each shaped like a piece. Which ones is read
+from the example's files with Prism, matching receiverless calls against each
+site component's `builder_method`, so an example that calls none shows no glue.
+A helper describes itself once, with `extend SiteHelper` and `describes "..."`;
+an example that calls a site component without a phrase fails to render.
+
 Which files those are is asked of the classes, not of the directory, so the pieces
 follow the code if the code moves. Two things `CodeBlock` knows that are easy to
 get wrong again:

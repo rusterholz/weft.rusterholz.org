@@ -405,6 +405,7 @@ article pre {
 .piece summary:hover { color: var(--ink); }
 .piece details[open] pre { margin-top: 12px; }
 .piece > a { font-size: 15px; }
+.glue > .pieces { margin: 12px 0 0 18px; }
 article :not(pre) > code { font-size: 0.8em; }
 
 pre code { color: var(--ink); }

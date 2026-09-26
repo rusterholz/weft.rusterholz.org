@@ -15,6 +15,8 @@ class ExamplePage < ApplicationPage
   Undescribed = Class.new(StandardError)
   NoSuchExample = Class.new(StandardError)
 
+  GLUE = "Glue"
+
   delegate :entry, to: :class, private: true
 
   def build(attributes = {})
@@ -72,17 +74,33 @@ class ExamplePage < ApplicationPage
 
   # The pieces you need, in reading order and then this page: each named and
   # described, its whole file folded away under its path, and the file on GitHub.
+  # Last, the site's own helpers the example's files call, shaped the same.
   def pieces_you_need
     h2 "Pieces You Need"
     ul class: "pieces" do
       example_sources.merge(self.class => page_source_path).each do |klass, path|
-        li(class: "piece") { piece(klass, path) }
+        li(class: "piece") { piece(klass, self.class.phrase_for(klass), path) }
+      end
+      glue
+    end
+  end
+
+  def glue
+    helpers = SiteHelper.used_in(example_sources.values.map { |path| File.join(APP_ROOT, path) })
+    return if helpers.empty?
+
+    li class: "glue" do
+      para GLUE, class: "about"
+      ul class: "pieces" do
+        helpers.each do |klass|
+          li(class: "piece") { piece(klass, klass.phrase, repo_path(SiteHelper.source_of(klass))) }
+        end
       end
     end
   end
 
-  def piece(klass, path)
-    para "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", class: "about"
+  def piece(klass, phrase, path)
+    para "#{klass.name.demodulize} -- #{phrase}", class: "about"
     details do
       summary path
       code_block path: path

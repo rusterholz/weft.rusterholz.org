@@ -98,6 +98,30 @@ RSpec.describe ClickToEditPage do
     it "links each piece's file on GitHub" do
       expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(piece_paths.map { |path| blob + path })
     end
+
+    describe "the glue after them" do
+      let(:items) { page.css("h2:contains('Pieces You Need') + ul > li") }
+      let(:glue) { items.last }
+      let(:helpers) { glue.css("ul > li.piece") }
+      let(:path) { "app/chrome/authenticity_token_field.rb" }
+
+      it "comes last, after the page, under its own label" do
+        expect(glue["class"]).to eq("glue")
+        expect(items[-2].at(".about").text).to start_with("ClickToEditPage")
+        expect(glue.element_children.first.text).to eq(ExamplePage::GLUE)
+      end
+
+      it "lists the site's own helpers the example's files call, each shaped like a piece" do
+        expect(helpers.map { |helper| helper.at(".about").text }).to eq(
+          ["AuthenticityTokenField -- the hidden field that carries the visitor's CSRF token, " \
+           "in every form that writes"]
+        )
+        expect(helpers.first.at("details")["open"]).to be_nil
+        expect(helpers.first.at("details > summary").text).to eq(path)
+        expect(helpers.first.at("details pre").text).to eq(File.read(File.join(APP_ROOT, path)))
+        expect(helpers.first.at("a")["href"]).to eq(blob + path)
+      end
+    end
   end
 
   it "gives no two elements the same id" do
