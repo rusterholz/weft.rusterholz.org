@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+
 RSpec.describe "choosing a theme" do
   let(:choose) { "/_components/theme_toggle/choose" }
 
@@ -17,6 +19,20 @@ RSpec.describe "choosing a theme" do
 
     expect(theme_on("/")).to eq("dark")
     expect(theme_on("/examples/click-to-edit")).to eq("dark")
+  end
+
+  it "keeps one visitor's choice from another" do
+    post choose, theme: "dark", return_to: "/"
+
+    with_session(:other) { expect(theme_on("/")).to be_nil }
+    expect(theme_on("/")).to eq("dark")
+  end
+
+  it "offers each page's toggle a way back to that page" do
+    get "/examples/click-to-edit"
+
+    return_to = Nokogiri::HTML5(last_response.body).css("#theme-toggle-dark input[name=return_to]").first
+    expect(return_to["value"]).to eq("/examples/click-to-edit")
   end
 
   it "sends the visitor back to the page they chose it on" do
