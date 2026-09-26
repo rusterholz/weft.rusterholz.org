@@ -26,6 +26,9 @@
   --size-code: 13px;
   --size-bench: 12.5px;
 
+  --main-foot: 32px;
+  --bench-height: 52px;
+
   --ground: #EEF0EA;
   --ink: #1B2733;
   --prussian: #1E4E8C;
@@ -208,7 +211,7 @@ code, pre, kbd { font-family: var(--face-mono); }
 }
 
 main {
-  padding: 44px 80px 32px;
+  padding: 44px 80px var(--main-foot);
   font-size: var(--size-article);
   line-height: 1.6;
 }
@@ -246,6 +249,19 @@ main.example-layout {
   display: grid;
   grid-template-columns: 176px 574px 274px;
   column-gap: 48px;
+}
+
+/* The side columns scroll with the article until they run out, then hold while
+   it goes on. Stuck to the viewport's bottom, kept inside the row, and at least
+   as tall as what the viewport shows above the bench at the page's end: a
+   column that fits holds near the top, one that does not holds once its end is
+   in view. */
+main.example-layout > :is(.examples-bar, .declarations) {
+  position: sticky;
+  bottom: 0;
+  align-self: end;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--main-foot) - var(--bench-height));
 }
 
 .examples-bar {
@@ -295,10 +311,9 @@ h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
 .pagination a:first-child { color: var(--muted); }
 
 /* H's column bench will sit absolutely inside this column, its foot on the
-   article's pagination line: keep the column a positioning context that
-   stretches the full height of the row. */
+   column's: sticky keeps the column a positioning context, and the foot meets
+   the article's pagination line once the page is scrolled to its end. */
 .declarations {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -406,13 +421,16 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
   main.example-layout, main.single-column { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
   main.single-column > * { grid-column: 1; }
   .examples-bar { display: none; }
+  main.example-layout > .declarations { position: relative; min-height: 0; align-self: start; }
 }
 
 .bench {
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 16px 80px;
+  box-sizing: border-box;
+  height: var(--bench-height);
+  padding: 0 80px;
   background: var(--bench);
   font-family: var(--face-mono);
   font-size: var(--size-bench);
