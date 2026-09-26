@@ -29,6 +29,13 @@ RSpec.describe Declarations do
       RUBY
     end
 
+    it "keeps a declaration's own line breaks" do
+      expect(described_class.of(ClickToEdit::ContactEditor)).to end_with(<<~RUBY.chomp)
+        transfers :cancel, to: ContactCard,
+                           method: :get
+      RUBY
+    end
+
     it "leaves out what is not weft's: the builder name, and the methods" do
       shown = described_class.of(ClickToEdit::ContactCard)
 

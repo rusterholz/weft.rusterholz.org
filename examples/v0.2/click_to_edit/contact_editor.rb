@@ -20,7 +20,8 @@ module ClickToEdit
       nil
     end
 
-    transfers :cancel, to: ContactCard, method: :get
+    transfers :cancel, to: ContactCard,
+                       method: :get
 
     def build(attributes = {})
       super
