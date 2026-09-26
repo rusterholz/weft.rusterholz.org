@@ -214,13 +214,14 @@ code, pre, kbd { font-family: var(--face-mono); }
 }
 
 /* The columns are 176 / 574 / 274 where the grid is 1120px wide, at a 1280px
-   window, and share every pixel past that: the article and the margin most of
-   it, the bar a little. */
+   window, and share every pixel past that: the bar a little, the article twice
+   what the margin gets, so however wide the window the margin stays about half
+   the article. */
 main {
   --columns:
     calc(176px + (100% - 1120px) * 0.06)
-    calc(574px + (100% - 1120px) * 0.5)
-    calc(274px + (100% - 1120px) * 0.44);
+    calc(574px + (100% - 1120px) * 0.63)
+    calc(274px + (100% - 1120px) * 0.31);
 
   padding: 44px var(--gutter) var(--main-foot);
   font-size: var(--size-article);
