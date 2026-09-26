@@ -19,7 +19,7 @@ RSpec.describe ClickToEditPage do
   end
 
   it "frames the walkthrough between the heading and the source" do
-    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Under the Hood"])
+    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Pieces You Need"])
   end
 
   it "embeds the visitor's own contact, live, ahead of the explanation" do
@@ -58,17 +58,21 @@ RSpec.describe ClickToEditPage do
     expect(intro.first.text).to start_with("A read-only view of a record with an Edit button.")
   end
 
-  describe "under the hood" do
-    let(:pieces) { page.css("h2:contains('Under the Hood') + ul > li.piece") }
+  describe "the pieces you need" do
+    let(:pieces) { page.css("h2:contains('Pieces You Need') + ul > li.piece") }
     let(:blob) { "https://github.com/rusterholz/weft.rusterholz.org/blob/main/" }
+    # The example's files in reading order, then the page that puts it on screen.
+    let(:piece_paths) { [*source_paths, "examples/v0.2/click_to_edit_page.rb"] }
 
     # A path answers "where is it", not "which one do I want", so each piece
     # names the class and says what it is for.
-    it "lists the pieces of the example in reading order, each named and described" do
+    it "lists every piece in reading order, the page last, each named and described" do
       expect(pieces.map { |piece| piece.at(".about").text }).to eq(
         ["Contacts -- where a visitor's contact is kept, standing in for your database",
          "ContactCard -- the contact at rest, and the button that opens it for editing",
-         "ContactEditor -- the form in its editable expanded view"]
+         "ContactEditor -- the form in its editable expanded view",
+         "ClickToEditPage -- a page to put it on (yours needs only the contact_card call; " \
+         "the rest is this walkthrough)"]
       )
     end
 
@@ -78,25 +82,21 @@ RSpec.describe ClickToEditPage do
     it "holds each file exactly as it is on disk, highlighted" do
       shown = pieces.map { |piece| piece.at("details pre").text }
 
-      expect(shown).to eq(source_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
+      expect(shown).to eq(piece_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
       expect(pieces.first.css("details pre span[class]")).not_to be_empty
     end
 
     it "keeps each file folded until asked, behind a summary naming it" do
       expect(pieces.map { |piece| piece.at("details")["open"] }).to all(be_nil)
-      expect(pieces.map { |piece| piece.at("details > summary").text }).to eq(source_paths)
+      expect(pieces.map { |piece| piece.at("details > summary").text }).to eq(piece_paths)
     end
 
     it "shows code nowhere else in the article" do
       expect(page.css("article pre").size).to eq(page.css("article details pre").size)
     end
 
-    it "links each piece's file, and this page's" do
-      this_page = page.at("h2:contains('Under the Hood') + ul > li:first-child a")
-
-      expect(this_page.text).to eq("This Page")
-      expect(this_page["href"]).to eq("#{blob}examples/v0.2/click_to_edit_page.rb")
-      expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(source_paths.map { |path| blob + path })
+    it "links each piece's file on GitHub" do
+      expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(piece_paths.map { |path| blob + path })
     end
   end
 

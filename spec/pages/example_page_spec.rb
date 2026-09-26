@@ -71,7 +71,7 @@ RSpec.describe ExamplePage do
   # Both directions at once, for every example as it lands: a class nobody
   # described stops the page, and a description naming nothing is dead copy that
   # would otherwise sit in the file unnoticed.
-  it "describes exactly the classes it is made of, on every live example page" do
+  it "describes exactly the classes it is made of, and itself, on every live example page" do
     live_pages = Catalog.entries.select(&:live?).map do |entry|
       Object.const_get("#{entry.slug.tr('-', '_').camelize}Page")
     end
@@ -79,7 +79,7 @@ RSpec.describe ExamplePage do
     expect(live_pages).not_to be_empty
     live_pages.each do |page_class|
       described = page_class.described_keys.sort
-      classes = page_class.example_classes.map { |klass| page_class.key_for(klass) }.sort
+      classes = [*page_class.example_classes, page_class].map { |klass| page_class.key_for(klass) }.sort
 
       expect(described).to eq(classes), "#{page_class} describes #{described.inspect}, not #{classes.inspect}"
     end

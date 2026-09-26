@@ -3,7 +3,9 @@
 class ClickToEditPage < ExamplePage
   describes contacts: "where a visitor's contact is kept, standing in for your database",
             contact_card: "the contact at rest, and the button that opens it for editing",
-            contact_editor: "the form in its editable expanded view"
+            contact_editor: "the form in its editable expanded view",
+            click_to_edit_page: "a page to put it on (yours needs only the contact_card call; " \
+                                "the rest is this walkthrough)"
 
   def walkthrough
     introduction

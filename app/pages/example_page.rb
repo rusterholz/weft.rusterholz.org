@@ -42,7 +42,7 @@ class ExamplePage < ApplicationPage
     h1 entry.title
     reset_example slug: entry.slug
     walkthrough
-    under_the_hood
+    pieces_you_need
     pagination
   end
 
@@ -70,13 +70,14 @@ class ExamplePage < ApplicationPage
   # the reader is looking at rather than to this one.
   def page_source_path = repo_path(self.class.instance_method(:walkthrough).source_location.first)
 
-  # The pieces you need, in reading order: each named and described, its whole
-  # file folded away under its path, and the file on GitHub.
-  def under_the_hood
-    h2 "Under the Hood"
+  # The pieces you need, in reading order and then this page: each named and
+  # described, its whole file folded away under its path, and the file on GitHub.
+  def pieces_you_need
+    h2 "Pieces You Need"
     ul class: "pieces" do
-      li { a "This Page", href: source_url(page_source_path) }
-      example_sources.each { |klass, path| li(class: "piece") { piece(klass, path) } }
+      example_sources.merge(self.class => page_source_path).each do |klass, path|
+        li(class: "piece") { piece(klass, path) }
+      end
     end
   end
 
@@ -117,8 +118,8 @@ class ExamplePage < ApplicationPage
     # page declares a `title` of its own.
     def title_declaration = "#{entry.title} · #{ApplicationPage::SITE_NAME}"
 
-    # Each of the example's classes in a phrase, so "which piece do I want?" is
-    # answerable from the list. On the page, since the example's files are the code.
+    # Each of the example's classes, and the page, in a phrase: "which piece do
+    # I want?" answered on the page, since the example's files are the code.
     def describes(**phrases) = @phrases = phrases
 
     def described_keys = (@phrases || {}).keys
