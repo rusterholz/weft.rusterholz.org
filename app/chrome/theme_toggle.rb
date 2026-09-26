@@ -20,6 +20,9 @@ class ThemeToggle < Weft::Component
   receives :theme
   param :return_to
   receives :return_to
+  derives(:icon) do |p|
+    ICONS.fetch(p.theme) { raise Weft::NotFound, "No theme #{p.theme.inspect}" }
+  end
 
   performs :choose do |params|
     Theme.choose(params.theme)
@@ -39,6 +42,6 @@ class ThemeToggle < Weft::Component
 
   def icon
     text_node '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' \
-              "stroke-width=\"2\" aria-hidden=\"true\">#{ICONS.fetch(params.theme)}</svg>".html_safe
+              "stroke-width=\"2\" aria-hidden=\"true\">#{params.icon}</svg>".html_safe
   end
 end

@@ -2,13 +2,20 @@
 
 require "nokogiri"
 
+# Picker only ever renders as a subclass that supplies its list, so the
+# behavior is driven through the one the site has, handed other lists.
 RSpec.describe Picker do
   def rendered(options)
     html = Weft::Context.new({}, nil, wire_params: {}) do
-      picker options: options, current: options.first.first, label: "Version",
-             disabled_reason: "Nothing else to pick."
+      version_picker options: options, current: options.first.first, label: "Version",
+                     disabled_reason: "Nothing else to pick."
     end.to_s
     Nokogiri::HTML5.fragment(html)
+  end
+
+  it "is never served on its own, where it would have no list to show" do
+    expect(described_class).not_to be_routable
+    expect(VersionPicker).to be_routable
   end
 
   context "with one entry" do
@@ -45,7 +52,7 @@ RSpec.describe Picker do
     it "goes as soon as the choice changes, and has a button for when htmx is not running" do
       form = two.at("form")
 
-      expect(form["hx-get"]).to eq("/_components/picker/go")
+      expect(form["hx-get"]).to eq("/_components/version_picker/go")
       expect(form["hx-trigger"]).to eq("change")
       expect(form.at("noscript")).not_to be_nil
     end

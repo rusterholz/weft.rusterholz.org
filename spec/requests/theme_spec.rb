@@ -38,6 +38,17 @@ RSpec.describe "choosing a theme" do
     expect(last_response.headers["location"]).to end_with("example.org/")
   end
 
+  it "answers the toggle fetched on its own sanely, whatever it is asked for" do
+    get "/_components/theme_toggle"
+    expect(last_response.status).to eq(404)
+
+    get "/_components/theme_toggle", theme: "sepia"
+    expect(last_response.status).to eq(404)
+
+    get "/_components/theme_toggle", theme: "dark"
+    expect(last_response.status).to eq(200)
+  end
+
   it "ignores a theme it does not offer" do
     post choose, theme: "sepia", return_to: "/"
 

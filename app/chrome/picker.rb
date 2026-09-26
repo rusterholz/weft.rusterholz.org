@@ -9,6 +9,7 @@
 # redirect, and without htmx the button inside <noscript> sends it instead.
 class Picker < Weft::Component
   builder_method :picker
+  abstract! # a subclass has the list; on its own there is nothing to serve
 
   receives :options
   receives :current

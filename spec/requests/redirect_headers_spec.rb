@@ -11,7 +11,7 @@ RSpec.describe "redirects built from a request's own values" do
 
   it "never carry a control character, from the picker" do
     payloads.each do |to|
-      get "/_components/picker/go", to: to
+      get "/_components/version_picker/go", to: to
 
       expect(redirect_targets.join).not_to match(/[\x00-\x1f\x7f]/), to.inspect
     end
