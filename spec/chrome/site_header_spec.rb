@@ -19,6 +19,10 @@ RSpec.describe SiteHeader do
                            { "theme" => "light", "return_to" => "/examples/click-to-edit" }])
   end
 
+  it "carries the version picker" do
+    expect(header.at(".widgets #version-picker select")).not_to be_nil
+  end
+
   it "links weft on GitHub" do
     expect(header.at(".widgets a")["href"]).to eq(WEFT_REPO_URL)
   end

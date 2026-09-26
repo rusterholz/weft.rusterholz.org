@@ -14,6 +14,7 @@ class SiteHeader < Weft::Component
     super(attributes.merge(class: "site-header"))
     crumbs trail: params.trail
     div class: "widgets" do
+      version_picker
       Theme::CHOICES.reverse_each { |theme| theme_toggle theme: theme, return_to: params.return_to }
       a "GitHub", href: WEFT_REPO_URL, class: "flat"
     end

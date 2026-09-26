@@ -21,11 +21,9 @@ class ThemeToggle < Weft::Component
   param :return_to
   receives :return_to
 
-  # Only a path on this site: a return address is a redirect anyone can write.
   performs :choose do |params|
     Theme.choose(params.theme)
-    path = params.return_to.to_s
-    Weft.redirect(path.match?(%r{\A/(?![/\\])}) ? path : "/")
+    Weft.redirect(LocalPath.or_home(params.return_to))
   end
 
   def build(attributes = {})

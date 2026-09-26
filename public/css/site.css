@@ -133,6 +133,23 @@ code, pre, kbd { font-family: var(--face-mono); }
 .site-header .widgets { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .site-header .widgets a.flat { font-weight: 500; }
 .site-header .widgets form { margin: 0; }
+.picker { position: relative; display: inline-flex; align-items: center; margin: 0; }
+.picker::after { content: "▾"; position: absolute; right: 8px; font-size: 11px; color: var(--muted); pointer-events: none; }
+.picker select {
+  appearance: none;
+  padding: 6px 22px 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--face-mono);
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.picker select:hover { background-color: var(--tint); }
+/* The wrapper's title is the explanation, so the pointer has to reach it. */
+.picker select:disabled { pointer-events: none; opacity: 1; color: var(--ink); }
+.picker noscript .flat { font-size: 13px; }
 .flat.icon { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; }
 
 /* Show the toggle that changes something: the other theme from the one in force. */
