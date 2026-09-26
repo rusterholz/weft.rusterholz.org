@@ -19,6 +19,10 @@ RSpec.describe ApplicationPage do
       Nokogiri::HTML5(page_class.render)
     end
 
+    it "says what language it is in" do
+      expect(rendered.at("html")["lang"]).to eq("en")
+    end
+
     it "loads the site's stylesheet from this origin" do
       expect(rendered.css("link[rel=stylesheet]").map { |link| link["href"] }).to eq(["/static/css/site.css"])
     end

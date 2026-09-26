@@ -23,6 +23,13 @@ RSpec.describe Crumbs do
     expect(here.text).to eq("Click to Edit")
   end
 
+  it "claims no page as current when the trail is the wordmark alone" do
+    alone = rendered([["weft", "/"]])
+
+    expect(alone.at("a.wordmark")["href"]).to eq("/")
+    expect(alone.at("[aria-current]")).to be_nil
+  end
+
   it "leads with the wordmark" do
     expect(rendered(trail).at("nav a.wordmark").text).to eq("weft")
   end

@@ -19,7 +19,7 @@ class ApplicationPage < Weft::Page
   adds_children_to :@content
 
   def build(attributes = {})
-    super(attributes.merge("data-theme": Theme.current).compact)
+    super(attributes.merge(lang: "en", "data-theme": Theme.current).compact)
     site_header trail: trail, return_to: return_to
     @content = main(class: "single-column")
     within(@content.parent) { bench source_path: page_source_path }

@@ -17,6 +17,6 @@ class Crumbs < Weft::Component
       a label, href: href, class: ("wordmark" if index.zero?)
       span "/", class: "crumb-divider", "aria-hidden": "true"
     end
-    path.empty? ? a(here, href: "/", class: "wordmark", "aria-current": "page") : span(here, "aria-current": "page")
+    path.empty? ? a(here, href: "/", class: "wordmark") : span(here, "aria-current": "page")
   end
 end
