@@ -19,6 +19,7 @@ class ExamplePage < ApplicationPage
 
   def build(attributes = {})
     super
+    @content.remove_class("single-column")
     @content.add_class("example-layout")
     examples_bar current: entry.slug
     shown = article { article_body }
