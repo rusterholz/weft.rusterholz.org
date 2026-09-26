@@ -30,7 +30,10 @@
   --bench-height: 52px;
 
   --col-gap: 48px;
-  --gutter: 80px;
+  /* 80px from a 1280px window; below that each side gives up half of every pixel
+     lost, down to 24px at 1168px, so the grid holds at 1120px through that range
+     and never widens as the window narrows. */
+  --gutter: clamp(24px, 24px + (100vw - 1168px) / 2, 80px);
 
   --ground: #EEF0EA;
   --ink: #1B2733;
@@ -213,10 +216,10 @@ code, pre, kbd { font-family: var(--face-mono); }
   :root:not([data-theme]) #theme-toggle-light { display: block; }
 }
 
-/* The columns are 176 / 574 / 274 where the grid is 1120px wide, at a 1280px
-   window, and share every pixel past that: the bar a little, the article twice
-   what the margin gets, so however wide the window the margin stays about half
-   the article. */
+/* The columns are 176 / 574 / 274 where the grid is 1120px wide, at any window
+   from 1168px to 1280px, and share every pixel past that: the bar a little, the
+   article twice what the margin gets, so however wide the window the margin
+   stays about half the article. */
 main {
   --columns:
     calc(176px + (100% - 1120px) * 0.06)
@@ -458,9 +461,6 @@ article form button[hx-get] { align-self: flex-start; font-size: 15px; color: va
 article div > strong { display: inline-block; width: 140px; font-size: 15px; font-weight: 400; color: var(--muted); }
 
 /* Narrower than the three columns: one column until the mobile layout lands. */
-@media (max-width: 1279px) {
-  :root { --gutter: 24px; }
-}
 @media (max-width: 1167px) {
   main.example-layout, main.single-column { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
   main.single-column > * { grid-column: 1; }
