@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # A dropdown over any collection of destinations, each a label and a path. With
-# fewer than two it disables itself and says why, so the control is honest
-# rather than absent. Subclasses supply the collection (VersionPicker), so a call
-# site never has to know where the list comes from.
+# fewer than two it is disabled, with a tooltip saying why. Subclasses supply the
+# collection (VersionPicker), so a call site never has to know where the list
+# comes from.
 #
 # Choosing navigates: htmx sends the form on change and weft answers with a
 # redirect, and without htmx the button inside <noscript> sends it instead.

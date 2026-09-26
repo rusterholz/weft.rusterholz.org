@@ -238,6 +238,10 @@ The full list of weft internals this site overrides, to re-check at every pin mo
   component's element from its class and first param, which would give every code
   block and every callout the same id and put the typed search into an id. A
   release that stops asking this method would bring the duplicates back.
+- The same rule, relied on rather than overridden, in `ThemeToggle`: the
+  stylesheet shows one of the two toggles by the ids weft derives for them,
+  `#theme-toggle-dark` and `#theme-toggle-light`. A release that names elements
+  differently leaves both toggles showing, or neither.
 
 When a page needs to tell the reader something prominent, such as a name a later
 weft changes, or a rough edge they will meet on this version, it wraps the prose

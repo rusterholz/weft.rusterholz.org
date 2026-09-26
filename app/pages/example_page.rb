@@ -90,7 +90,7 @@ class ExamplePage < ApplicationPage
     a "View on GitHub", href: source_url(path)
   end
 
-  # Previous and next walk the running examples; the way back to all of them is always there.
+  # Previous and next walk the running examples; the first one's "previous" is the list of all of them.
   def pagination
     previous, following = Catalog.neighbors_of(entry.slug)
     nav "aria-label": "Pagination", class: "pagination" do

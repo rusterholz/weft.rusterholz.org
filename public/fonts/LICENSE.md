@@ -3,7 +3,10 @@
 Every file in this directory is licensed under the
 [SIL Open Font License 1.1](https://openfontlicense.org), which permits
 redistribution as part of a website. They are served from this site's own
-origin, so a reader receives them over the connection already open.
+origin, so a reader receives them over the connection already open. The license
+travels with them, each family's copy as its project publishes it:
+[`OFL-Spectral.txt`](OFL-Spectral.txt) and
+[`OFL-SplineSansMono.txt`](OFL-SplineSansMono.txt).
 
 `bin/fetch-fonts` downloads them and records the exact request for each one:
 the `latin` subset of a single weight, as Google Fonts serves it.

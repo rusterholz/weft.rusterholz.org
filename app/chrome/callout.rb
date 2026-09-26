@@ -2,7 +2,7 @@
 
 # The one prominent note an article can carry: a name weft changes later, or a
 # rough edge an adopter will meet. Tint tone on a copper rule, the grammar of the
-# highlighted declaration in the margin. It classifies nothing; the page's words do.
+# highlighted declaration in the margin, around whatever the page writes in it.
 class Callout < Weft::Component
   builder_method :callout
 
