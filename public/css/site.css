@@ -385,8 +385,13 @@ article pre {
   line-height: 1.55;
   tab-size: 2;
 }
-article p:has(+ pre) { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
-article p:has(+ pre) code { font-size: 13px; }
+.pieces { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 18px; }
+.piece .about { margin: 0; }
+.piece details { margin: 6px 0 4px; }
+.piece summary { cursor: pointer; font-family: var(--face-mono); font-size: 13px; color: var(--muted); }
+.piece summary:hover { color: var(--ink); }
+.piece details[open] pre { margin-top: 12px; }
+.piece > a { font-size: 15px; }
 article :not(pre) > code { font-size: 0.8em; }
 
 pre code { color: var(--ink); }

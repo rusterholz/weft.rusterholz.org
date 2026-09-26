@@ -316,13 +316,14 @@ to them.
 ### Showing the Code
 
 `CodeBlock` reads one file at render time and highlights it, and every example
-goes through it, so how code is presented is one place. A page shows **one block
-per file**, labeled with the path, in the order someone reads them: the data class
-first, then the components. The gem's docs show an example as a single block
-because markdown has nowhere to put a file boundary; here the boundary is part of
-the lesson.
+goes through it, so how code is presented is one place. A page's "Under the Hood"
+lists **one piece per file**, in the order someone reads them: the data class
+first, then the components. Each piece names its class and what it is for, holds
+the whole file folded away under its path, and links the file on GitHub. The
+gem's docs show an example as a single block because markdown has nowhere to put
+a file boundary; here the boundary is part of the lesson.
 
-Which files those are is asked of the classes, not of the directory, so the blocks
+Which files those are is asked of the classes, not of the directory, so the pieces
 follow the code if the code moves. Two things `CodeBlock` knows that are easy to
 get wrong again:
 

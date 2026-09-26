@@ -50,43 +50,51 @@ RSpec.describe ClickToEditPage do
     expect(intro.first.text).to start_with("A read-only view of a record with an Edit button.")
   end
 
-  # Not a sample of the code: every file the example is made of, whole and
-  # unaltered, one block each. Nothing here can drift from the classes that
-  # rendered the card above it.
-  it "shows each of the example's files exactly as it is on disk, in reading order" do
-    shown = page.css("article pre").map(&:text)
+  describe "under the hood" do
+    let(:pieces) { page.css("h2:contains('Under the Hood') + ul > li.piece") }
+    let(:blob) { "https://github.com/rusterholz/weft.rusterholz.org/blob/main/" }
 
-    expect(shown).to eq(source_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
-    expect(page.css("article pre span[class]")).not_to be_empty
+    # A path answers "where is it", not "which one do I want", so each piece
+    # names the class and says what it is for.
+    it "lists the pieces of the example in reading order, each named and described" do
+      expect(pieces.map { |piece| piece.at(".about").text }).to eq(
+        ["Contacts -- where a visitor's contact is kept, standing in for your database",
+         "ContactCard -- the contact at rest, and the button that opens it for editing",
+         "ContactEditor -- the form in its editable expanded view"]
+      )
+    end
+
+    # Not a sample of the code: every file the example is made of, whole and
+    # unaltered, one per piece. Nothing here can drift from the classes that
+    # rendered the card above it.
+    it "holds each file exactly as it is on disk, highlighted" do
+      shown = pieces.map { |piece| piece.at("details pre").text }
+
+      expect(shown).to eq(source_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
+      expect(pieces.first.css("details pre span[class]")).not_to be_empty
+    end
+
+    it "keeps each file folded until asked, behind a summary naming it" do
+      expect(pieces.map { |piece| piece.at("details")["open"] }).to all(be_nil)
+      expect(pieces.map { |piece| piece.at("details > summary").text }).to eq(source_paths)
+    end
+
+    it "shows code nowhere else in the article" do
+      expect(page.css("article pre").size).to eq(page.css("article details pre").size)
+    end
+
+    it "links each piece's file, and this page's" do
+      this_page = page.at("h2:contains('Under the Hood') + ul > li:first-child a")
+
+      expect(this_page.text).to eq("This Page")
+      expect(this_page["href"]).to eq("#{blob}examples/v0.2/click_to_edit_page.rb")
+      expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(source_paths.map { |path| blob + path })
+    end
   end
 
   it "gives no two elements the same id" do
     ids = page.css("[id]").map { |element| element["id"] }
 
     expect(ids.tally.select { |_id, count| count > 1 }).to be_empty
-  end
-
-  it "labels each block with the file it read" do
-    labels = page.css("article pre").map { |pre| pre.previous_element.at("code").text.strip }
-
-    expect(labels).to eq(source_paths)
-  end
-
-  it "links the source of the page and of every file the example is made of" do
-    hrefs = page.css("h2:contains('Under the Hood') + ul a").map { |link| link["href"] }
-    blob = "https://github.com/rusterholz/weft.rusterholz.org/blob/main/"
-
-    expect(hrefs).to eq(["examples/v0.2/click_to_edit_page.rb", *source_paths].map { |path| blob + path })
-  end
-
-  # A path answers "where is it", not "which one do I want", so each link names
-  # the class and says what it is for.
-  it "names each piece of the example and says what it is" do
-    names = page.css("h2:contains('Under the Hood') + ul a").map(&:text)
-
-    expect(names).to eq(["This Page",
-                         "Contacts -- where a visitor's contact is kept, standing in for your database",
-                         "ContactCard -- the contact at rest, and the button that opens it for editing",
-                         "ContactEditor -- the form in its editable expanded view"])
   end
 end

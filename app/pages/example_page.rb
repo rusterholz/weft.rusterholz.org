@@ -37,7 +37,6 @@ class ExamplePage < ApplicationPage
   def article_body
     h1 entry.title
     walkthrough
-    example_sources.each_value { |path| code_block path: path }
     under_the_hood
     pagination
   end
@@ -66,14 +65,23 @@ class ExamplePage < ApplicationPage
   # the reader is looking at rather than to this one.
   def page_source_path = repo_path(self.class.instance_method(:walkthrough).source_location.first)
 
+  # The pieces you need, in reading order: each named and described, its whole
+  # file folded away under its path, and the file on GitHub.
   def under_the_hood
     h2 "Under the Hood"
-    ul do
+    ul class: "pieces" do
       li { a "This Page", href: source_url(page_source_path) }
-      example_sources.each do |klass, path|
-        li { a "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", href: source_url(path) }
-      end
+      example_sources.each { |klass, path| li(class: "piece") { piece(klass, path) } }
     end
+  end
+
+  def piece(klass, path)
+    para "#{klass.name.demodulize} -- #{self.class.phrase_for(klass)}", class: "about"
+    details do
+      summary path
+      code_block path: path
+    end
+    a "View on GitHub", href: source_url(path)
   end
 
   # Previous and next walk the running examples; the way back to all of them is always there.

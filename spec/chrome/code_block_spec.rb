@@ -12,8 +12,8 @@ RSpec.describe CodeBlock do
     Nokogiri::HTML5.fragment(html)
   end
 
-  it "labels the block with the path it was handed" do
-    expect(rendered(path: path).at("p > code").text).to eq(path)
+  it "is the code alone, for its call site to name" do
+    expect(rendered(path: path).at("div").element_children.map(&:name)).to eq(%w[pre])
   end
 
   it "shows the file exactly as it is on disk" do
