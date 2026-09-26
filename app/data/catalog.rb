@@ -54,6 +54,12 @@ class Catalog
       ENTRIES.find { |entry| entry.slug == slug } || raise(Unknown, "No example with the slug #{slug.inspect}")
     end
 
+    # Entries whose title or summary holds the text, ignoring case.
+    def matching(text)
+      needle = text.downcase
+      ENTRIES.select { |entry| "#{entry.title} #{entry.summary}".downcase.include?(needle) }
+    end
+
     # The entries before and after this one, nil at either end: what a page's
     # previous and next links walk, which is the running examples only.
     def neighbors_of(slug, among: ENTRIES.select(&:live?))

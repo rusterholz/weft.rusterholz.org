@@ -133,6 +133,52 @@ code, pre, kbd { font-family: var(--face-mono); }
 .site-header .widgets { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .site-header .widgets a.flat { font-weight: 500; }
 .site-header .widgets form { margin: 0; }
+.site-search { position: relative; margin-right: 8px; }
+.site-search .pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  color: var(--muted);
+}
+.site-search input {
+  width: 140px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--ink);
+}
+.site-search input:focus { outline: none; }
+.site-search .pill:focus-within { border-color: var(--prussian); }
+
+/* Open while the search has focus or the pointer is over it, and only with
+   something in it. Hover counts because Safari does not focus a link on click,
+   so focus alone would close the panel before the click lands. */
+.search-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 2;
+  width: 340px;
+  padding: 8px;
+  background: var(--ground);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(27, 39, 51, 0.12);
+  font-size: 15px;
+}
+.site-search:is(:focus-within, :hover) .search-panel:has(li, p) { display: block; }
+.search-panel ul { margin: 0; padding: 0; list-style: none; }
+.search-panel :is(a, .coming) { display: block; padding: 6px 8px; border-radius: 4px; text-decoration: none; }
+.search-panel a:hover, .search-panel a:focus-visible { background: var(--tint); }
+.search-panel .title { display: block; color: var(--ink); }
+.search-panel .summary { display: block; font-size: 13px; color: var(--muted); }
+.search-panel .coming .title { color: var(--muted); }
+.search-panel p { margin: 6px 8px; color: var(--muted); }
+
 .picker { position: relative; display: inline-flex; align-items: center; margin: 0; }
 .picker::after { content: "▾"; position: absolute; right: 8px; font-size: 11px; color: var(--muted); pointer-events: none; }
 .picker select {
