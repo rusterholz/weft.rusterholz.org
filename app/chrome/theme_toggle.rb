@@ -32,7 +32,7 @@ class ThemeToggle < Weft::Component
   def build(attributes = {})
     super
     form(action: :choose) do
-      input type: "hidden", name: "authenticity_token", value: Current.csrf_token
+      authenticity_token
       input type: "hidden", name: "theme", value: params.theme
       input type: "hidden", name: "return_to", value: params.return_to
       button(type: "submit", class: "flat icon", "aria-label": "Switch to #{params.theme} theme") { icon }

@@ -441,15 +441,20 @@ The real secret appears for the first time at deploy, and only there.
 `Rack::Protection::AuthenticityToken` sits between the session and
 `VisitorScope`, and answers `403` to any POST without the session's CSRF token,
 before weft sees it. `VisitorScope` publishes the token as `Current.csrf_token`,
-and each form that writes carries it in one hidden field:
+and each form that writes carries it in one hidden field, rendered by the
+`AuthenticityTokenField` component:
 
 ```ruby
-input type: "hidden", name: "authenticity_token", value: Current.csrf_token
+form(action: :save) do
+  authenticity_token
+  # ...the form's own fields
+end
 ```
 
 That one field serves both transports, since htmx sends a form's fields and so
-does a plain submit. This is the recipe from weft 0.2.0's `docs/app-patterns.md`.
-A new form that writes needs the line; a GET action does not. In request specs,
+does a plain submit. This is the recipe from weft 0.2.0's `docs/app-patterns.md`,
+with its hidden input folded into a component as the guide suggests. A new form
+that writes needs the line; a GET action does not. In request specs,
 `post_form` fetches a token the way a browser would and posts with it.
 
 ### A Secure Cookie Needs a Truthful Proxy

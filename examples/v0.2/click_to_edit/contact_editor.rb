@@ -26,7 +26,7 @@ module ClickToEdit
     def build(attributes = {})
       super
       form(action: :save) do
-        input(type: "hidden", name: "authenticity_token", value: Current.csrf_token)
+        authenticity_token
         input(type: "hidden", name: "contact_id", value: params.contact_id)
         text_field "First Name", :first_name
         text_field "Last Name", :last_name
