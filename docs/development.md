@@ -219,7 +219,9 @@ disagree about where an example starts.
 **A page declares nothing but its prose and its composition.** Its URL, heading
 and document title all come from the catalog, found from the page's own class
 name, so the two can never drift. `ExamplePage` supplies the frame and calls the
-page's `walkthrough`; a page that forgets to define one says so.
+page's `walkthrough`; a page that forgets to define one says so. The walkthrough
+wraps what it renders live in `live { ... }`, which frames it apart from the prose;
+whatever the component swaps in stays inside the frame.
 
 The URL half of that reaches into the gem: `ExamplePage` overrides
 `default_page_path`, which weft declares **private**. It is the right seam, since

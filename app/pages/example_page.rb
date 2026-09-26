@@ -34,6 +34,10 @@ class ExamplePage < ApplicationPage
 
   private
 
+  # Frames what a walkthrough renders live, setting it apart from the prose;
+  # whatever the live component swaps in lands inside.
+  def live(&) = div(class: "live-example", &)
+
   def article_body
     h1 entry.title
     reset_example slug: entry.slug

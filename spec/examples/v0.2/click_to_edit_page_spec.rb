@@ -32,8 +32,16 @@ RSpec.describe ClickToEditPage do
     expect(card.xpath("following::h2").first.text).to eq("How It Works")
   end
 
-  it "warns about the log line, right after the contact it comes from" do
-    callout = page.at("#click-to-edit-contact-card-1").next_element
+  # Edit swaps the editor in where the card stands, so the frame holds whichever is showing.
+  it "sets the live contact apart in a frame of its own" do
+    frame = page.at("#click-to-edit-contact-card-1").parent
+
+    expect(frame["class"]).to eq("live-example")
+    expect(frame.element_children.size).to eq(1)
+  end
+
+  it "warns about the log line, right after the live contact, outside its frame" do
+    callout = page.at(".live-example").next_element
 
     expect(callout["class"]).to eq("callout")
     expect(callout.text.squish).to eq(
@@ -44,7 +52,7 @@ RSpec.describe ClickToEditPage do
   end
 
   it "introduces the example in prose before the contact" do
-    intro = page.at("#click-to-edit-contact-card-1").xpath("preceding-sibling::p")
+    intro = page.at(".live-example").xpath("preceding-sibling::p")
 
     expect(intro.size).to eq(3)
     expect(intro.first.text).to start_with("A read-only view of a record with an Edit button.")

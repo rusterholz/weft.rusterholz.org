@@ -7,7 +7,7 @@ class ClickToEditPage < ExamplePage
 
   def walkthrough
     introduction
-    contact_card contact_id: "1"
+    live { contact_card contact_id: "1" }
     log_warning
     how_it_works
     worth_noticing
