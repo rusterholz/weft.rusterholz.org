@@ -12,11 +12,18 @@ class Crumbs < Weft::Component
 
   def build(attributes = {})
     super(attributes.merge("aria-label": "Breadcrumb"))
-    *path, (here,) = params.trail
-    path.each_with_index do |(label, href), index|
+    earlier_steps = params.trail[0...-1]
+    current_label = params.trail.last.first
+
+    earlier_steps.each_with_index do |(label, href), index|
       a label, href: href, class: ("wordmark" if index.zero?)
       span "/", class: "crumb-divider", "aria-hidden": "true"
     end
-    path.empty? ? a(here, href: "/", class: "wordmark") : span(here, "aria-current": "page")
+
+    if earlier_steps.empty?
+      a current_label, href: "/", class: "wordmark"
+    else
+      span current_label, "aria-current": "page"
+    end
   end
 end
