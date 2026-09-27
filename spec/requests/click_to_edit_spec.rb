@@ -5,8 +5,8 @@ RSpec.describe "the Click to Edit example" do
   let(:editor_path) { "/_components/click_to_edit/contact_editor" }
 
   def save(**overrides)
-    post "#{editor_path}/save",
-         { contact_id: "1", first_name: "Joseph", last_name: "Blow", email: "joe@blow.com" }.merge(overrides)
+    post_form "#{editor_path}/save",
+              { contact_id: "1", first_name: "Joseph", last_name: "Blow", email: "joe@blow.com" }.merge(overrides)
   end
 
   it "serves the example at the slug weft's own docs use" do
@@ -44,10 +44,10 @@ RSpec.describe "the Click to Edit example" do
 
   # Edit and Cancel change nothing, so they are GETs; only saving is a POST.
   it "answers Edit and Cancel only as GETs" do
-    post "#{card_path}/edit", contact_id: "1"
+    post_form "#{card_path}/edit", contact_id: "1"
     expect(last_response.status).to eq(404)
 
-    post "#{editor_path}/cancel", contact_id: "1"
+    post_form "#{editor_path}/cancel", contact_id: "1"
     expect(last_response.status).to eq(404)
   end
 
@@ -92,7 +92,7 @@ RSpec.describe "the Click to Edit example" do
   it "leaves a field alone when the form does not send it" do
     get "/examples/click-to-edit"
 
-    post "#{editor_path}/save", contact_id: "1", first_name: "Joseph"
+    post_form "#{editor_path}/save", contact_id: "1", first_name: "Joseph"
 
     expect(last_response.body).to include("Joseph")
     expect(last_response.body).to include("Blow")

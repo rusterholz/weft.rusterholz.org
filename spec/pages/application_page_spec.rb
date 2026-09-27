@@ -3,6 +3,70 @@
 require "nokogiri"
 
 RSpec.describe ApplicationPage do
+  describe "the frame every page renders in" do
+    let(:page_class) do
+      Class.new(described_class) do
+        abstract!
+        def build(attributes = {})
+          super
+          h1 "The Page Itself"
+        end
+      end
+    end
+
+    def rendered(session: {})
+      Current.request = Rack::Request.new(Rack::MockRequest.env_for("/", "rack.session" => session))
+      Nokogiri::HTML5(page_class.render)
+    end
+
+    it "says what language it is in" do
+      expect(rendered.at("html")["lang"]).to eq("en")
+    end
+
+    it "loads the site's stylesheet from this origin" do
+      expect(rendered.css("link[rel=stylesheet]").map { |link| link["href"] }).to eq(["/static/css/site.css"])
+    end
+
+    it "puts the header, then the page's own content, then the bench" do
+      body = rendered.at("body")
+
+      expect(body.element_children.map(&:name)).to eq(%w[header main footer])
+      expect(body.at("main > h1").text).to eq("The Page Itself")
+    end
+
+    it "leaves the theme to the visitor's system until they choose one" do
+      expect(rendered.at("html")["data-theme"]).to be_nil
+    end
+
+    it "wears the theme the visitor chose" do
+      expect(rendered(session: { "theme" => "dark" }).at("html")["data-theme"]).to eq("dark")
+    end
+
+    it "ignores a theme it does not know" do
+      expect(rendered(session: { "theme" => "sepia" }).at("html")["data-theme"]).to be_nil
+    end
+
+    def return_to_after(method, path)
+      Current.request = Rack::Request.new(Rack::MockRequest.env_for(path, method: method, "rack.session" => {}))
+      Nokogiri::HTML5(page_class.render).at("#theme-toggle-dark input[name=return_to]")["value"]
+    end
+
+    it "brings a theme choice back to the page it was made on" do
+      expect(return_to_after("GET", "/examples/click-to-edit?x=1")).to eq("/examples/click-to-edit?x=1")
+    end
+
+    # A page answering a POST sits at the action's address, which is no page to come back to.
+    it "brings a theme choice made on a page answering a POST back home" do
+      expect(return_to_after("POST", "/_components/click_to_edit/contact_editor/save")).to eq("/")
+    end
+
+    it "opens the hood on the page's own file" do
+      hood = rendered.css("footer a").find { |link| link.text.start_with?("Open the Hood") }
+
+      expect(hood.text).to eq("Open the Hood: spec/pages/application_page_spec.rb")
+    end
+  end
+
   describe "#prose" do
     def paragraphs_of(text)
       page = Class.new(described_class) do
@@ -12,7 +76,7 @@ RSpec.describe ApplicationPage do
           prose text
         end
       end
-      Nokogiri::HTML5(page.render).css("body > p").map(&:text)
+      Nokogiri::HTML5(page.render).css("main > p").map(&:text)
     end
 
     it "makes one paragraph of each chunk between blank lines" do

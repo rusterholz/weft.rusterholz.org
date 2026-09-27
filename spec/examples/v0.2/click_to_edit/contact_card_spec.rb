@@ -21,7 +21,7 @@ RSpec.describe ClickToEdit::ContactCard do
   end
 
   it "shows an edit the visitor has saved" do
-    ClickToEdit::Contacts.update("1", first_name: "Joseph")
+    ClickToEdit::ContactData.update("1", first_name: "Joseph")
 
     expect(shown_fields["First Name:"]).to eq("Joseph")
   end

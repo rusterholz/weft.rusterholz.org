@@ -3,7 +3,7 @@
 module ClickToEdit
   # Stands in for a data layer, the way the gem's own docs use a constant. Here it
   # is the visitor's own copy, which expires; the verbs are the same either way.
-  class Contacts
+  class ContactData
     SEED = {
       "1" => { first_name: "Joe", last_name: "Blow", email: "joe@blow.com" }
     }.freeze
@@ -12,6 +12,8 @@ module ClickToEdit
       def all = store.fetch
 
       def find(id) = contact(all, id)
+
+      def reset! = store.reset!
 
       # A form that leaves a field out means "unchanged" rather than "blank",
       # which is compact's job. Hash#slice guards nothing a visitor can reach,

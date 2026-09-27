@@ -2,7 +2,7 @@
 
 require "securerandom"
 
-RSpec.describe ClickToEdit::Contacts do
+RSpec.describe ClickToEdit::ContactData do
   before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   it "finds a contact as it was seeded" do
@@ -13,6 +13,14 @@ RSpec.describe ClickToEdit::Contacts do
     described_class.update("1", first_name: "Joseph")
 
     expect(described_class.find("1")).to include(first_name: "Joseph", last_name: "Blow")
+  end
+
+  it "goes back to the seed when reset" do
+    described_class.update("1", first_name: "Joseph")
+
+    described_class.reset!
+
+    expect(described_class.find("1")).to include(first_name: "Joe")
   end
 
   it "reads a missing attribute as unchanged, not blank" do

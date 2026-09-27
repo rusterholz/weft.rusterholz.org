@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/string/filters"
 require "nokogiri"
 require "securerandom"
 
@@ -9,7 +10,7 @@ RSpec.describe ClickToEditPage do
   let(:page) { Nokogiri::HTML5(described_class.render) }
   # In reading order: the data class, then the components.
   let(:source_paths) do
-    %w[contacts contact_card contact_editor].map { |stem| "examples/v0.2/click_to_edit/#{stem}.rb" }
+    %w[contact_data contact_card contact_editor].map { |stem| "examples/v0.2/click_to_edit/#{stem}.rb" }
   end
 
   it "takes its heading and its title from the catalog" do
@@ -18,11 +19,11 @@ RSpec.describe ClickToEditPage do
   end
 
   it "frames the walkthrough between the heading and the source" do
-    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Under the Hood"])
+    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Pieces You Need"])
   end
 
   it "embeds the visitor's own contact, live, ahead of the explanation" do
-    ClickToEdit::Contacts.update("1", first_name: "Joseph")
+    ClickToEdit::ContactData.update("1", first_name: "Joseph")
 
     card = page.at("#click-to-edit-contact-card-1")
 
@@ -31,44 +32,101 @@ RSpec.describe ClickToEditPage do
     expect(card.xpath("following::h2").first.text).to eq("How It Works")
   end
 
+  # Edit swaps the editor in where the card stands, so the frame holds whichever is showing.
+  it "sets the live contact apart in a frame of its own" do
+    frame = page.at("#click-to-edit-contact-card-1").parent
+
+    expect(frame["class"]).to eq("live-example")
+    expect(frame.element_children.size).to eq(1)
+  end
+
+  it "warns about the log line, right after the live contact, outside its frame" do
+    callout = page.at(".live-example").next_element
+
+    expect(callout["class"]).to eq("callout")
+    expect(callout.text.squish).to eq(
+      "If you run this example yourself, Weft logs a warning the first time you click Edit, Cancel or Save, " \
+      "and on every click in development, where classes reload. It's harmless, and Weft plans to improve " \
+      "how this case is handled."
+    )
+  end
+
   it "introduces the example in prose before the contact" do
-    intro = page.at("#click-to-edit-contact-card-1").xpath("preceding-sibling::p")
+    intro = page.at(".live-example").xpath("preceding-sibling::p")
 
     expect(intro.size).to eq(3)
     expect(intro.first.text).to start_with("A read-only view of a record with an Edit button.")
   end
 
-  # Not a sample of the code: every file the example is made of, whole and
-  # unaltered, one block each. Nothing here can drift from the classes that
-  # rendered the card above it.
-  it "shows each of the example's files exactly as it is on disk, in reading order" do
-    shown = page.css("pre").map(&:text)
+  describe "the pieces you need" do
+    let(:pieces) { page.css("h2:contains('Pieces You Need') + ul > li.piece") }
+    let(:blob) { "https://github.com/rusterholz/weft.rusterholz.org/blob/main/" }
+    # The example's files in reading order, then the page that puts it on screen.
+    let(:piece_paths) { [*source_paths, "examples/v0.2/click_to_edit_page.rb"] }
 
-    expect(shown).to eq(source_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
-    expect(page.css("pre span[class]")).not_to be_empty
+    # A path answers "where is it", not "which one do I want", so each piece
+    # names the class and says what it is for.
+    it "lists every piece in reading order, the page last, each named and described" do
+      expect(pieces.map { |piece| piece.at(".about").text }).to eq(
+        ["ContactData -- where a visitor's contact is kept, standing in for your database",
+         "ContactCard -- the contact at rest, and the button that opens it for editing",
+         "ContactEditor -- the form in its editable expanded view",
+         "ClickToEditPage -- a page to put it on (yours needs only the contact_card call; " \
+         "the rest is this walkthrough)"]
+      )
+    end
+
+    # Not a sample of the code: every file the example is made of, whole and
+    # unaltered, one per piece. Nothing here can drift from the classes that
+    # rendered the card above it.
+    it "holds each file exactly as it is on disk, highlighted" do
+      shown = pieces.map { |piece| piece.at("details pre").text }
+
+      expect(shown).to eq(piece_paths.map { |path| File.read(File.join(APP_ROOT, path)) })
+      expect(pieces.first.css("details pre span[class]")).not_to be_empty
+    end
+
+    it "keeps each file folded until asked, behind a summary naming it" do
+      expect(pieces.map { |piece| piece.at("details")["open"] }).to all(be_nil)
+      expect(pieces.map { |piece| piece.at("details > summary").text }).to eq(piece_paths)
+    end
+
+    it "shows code nowhere else in the article" do
+      expect(page.css("article pre").size).to eq(page.css("article details pre").size)
+    end
+
+    it "links each piece's file on GitHub" do
+      expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(piece_paths.map { |path| blob + path })
+    end
+
+    describe "the glue after them" do
+      let(:items) { page.css("h2:contains('Pieces You Need') + ul > li") }
+      let(:glue) { items.last }
+      let(:helpers) { glue.css("ul > li.piece") }
+      let(:path) { "app/chrome/authenticity_token_field.rb" }
+
+      it "comes last, after the page, under its own label" do
+        expect(glue["class"]).to eq("glue")
+        expect(items[-2].at(".about").text).to start_with("ClickToEditPage")
+        expect(glue.element_children.first.text).to eq(ExamplePage::GLUE)
+      end
+
+      it "lists the site's own helpers the example's files call, each shaped like a piece" do
+        expect(helpers.map { |helper| helper.at(".about").text }).to eq(
+          ["AuthenticityTokenField -- the hidden field that carries the visitor's CSRF token, " \
+           "in every form that writes"]
+        )
+        expect(helpers.first.at("details")["open"]).to be_nil
+        expect(helpers.first.at("details > summary").text).to eq(path)
+        expect(helpers.first.at("details pre").text).to eq(File.read(File.join(APP_ROOT, path)))
+        expect(helpers.first.at("a")["href"]).to eq(blob + path)
+      end
+    end
   end
 
-  it "labels each block with the file it read" do
-    labels = page.css("pre").map { |pre| pre.previous_element.at("code").text.strip }
+  it "gives no two elements the same id" do
+    ids = page.css("[id]").map { |element| element["id"] }
 
-    expect(labels).to eq(source_paths)
-  end
-
-  it "links the source of the page and of every file the example is made of" do
-    hrefs = page.css("h2:contains('Under the Hood') + ul a").map { |link| link["href"] }
-    blob = "https://github.com/rusterholz/weft.rusterholz.org/blob/main/"
-
-    expect(hrefs).to eq(["examples/v0.2/click_to_edit_page.rb", *source_paths].map { |path| blob + path })
-  end
-
-  # A path answers "where is it", not "which one do I want", so each link names
-  # the class and says what it is for.
-  it "names each piece of the example and says what it is" do
-    names = page.css("h2:contains('Under the Hood') + ul a").map(&:text)
-
-    expect(names).to eq(["This Page",
-                         "Contacts -- where a visitor's contact is kept, standing in for your database",
-                         "ContactCard -- the contact at rest, and the button that opens it for editing",
-                         "ContactEditor -- the form in its editable expanded view"])
+    expect(ids.tally.select { |_id, count| count > 1 }).to be_empty
   end
 end
