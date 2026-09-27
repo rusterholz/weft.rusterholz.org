@@ -9,13 +9,14 @@ class ExamplesBar < Weft::Component
   builder_method :examples_bar
 
   receives :current
+  defines entries: Catalog.entries
 
   def tag_name = "nav"
 
   def build(attributes = {})
     super(attributes.merge("aria-label": "UI Examples"))
     add_class "examples-bar"
-    Catalog.entries.each { |entry| entry_for(entry) }
+    params.entries.each { |entry| entry_for(entry) }
   end
 
   private
