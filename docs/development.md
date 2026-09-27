@@ -234,10 +234,13 @@ or inlines that method takes every example page's URL with it. The neighboring
 The full list of weft internals this site overrides, to re-check at every pin move:
 
 - `default_page_path`, in `ExamplePage`: every example page's URL.
-- `weft_dom_id`, in `CodeBlock`, `Callout` and `SearchResults`: weft names a
-  component's element from its class and first param, which would give every code
-  block and every callout the same id and put the typed search into an id. A
-  release that stops asking this method would bring the duplicates back.
+- `weft_dom_id`, in `CodeBlock`, `Callout`, `SearchResults` and
+  `AuthenticityTokenField`: weft names a component's element from its class and
+  first param, which would give every code block, callout and token field the same
+  id and put the typed search into an id. A release that stops asking this method
+  would bring the duplicates back. Weft 0.3 declares both: `anonymous!` replaces
+  the `weft_dom_id = nil` overrides (`Callout`, `AuthenticityTokenField`), and
+  `identifies_by` the ones that return an id (`CodeBlock`, `SearchResults`).
 - The same rule, relied on rather than overridden, in `ThemeToggle`: the
   stylesheet shows one of the two toggles by the ids weft derives for them,
   `#theme-toggle-dark` and `#theme-toggle-light`. A release that names elements
