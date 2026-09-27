@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/string/filters"
 require "active_support/core_ext/string/output_safety"
 
 # The header's search pill. It is weft's Active Search example at work on the
@@ -10,9 +11,10 @@ require "active_support/core_ext/string/output_safety"
 class SiteSearch < Weft::Component
   builder_method :site_search
 
-  MAGNIFIER = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' \
-              'stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle>' \
-              '<path d="M20 20l-3.5-3.5"></path></svg>'
+  MAGNIFIER = <<~SVG.squish.freeze
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+  SVG
 
   def build(attributes = {})
     super
