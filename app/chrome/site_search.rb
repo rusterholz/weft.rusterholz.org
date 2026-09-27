@@ -20,6 +20,7 @@ class SiteSearch < Weft::Component
       text_node MAGNIFIER.html_safe
       input type: "search", name: "q", placeholder: "Search", autocomplete: "off",
             "aria-label": "Search the examples",
+            # One of weft's built-in presets: trigger on input, fill the target.
             live_search: SearchResults, with: {}, target: "#site-search-results"
     end
     div id: "site-search-results", class: "search-panel"

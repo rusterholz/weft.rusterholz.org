@@ -14,7 +14,7 @@ class SearchResults < Weft::Component
 
   def build(attributes = {})
     super
-    return if params.query.empty?
+    return if params.query.empty? # the wrapper still renders, empty; only its contents are skipped
 
     if params.matches.empty?
       para "No example matches \"#{params.query}\"."

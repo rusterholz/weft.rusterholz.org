@@ -9,7 +9,7 @@ class AuthenticityTokenField < Weft::Component
   builder_method :authenticity_token
   describes "the hidden field that carries the visitor's CSRF token, in every form that writes"
 
-  # Weft would give every field the one id its class name yields.
+  # No id, since weft would give every field the same one; tag_name is Arbre's hook for the element's tag.
   def weft_dom_id = nil
   def tag_name = "input"
 
