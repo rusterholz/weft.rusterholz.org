@@ -9,7 +9,7 @@ RSpec.describe Declarations do
         param :contact_id
         receives :contact_id
         derives(:contact) do |p|
-          Contacts.find(p.contact_id)
+          ContactData.find(p.contact_id)
         end
 
         transfers :edit, to: ContactEditor,
@@ -20,10 +20,10 @@ RSpec.describe Declarations do
     it "keeps a block whole, at its own indentation" do
       expect(described_class.of(ClickToEdit::ContactEditor)).to include(<<~RUBY.chomp)
         transfers :save, to: ContactCard do |params|
-          Contacts.update(params.contact_id,
-                          first_name: params.first_name,
-                          last_name: params.last_name,
-                          email: params.email)
+          ContactData.update(params.contact_id,
+                             first_name: params.first_name,
+                             last_name: params.last_name,
+                             email: params.email)
           nil
         end
       RUBY
@@ -49,7 +49,7 @@ RSpec.describe Declarations do
       html = Weft::Context.new({}, nil, wire_params: {}) do
         declarations components: [ClickToEdit::ContactCard, ClickToEdit::ContactEditor],
                      at_rest: [ClickToEdit::ContactCard],
-                     behind: { ClickToEdit::Contacts => "where a visitor's contact is kept" }
+                     behind: { ClickToEdit::ContactData => "where a visitor's contact is kept" }
       end.to_s
       Nokogiri::HTML5.fragment(html).at("aside")
     end
@@ -67,7 +67,7 @@ RSpec.describe Declarations do
     end
 
     it "closes with what the components stand on" do
-      expect(margin.element_children.last.text).to eq("Behind both: Contacts, where a visitor's contact is kept.")
+      expect(margin.element_children.last.text).to eq("Behind both: ContactData, where a visitor's contact is kept.")
     end
   end
 end

@@ -9,14 +9,14 @@ module ClickToEdit
     param :last_name
     param :email
     derives(:contact) do |p|
-      Contacts.find(p.contact_id)
+      ContactData.find(p.contact_id)
     end
 
     transfers :save, to: ContactCard do |params|
-      Contacts.update(params.contact_id,
-                      first_name: params.first_name,
-                      last_name: params.last_name,
-                      email: params.email)
+      ContactData.update(params.contact_id,
+                         first_name: params.first_name,
+                         last_name: params.last_name,
+                         email: params.email)
       nil
     end
 

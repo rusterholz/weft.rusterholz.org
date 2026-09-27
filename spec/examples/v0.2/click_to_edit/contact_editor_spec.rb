@@ -15,7 +15,7 @@ RSpec.describe ClickToEdit::ContactEditor do
   end
 
   it "fills each field from the visitor's store" do
-    ClickToEdit::Contacts.update("1", email: "joseph@blow.com")
+    ClickToEdit::ContactData.update("1", email: "joseph@blow.com")
 
     expect(field_values).to eq("first_name" => "Joe", "last_name" => "Blow", "email" => "joseph@blow.com")
   end

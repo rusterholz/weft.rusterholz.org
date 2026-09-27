@@ -18,7 +18,7 @@ RSpec.describe SiteHelper do
   end
 
   it "finds none where a file calls none" do
-    expect(described_class.used_in([example_file("contacts"), example_file("contact_card")])).to be_empty
+    expect(described_class.used_in([example_file("contact_data"), example_file("contact_card")])).to be_empty
   end
 
   it "reads the call, not a mention: a name in a string or a comment is not a use" do

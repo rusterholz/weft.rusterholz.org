@@ -2,7 +2,7 @@
 
 require "securerandom"
 
-RSpec.describe ClickToEdit::Contacts do
+RSpec.describe ClickToEdit::ContactData do
   before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   it "finds a contact as it was seeded" do

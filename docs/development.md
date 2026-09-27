@@ -139,7 +139,7 @@ documented weft version:
 
 ```
 examples/v0.2/click_to_edit_page.rb          # ClickToEditPage: prose and composition
-examples/v0.2/click_to_edit/contacts.rb      # ClickToEdit::Contacts
+examples/v0.2/click_to_edit/contact_data.rb  # ClickToEdit::ContactData
 examples/v0.2/click_to_edit/contact_card.rb  # ClickToEdit::ContactCard
 examples/v0.2/click_to_edit/contact_editor.rb
 ```
@@ -163,7 +163,7 @@ validates a single global route table. The namespace keeps them apart and gives
 each component an unsurprising route: `/_components/click_to_edit/contact_card`.
 
 **A constant that belongs to a class goes inside it.** An example's seed data is
-`ClickToEdit::Contacts::SEED`, not `ClickToEdit::SEED`, which under this rule would
+`ClickToEdit::ContactData::SEED`, not `ClickToEdit::SEED`, which under this rule would
 need a file and a name of its own. The same goes for anything else an example keeps
 beside its data.
 
@@ -195,7 +195,7 @@ the two or three verbs its components need:
 
 ```ruby
 module ClickToEdit
-  class Contacts
+  class ContactData
     SEED = { "1" => { first_name: "Joe", last_name: "Blow" } }.freeze
 
     class << self

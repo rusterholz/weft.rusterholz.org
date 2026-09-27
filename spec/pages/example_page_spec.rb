@@ -30,7 +30,7 @@ RSpec.describe ExamplePage do
 
     it "closes the margin on the example's data class, in the page's own words" do
       expect(page.at("aside").element_children.last.text).
-        to eq("Behind both: Contacts, where a visitor's contact is kept, standing in for your database.")
+        to eq("Behind both: ContactData, where a visitor's contact is kept, standing in for your database.")
     end
 
     it "offers to reset the whole example right under its title" do
@@ -77,11 +77,11 @@ RSpec.describe ExamplePage do
   # happens to answer in the right order in this process, so a page would render
   # correctly with nothing ordering it at all.
   it "puts the data class before the components, whatever order they arrive in" do
-    arriving = [ClickToEdit::ContactEditor, ClickToEdit::ContactCard, ClickToEdit::Contacts]
+    arriving = [ClickToEdit::ContactEditor, ClickToEdit::ContactCard, ClickToEdit::ContactData]
 
     ordered = described_class.in_reading_order(arriving)
 
-    expect(ordered).to eq([ClickToEdit::Contacts, ClickToEdit::ContactCard, ClickToEdit::ContactEditor])
+    expect(ordered).to eq([ClickToEdit::ContactData, ClickToEdit::ContactCard, ClickToEdit::ContactEditor])
   end
 
   it "orders components among themselves by name" do

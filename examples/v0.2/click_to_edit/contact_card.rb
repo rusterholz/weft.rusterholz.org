@@ -9,7 +9,7 @@ module ClickToEdit
     param :contact_id
     receives :contact_id
     derives(:contact) do |p|
-      Contacts.find(p.contact_id)
+      ContactData.find(p.contact_id)
     end
 
     transfers :edit, to: ContactEditor,

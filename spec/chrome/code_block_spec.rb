@@ -3,7 +3,7 @@
 require "nokogiri"
 
 RSpec.describe CodeBlock do
-  let(:path) { "examples/v0.2/click_to_edit/contacts.rb" }
+  let(:path) { "examples/v0.2/click_to_edit/contact_data.rb" }
 
   # A call site, as a page is one: `receives` values come from the caller, and
   # Component.render only speaks for the wire.
@@ -25,7 +25,7 @@ RSpec.describe CodeBlock do
   end
 
   it "takes its id from the file it shows, so a page of blocks can link each one" do
-    expect(rendered(path: path).at("div")["id"]).to eq("code-examples-v0-2-click-to-edit-contacts-rb")
+    expect(rendered(path: path).at("div")["id"]).to eq("code-examples-v0-2-click-to-edit-contact-data-rb")
   end
 
   it "refuses to render without a path" do

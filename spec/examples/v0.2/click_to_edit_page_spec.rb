@@ -10,7 +10,7 @@ RSpec.describe ClickToEditPage do
   let(:page) { Nokogiri::HTML5(described_class.render) }
   # In reading order: the data class, then the components.
   let(:source_paths) do
-    %w[contacts contact_card contact_editor].map { |stem| "examples/v0.2/click_to_edit/#{stem}.rb" }
+    %w[contact_data contact_card contact_editor].map { |stem| "examples/v0.2/click_to_edit/#{stem}.rb" }
   end
 
   it "takes its heading and its title from the catalog" do
@@ -23,7 +23,7 @@ RSpec.describe ClickToEditPage do
   end
 
   it "embeds the visitor's own contact, live, ahead of the explanation" do
-    ClickToEdit::Contacts.update("1", first_name: "Joseph")
+    ClickToEdit::ContactData.update("1", first_name: "Joseph")
 
     card = page.at("#click-to-edit-contact-card-1")
 
@@ -68,7 +68,7 @@ RSpec.describe ClickToEditPage do
     # names the class and says what it is for.
     it "lists every piece in reading order, the page last, each named and described" do
       expect(pieces.map { |piece| piece.at(".about").text }).to eq(
-        ["Contacts -- where a visitor's contact is kept, standing in for your database",
+        ["ContactData -- where a visitor's contact is kept, standing in for your database",
          "ContactCard -- the contact at rest, and the button that opens it for editing",
          "ContactEditor -- the form in its editable expanded view",
          "ClickToEditPage -- a page to put it on (yours needs only the contact_card call; " \
