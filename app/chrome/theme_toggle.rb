@@ -32,9 +32,11 @@ class ThemeToggle < Weft::Component
     ICONS.fetch(p.theme) { raise Weft::NotFound, "No theme #{p.theme.inspect}" }
   end
 
+  derives(:destination) { |p| LocalPath.or_home(p.return_to) }
+
   performs :choose do |params|
     Theme.choose(params.theme)
-    Weft.redirect(LocalPath.or_home(params.return_to))
+    Weft.redirect(params.destination)
   end
 
   def build(attributes = {})
