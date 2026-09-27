@@ -7,6 +7,7 @@ class Bench < Weft::Component
   builder_method :bench
 
   receives :source_path
+  derives(:source_href) { |p| Source.url(p.source_path) }
 
   def tag_name = "footer"
 
@@ -15,6 +16,6 @@ class Bench < Weft::Component
     add_class "bench"
     span class: "bench-request"
     a "weft #{Weft::VERSION}", href: WEFT_CHANGELOG_URL
-    a "Open the Hood: #{params.source_path}", href: Source.url(params.source_path), class: "hood"
+    a "Open the Hood: #{params.source_path}", href: params.source_href, class: "hood"
   end
 end
