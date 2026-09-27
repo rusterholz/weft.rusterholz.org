@@ -17,9 +17,10 @@ class Picker < Weft::Component
   receives :disabled_reason
 
   param :to
+  derives(:destination) { |p| LocalPath.or_home(p.to) }
 
   performs :go, method: :get do |params|
-    Weft.redirect(LocalPath.or_home(params.to))
+    Weft.redirect(params.destination)
   end
 
   def build(attributes = {})
