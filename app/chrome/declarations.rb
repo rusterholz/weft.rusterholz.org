@@ -24,7 +24,8 @@ class Declarations < Weft::Component
   def tag_name = "aside"
 
   def build(attributes = {})
-    super(attributes.merge(class: "declarations", "aria-label": "Declarations"))
+    super(attributes.merge("aria-label": "Declarations"))
+    add_class "declarations"
     span "Declarations", class: "heading"
     params.components.each { |klass| block_for(klass) }
     behind

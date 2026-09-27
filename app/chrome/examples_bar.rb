@@ -13,7 +13,8 @@ class ExamplesBar < Weft::Component
   def tag_name = "nav"
 
   def build(attributes = {})
-    super(attributes.merge(class: "examples-bar", "aria-label": "UI Examples"))
+    super(attributes.merge("aria-label": "UI Examples"))
+    add_class "examples-bar"
     Catalog.entries.each { |entry| entry_for(entry) }
   end
 

@@ -11,7 +11,8 @@ class Bench < Weft::Component
   def tag_name = "footer"
 
   def build(attributes = {})
-    super(attributes.merge(class: "bench", "aria-label": "Bench"))
+    super(attributes.merge("aria-label": "Bench"))
+    add_class "bench"
     span class: "bench-request"
     a "weft #{Weft::VERSION}", href: WEFT_CHANGELOG_URL
     a "Open the Hood: #{params.source_path}", href: Source.url(params.source_path), class: "hood"

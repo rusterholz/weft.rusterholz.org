@@ -15,7 +15,8 @@ class SiteSearch < Weft::Component
               '<path d="M20 20l-3.5-3.5"></path></svg>'
 
   def build(attributes = {})
-    super(attributes.merge(class: "site-search"))
+    super
+    add_class "site-search"
     label class: "pill" do
       text_node MAGNIFIER.html_safe
       input type: "search", name: "q", placeholder: "Search", autocomplete: "off",

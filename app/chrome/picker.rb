@@ -23,7 +23,8 @@ class Picker < Weft::Component
   end
 
   def build(attributes = {})
-    super(attributes.merge(class: "picker-host"))
+    super
+    add_class "picker-host"
     params.options.size < 2 ? disabled : live
   end
 

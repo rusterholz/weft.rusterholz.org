@@ -10,6 +10,7 @@ class Callout < Weft::Component
   def weft_dom_id = nil
 
   def build(attributes = {})
-    super(attributes.merge(class: "callout", role: "note"))
+    super(attributes.merge(role: "note"))
+    add_class "callout"
   end
 end

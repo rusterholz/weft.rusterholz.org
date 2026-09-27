@@ -11,7 +11,8 @@ class SiteHeader < Weft::Component
   def tag_name = "header"
 
   def build(attributes = {})
-    super(attributes.merge(class: "site-header"))
+    super
+    add_class "site-header"
     crumbs trail: params.trail
     div class: "widgets" do
       site_search
