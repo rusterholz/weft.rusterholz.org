@@ -28,7 +28,7 @@ module SiteData
     # Last-Modified). Fingerprinted URLs are what would justify a year, immutable.
     CACHE_CONTROL = {
       "/static/fonts/" => "private, max-age=604800", # a week
-      "/static/js/" => "private, max-age=86400" # a day: a pin move changes htmx
+      "/static/js/" => "private, max-age=86400" # a day: a pin move changes htmx, a deploy site.js
     }.freeze
     REVALIDATE = "private, no-cache" # pages carry per-visitor state and the session's CSRF token
 
