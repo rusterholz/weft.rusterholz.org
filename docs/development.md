@@ -589,8 +589,10 @@ weft's router runs already sends them.
 
 The site runs on Fly.io as the app `weft-rusterholz-org`: one machine in `dfw`,
 always on, described by `fly.toml`. It answers at
-<https://weft-rusterholz-org.fly.dev>. A custom domain comes later; when it does,
-the address changes in one place, `SITE_URL` in the deploy workflow.
+<https://weft-rusterholz-org.fly.dev>. A custom domain comes later. When it
+does, the deploy workflow's check follows its `SITE_URL`, a single line; the
+address also appears in the examples on this page and in `bin/smoke`'s usage
+comment, and the old one keeps answering, so those can follow at leisure.
 
 Visitor state lives in that machine's memory, so every deploy starts every
 visitor's examples afresh. That is expected: the state is throwaway by design.
@@ -600,10 +602,10 @@ visitor's examples afresh. That is expected: the state is throwaway by design.
 `.github/workflows/deploy.yml` waits for CI to finish on a push to `main`, and
 deploys only if it passed, building exactly the commit CI checked, and only
 while that commit is still `main`'s tip: re-running an old CI run never rolls
-production back. It runs
-`flyctl deploy --remote-only`, so Fly's builders make the image, and then runs
-`bin/smoke` against the live site. A pull request never deploys, and a deploy in
-progress is never cancelled by a newer push; the newer one waits.
+production back. It runs `flyctl deploy --remote-only`, so Fly's builders make
+the image, and then runs `bin/smoke` against the live site. A pull request never
+deploys, and a deploy in progress is never canceled by a newer push; the newer
+one waits.
 
 It needs one repository secret, `FLY_API_TOKEN`, a deploy token scoped to this
 one app. The application's own secret, `SESSION_SECRET`, lives on Fly and
