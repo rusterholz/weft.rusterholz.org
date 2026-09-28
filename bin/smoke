@@ -1,0 +1,170 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Check a running copy of the site the way a visitor uses it, over the network.
+#
+#   bin/smoke https://weft-rusterholz-org.fly.dev
+#   bin/smoke http://localhost:8080 --forwarded-https   # a container run by hand
+#
+# The deploy workflow runs it after every deploy. Standard library only, so it
+# runs from anywhere with a Ruby. The checks it makes are the failures no spec
+# can see: a proxy that hides https withholds the session cookie, and an Origin
+# that disagrees with the app's idea of its own address loses visitors' writes.
+
+require "net/http"
+require "optparse"
+require "securerandom"
+require "uri"
+
+# One visitor's walk through the site, with a cookie jar of its own.
+class Smoke
+  CARD = "/_components/click_to_edit/contact_card"
+  SAVE = "/_components/click_to_edit/contact_editor/save"
+  ASSETS = %w[/static/js/htmx.min.js /static/css/site.css /static/fonts/spectral-400.woff2].freeze
+
+  Failure = Class.new(StandardError)
+
+  def initialize(base, forwarded_https:, sha:)
+    @base = URI(base)
+    @forwarded_https = forwarded_https
+    @sha = sha
+    @cookies = {}
+  end
+
+  def run
+    check_home
+    token = check_example
+    check_assets
+    name = check_save(token)
+    check_refusals(token, name)
+    check_source_links if @sha
+    puts "all checks passed"
+  end
+
+  private
+
+  def check_home
+    response = request(:get, "/", attempts: 10)
+    expect(response.code == "200", "/ answers 200", response)
+    cookie = response.get_fields("set-cookie").to_a.find { |line| line.start_with?("weft_site_session=") }
+    expect(cookie&.downcase&.include?("secure"), "/ sets a secure session cookie", response)
+    expect(response["content-security-policy"] && response["strict-transport-security"],
+           "/ carries the content security policy and HSTS", response)
+  end
+
+  def check_example
+    response = request(:get, "/examples/click-to-edit")
+    expect(response.code == "200", "the Click to Edit page answers 200", response)
+    token = response.body[/name="authenticity_token"[^>]*value="([^"]+)"/, 1]
+    expect(token, "the page carries a CSRF token", response)
+    expect(request(:get, "#{CARD}?contact_id=1").code == "200", "the card fragment answers 200")
+    token
+  end
+
+  def check_assets
+    ASSETS.each { |path| expect(request(:get, path).code == "200", "#{path} answers 200") }
+  end
+
+  # A name no earlier run could have left, so finding it proves this run's write.
+  def check_save(token)
+    name = "Smoke-#{SecureRandom.hex(4)}"
+    response = save(name, token: token, origin: own_origin)
+    expect(response.code == "200", "a save with the token and this site's Origin answers 200", response)
+    expect(card_shows?(name), "the saved name is still there on the next request")
+    name
+  end
+
+  def check_refusals(token, name)
+    expect(save("Mallory", origin: own_origin).code == "403", "a save without the token is refused")
+    response = save("Mallory", token: token, origin: "https://evil.example")
+    expect(response.code == "403", "a save from another Origin is refused, token or not", response)
+    expect(card_shows?(name), "the refused save left the visitor's session and edit alone")
+  end
+
+  def check_source_links
+    body = request(:get, "/examples/click-to-edit").body
+    expect(body.include?("/blob/#{@sha}/"), "source links point at #{@sha}")
+  end
+
+  def save(first_name, origin:, token: nil)
+    fields = { contact_id: "1", first_name: first_name, authenticity_token: token }.compact
+    request(:post, SAVE, form: fields, headers: { "Origin" => origin, "HX-Request" => "true" }) # as htmx sends it
+  end
+
+  def card_shows?(name) = request(:get, "#{CARD}?contact_id=1").body.include?(name)
+
+  # The address the app believes it has, which is what a browser sends as Origin.
+  def own_origin
+    scheme = @forwarded_https ? "https" : @base.scheme
+    default_port = { "http" => 80, "https" => 443 }[scheme]
+    @base.port == default_port ? "#{scheme}://#{@base.host}" : "#{scheme}://#{@base.host}:#{@base.port}"
+  end
+
+  def request(verb, path, form: nil, headers: {}, attempts: 1)
+    response = with_retries(attempts) { http_request(verb, URI.join(@base, path), form, headers) }
+    remember_cookies(response)
+    response
+  end
+
+  def http_request(verb, uri, form, headers)
+    req = build_request(verb, uri, form)
+    headers.each { |name, value| req[name] = value }
+    Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 20) do |http|
+      http.request(req)
+    end
+  end
+
+  def build_request(verb, uri, form)
+    req = verb == :post ? Net::HTTP::Post.new(uri) : Net::HTTP::Get.new(uri)
+    req.set_form_data(form) if form
+    req["Cookie"] = @cookies.map { |name, value| "#{name}=#{value}" }.join("; ") if @cookies.any?
+    req["X-Forwarded-Proto"] = "https" if @forwarded_https
+    req
+  end
+
+  # A machine that has just been replaced can take a few seconds to answer.
+  def with_retries(attempts)
+    1.upto(attempts) do |attempt|
+      last = attempt == attempts
+      begin
+        response = yield
+        return response if last || response.code.to_i < 500
+      rescue SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError
+        raise if last
+      end
+      sleep 3
+    end
+  end
+
+  def remember_cookies(response)
+    response.get_fields("set-cookie").to_a.each do |line|
+      name, value = line.split(";").first.split("=", 2)
+      @cookies[name] = value
+    end
+  end
+
+  def expect(condition, claim, response = nil)
+    raise Failure, "FAIL #{claim}#{" (got #{response.code})" if response}" unless condition
+
+    puts "ok   #{claim}"
+  end
+end
+
+$stdout.sync = true # so the checks passed print before the one that failed
+
+options = { forwarded_https: false, sha: nil }
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: bin/smoke BASE_URL [--forwarded-https] [--sha SHA]"
+  opts.on("--forwarded-https", "Send X-Forwarded-Proto: https, as a TLS proxy would") do
+    options[:forwarded_https] = true
+  end
+  opts.on("--sha SHA", "Also check that source links point at this commit") { |sha| options[:sha] = sha }
+end
+parser.parse!
+abort parser.banner unless ARGV.size == 1
+
+begin
+  Smoke.new(ARGV.first, **options).run
+rescue Smoke::Failure => e
+  abort e.message
+end
