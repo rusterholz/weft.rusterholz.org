@@ -103,4 +103,15 @@ RSpec.describe ApplicationPage do
       expect(paragraphs_of("Use <b>bold</b> & friends.")).to eq(["Use <b>bold</b> & friends."])
     end
   end
+
+  # Weft's own StandardError edge renders the same page with the same status, so
+  # the request specs cannot tell the two apart; what this edge adds is that a
+  # search for a wiring error ends at a declaration saying where it goes.
+  it "recovers from the site's wiring errors on an edge of its own, for every page" do
+    [described_class, ExamplePage, ClickToEditPage].each do |page_class|
+      edge = page_class.recovery_for(SiteData::Store::NoVisitor.new)
+
+      expect(edge).to include(from: SiteData::Misassembled, with: :error_page, status: 500)
+    end
+  end
 end

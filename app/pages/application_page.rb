@@ -11,6 +11,9 @@ require "active_support/core_ext/string/filters"
 class ApplicationPage < Weft::Page
   abstract!
 
+  # The site wired wrong (see SiteData::Misassembled): the error page, as a 500.
+  recovers from: SiteData::Misassembled, with: :error_page, status: 500
+
   SITE_NAME = "weft"
 
   register_stylesheet "css/site.css"
