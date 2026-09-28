@@ -563,10 +563,17 @@ request indicators, and weft's documented examples, which this site ports, use
 
 **Nothing may sit in a shared cache.** Every response renews the session cookie,
 static files included, so a shared cache holding one would hand a visitor's
-cookie to the next. Fonts are kept privately for a year, `immutable`. Vendored
-scripts are kept for a day, because `/static/js/htmx.min.js` carries no version
-and changes when the pin moves. Pages, fragments and the stylesheet revalidate
-on every use.
+cookie to the next.
+
+**Nothing is kept long, because no URL here carries a version.** A font swapped
+under the same name reaches a returning visitor only once their copy expires, so
+fonts are kept for a week, and vendored scripts for a day, since
+`/static/js/htmx.min.js` changes whenever the pin moves. An expired copy costs
+little: static files carry `Last-Modified`, so the browser revalidates and gets a
+`304` rather than the file. Pages, fragments and the stylesheet revalidate on
+every use, and a font or script that was not found is not kept at all, so adding
+it takes effect at once. A long, `immutable` cache is what fingerprinted URLs,
+a digest in each file's name, would justify.
 
 `X-Frame-Options` and `X-XSS-Protection` are not set here: the `Rack::Protection`
 weft's router runs already sends them.

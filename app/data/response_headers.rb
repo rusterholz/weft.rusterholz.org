@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
 module SiteData
-  # Rack middleware, used first in config.ru so it wraps every response, the
-  # 403s refused in front of the session included. Adds what a browser should be
-  # told about each one: where it may load things from, to stay on https, how
-  # much to say to other sites, and how long to keep it. X-Frame-Options and
-  # X-XSS-Protection are left to the Rack::Protection weft's router runs.
+  # Rack middleware, used first in config.ru so it wraps every response, the 403s
+  # refused in front of the session included. Tells the browser where it may load
+  # from, to stay on https, what to tell other sites, and how long to keep each
+  # response. The reasoning in full: docs/development.md.
   class ResponseHeaders
-    # Every source here is something a page actually loads. Weft 0.2 writes one
-    # inline <script> of its own (htmx's responseHandling config) with no way to
-    # give it a nonce, so it is allowed by its hash; a spec renders every page
-    # and checks each inline script against this list. No 'unsafe-eval': htmx
-    # would need it for trigger filters and hx-on, and with it, any injected
-    # markup becomes script.
+    # Only what the pages load. Weft 0.2's one inline <script> (htmx's config)
+    # takes no nonce, so it is allowed by hash, checked by a spec over every page.
+    # No 'unsafe-eval': htmx wants it only for trigger filters and hx-on, and with
+    # it, injected markup becomes script.
     CONTENT_SECURITY_POLICY = [
       "default-src 'none'",
       "script-src 'self' 'sha256-thcqbt0TDLqzGDbsIMcZ6vA04lFE20xPPAHu3hb3WQ8='",
@@ -25,11 +22,13 @@ module SiteData
       "frame-ancestors 'self'" # what X-Frame-Options: SAMEORIGIN says, for browsers that read only this
     ].join("; ")
 
-    # Every response renews the session cookie, static files included, so none
-    # may sit in a shared cache: it would hand one visitor's cookie to the next.
+    # All private: every response renews the session cookie, which a shared cache
+    # would hand to the next visitor. None long: no URL carries a version, so a
+    # swapped file waits for the old copy to expire (then a cheap 304 on
+    # Last-Modified). Fingerprinted URLs are what would justify a year, immutable.
     CACHE_CONTROL = {
-      "/static/fonts/" => "private, max-age=31536000, immutable",
-      "/static/js/" => "private, max-age=86400" # htmx's URL carries no version, and a pin move changes it
+      "/static/fonts/" => "private, max-age=604800", # a week
+      "/static/js/" => "private, max-age=86400" # a day: a pin move changes htmx
     }.freeze
     REVALIDATE = "private, no-cache" # pages carry per-visitor state and the session's CSRF token
 
@@ -49,7 +48,7 @@ module SiteData
 
     private
 
-    # Only a file that was found is kept: a 404 kept for a year outlives the fix.
+    # Only a file that was found is kept: a 404 kept for a week outlives the fix.
     def cache_control(path, status)
       return REVALIDATE unless [200, 304].include?(status)
 

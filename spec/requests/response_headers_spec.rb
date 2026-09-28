@@ -44,13 +44,24 @@ RSpec.describe "response headers" do
     end
   end
 
-  it "keeps fonts a year and scripts a day, and revalidates the rest" do
+  it "keeps fonts a week and scripts a day, and revalidates the rest" do
     get "/static/fonts/spectral-400.woff2"
-    expect(last_response.headers["cache-control"]).to eq("private, max-age=31536000, immutable")
+    expect(last_response.headers["cache-control"]).to eq("private, max-age=604800")
     get "/static/js/htmx.min.js"
     expect(last_response.headers["cache-control"]).to eq("private, max-age=86400")
     get "/examples/click-to-edit"
     expect(last_response.headers["cache-control"]).to eq("private, no-cache")
+  end
+
+  # So an expired font or script costs a 304, not the file again.
+  it "answers a conditional request for a static file with a 304 that keeps its lifetime" do
+    get "/static/fonts/spectral-400.woff2"
+    last_modified = last_response.headers["last-modified"]
+
+    get "/static/fonts/spectral-400.woff2", {}, "HTTP_IF_MODIFIED_SINCE" => last_modified
+
+    expect(last_response.status).to eq(304)
+    expect(last_response.headers["cache-control"]).to eq("private, max-age=604800")
   end
 
   it "revalidates a font or script that is not there" do

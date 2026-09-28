@@ -43,9 +43,8 @@ RSpec.describe SiteData::ResponseHeaders do
   end
 
   describe "caching" do
-    it "keeps a font for a year, unchanged" do
-      expect(headers_for("/static/fonts/spectral-400.woff2")["cache-control"]).
-        to eq("private, max-age=31536000, immutable")
+    it "keeps a font for a week, since its URL carries no version either" do
+      expect(headers_for("/static/fonts/spectral-400.woff2")["cache-control"]).to eq("private, max-age=604800")
     end
 
     it "keeps a vendored script for a day, since its URL carries no version" do
@@ -58,7 +57,7 @@ RSpec.describe SiteData::ResponseHeaders do
       end
     end
 
-    # A missing file kept for a year would stay missing for a year after it is added.
+    # A missing file kept for a week would stay missing for a week after it is added.
     it "revalidates a font or script that was not found" do
       %w[/static/fonts/nope.woff2 /static/js/nope.js].each do |path|
         expect(headers_for(path, status: 404)["cache-control"]).to eq("private, no-cache"), path
@@ -67,7 +66,7 @@ RSpec.describe SiteData::ResponseHeaders do
 
     it "keeps the long lifetime on a not-modified answer" do
       expect(headers_for("/static/fonts/spectral-400.woff2", status: 304)["cache-control"]).
-        to eq("private, max-age=31536000, immutable")
+        to eq("private, max-age=604800")
     end
 
     it "leaves a cache policy the application chose alone" do
