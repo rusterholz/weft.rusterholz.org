@@ -18,9 +18,15 @@ RSpec.describe "response headers" do
     yield "fragment"
     get "/static/css/site.css"
     yield "static file"
-    post "/_components/theme_toggle/choose", theme: "dark", return_to: "/"
+    refused_write
+    yield "write refused for its token"
+    refused_write("HTTP_ORIGIN" => "https://evil.example")
+    yield "write refused for its Origin"
+  end
+
+  def refused_write(headers = {})
+    post "/_components/theme_toggle/choose", { theme: "dark", return_to: "/" }, headers
     expect(last_response.status).to eq(403)
-    yield "refused write"
   end
 
   def pages = ["/", *SiteData::Catalog.entries.select(&:live?).map(&:path), "/no-such-page"]
