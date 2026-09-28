@@ -30,6 +30,21 @@
     light(xhr.getResponseHeader(HANDLED));
   });
 
+  // A code block's Copy button: the file as shown, then "Copied" for a moment.
+  // Where the browser refuses the clipboard, the code is selected instead.
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest(".code-block .copy");
+    if (!button) return;
+
+    var code = button.closest(".code-block").querySelector("pre code");
+    navigator.clipboard.writeText(code.textContent).then(function () {
+      button.textContent = "Copied";
+      setTimeout(function () { button.textContent = "Copy"; }, 2000);
+    }, function () {
+      window.getSelection().selectAllChildren(code);
+    });
+  });
+
   // The bench's line: the last request, as the browser sent it.
   function showRequest(detail, ms) {
     var line = document.querySelector(".bench-request");

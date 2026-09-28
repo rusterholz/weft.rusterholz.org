@@ -418,6 +418,9 @@ article pre {
 .piece details[open] pre { margin-top: 12px; }
 .piece > a { font-size: 15px; }
 .glue > .pieces { margin: 12px 0 0 18px; }
+.code-block { position: relative; }
+.code-block .copy { position: absolute; top: 0; right: 0; font-size: 13px; color: var(--muted); background: var(--ground); }
+.piece details[open] .copy { top: 12px; } /* level with the first line, below the pre's margin */
 article :not(pre) > code { font-size: 0.8em; }
 
 pre code { color: var(--ink); }

@@ -610,6 +610,9 @@ status and round-trip time) and lights, in the declarations margin, whatever
 answered: the action's declaration, or the component's block when it rendered
 itself. The light stays until the next request.
 
+It also works each code block's Copy button, which copies the file as shown;
+where the browser refuses the clipboard, it selects the code instead.
+
 **This is weft not fitting the need yet.** Knowing what answered takes a hook
 weft 0.2 does not have. Its companions (`includes`) ride action responses,
 pushes and transfer arrivals, but not a plain fetch: `loads:` and every preset

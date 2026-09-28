@@ -16,7 +16,10 @@ class CodeBlock < ApplicationComponent
 
   def build(attributes = {})
     super
+    add_class "code-block"
     pre { text_node "<code>#{highlight}</code>".html_safe }
+    # The site's script does the copying, and reveals the button.
+    button "Copy", type: "button", class: "flat copy", hidden: true, "data-reveal": true
   end
 
   # Weft would give every block the one id its class name yields; a page shows several.

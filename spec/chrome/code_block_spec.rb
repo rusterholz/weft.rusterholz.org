@@ -12,8 +12,19 @@ RSpec.describe CodeBlock do
     Nokogiri::HTML5.fragment(html)
   end
 
-  it "is the code alone, for its call site to name" do
-    expect(rendered(path: path).at("div").element_children.map(&:name)).to eq(%w[pre])
+  it "is the code and a way to copy it, with no name of its own: its call site names it" do
+    expect(rendered(path: path).at("div").element_children.map(&:name)).to eq(%w[pre button])
+  end
+
+  # Copying takes the site's script, so without it the button would do nothing.
+  it "offers to copy the code, hidden until the site's script reveals it" do
+    button = rendered(path: path).at("button")
+
+    expect(button.text).to eq("Copy")
+    expect(button["type"]).to eq("button")
+    expect(button["class"].split).to include("copy")
+    expect(button).to have_attribute("hidden")
+    expect(button).to have_attribute("data-reveal")
   end
 
   it "shows the file exactly as it is on disk" do
