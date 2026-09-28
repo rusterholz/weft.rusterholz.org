@@ -31,6 +31,12 @@ COPY . .
 RUN useradd --create-home --shell /usr/sbin/nologin site && chown -R site:site /app
 USER site
 
+# The commit this image was built from, so every "open the hood" link points at
+# the code that is running. Last, because it changes on every build and would
+# otherwise invalidate the layers after it.
+ARG GIT_SHA=main
+ENV GIT_SHA=$GIT_SHA
+
 EXPOSE 8080
 
 CMD ["bundle", "exec", "puma", "--port", "8080"]
