@@ -29,7 +29,7 @@ bin/dev      # http://127.0.0.1:9393
 | --- | --- |
 | `examples/` | The examples themselves, one directory per documented Weft version |
 | `app/pages/` | The site's own pages |
-| `app/chrome/` | Site components, the parts pages are built from, on their base `ApplicationComponent` |
+| `app/chrome/` | Site components, the parts pages are built from, most on their base `ApplicationComponent` |
 | `app/data/` | `SiteData`: who a visitor is, their theme, their own expiring copy of an example's data, and the catalog |
 | `config/` | Boot: autoloading, then Weft's configuration |
 | `public/` | Static assets, served from this origin |

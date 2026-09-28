@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The base of the site's own components; the examples' stay on Weft::Component, as weft's docs write them.
+# The base of the site's own components. Code a page shows, the examples' and Glue's, stays on Weft::Component.
 class ApplicationComponent < Weft::Component
   abstract!
 

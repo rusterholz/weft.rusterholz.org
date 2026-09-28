@@ -391,9 +391,9 @@ is missing. Where they land:
   with weft's error fragment, in place, as a 500. Its target is the
   `:error_component` knob, not a page: weft answers a page target from a
   component with a redirect.
-- **In an example's component:** weft's built-in `StandardError` edge, with the
-  same fragment. The examples subclass `Weft::Component`, as weft's docs write
-  them.
+- **In an example's component, or a Glue helper's:** weft's built-in
+  `StandardError` edge, with the same fragment. Code a page shows as something
+  to copy stands on weft alone, so these subclass `Weft::Component`.
 - **Before any of those:** `SiteData::Catalog::Unknown` raises as weft first
   builds its route table, so it lands on `Weft::Page`'s built-in edge, for every
   request; `SiteData::VisitorScope::NoSession` raises in Rack, before weft, and

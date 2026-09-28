@@ -5,8 +5,16 @@ RSpec.describe ApplicationComponent do
     Weft.registry.components.select { |klass| SiteHelper.source_of(klass)&.start_with?(SiteHelper::APP) }
   end
 
-  it "is the base of every component the site defines for itself" do
-    expect(site_components - [described_class]).to all(be < described_class)
+  # Shown code stands on weft alone: a page offers Glue's helpers as code to copy.
+  def glue = site_components.select { |klass| klass.is_a?(SiteHelper) && klass.phrase }
+
+  it "is the base of every component the site defines for itself, except the ones shown as Glue" do
+    expect(site_components - [described_class] - glue).to all(be < described_class)
+  end
+
+  it "leaves Glue's components on Weft::Component" do
+    expect(glue).not_to be_empty
+    expect(glue.map(&:superclass)).to all(eq(Weft::Component))
   end
 
   it "leaves the examples' components on Weft::Component, as weft's docs write them" do
