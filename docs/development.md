@@ -615,8 +615,9 @@ itself. The light moves only to something this page's margin carries, so a
 request the chrome makes, such as the search's, shows on the bench and leaves
 the light where it was.
 
-It also works each code block's Copy button, which copies the file as shown;
-where the browser refuses the clipboard, it selects the code instead. And ⌘K,
+It also works each code block's Copy button, which copies the file as shown.
+Where the browser offers no clipboard, as on `bin/dev` reached from another
+machine over plain http, or refuses it, the button selects the code instead. And ⌘K,
 or Ctrl K off Apple's platforms, puts the cursor in the search, whose pill shows
 whichever applies.
 

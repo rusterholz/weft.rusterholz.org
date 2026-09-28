@@ -46,18 +46,20 @@
   });
 
   // A code block's Copy button: the file as shown, then "Copied" for a moment.
-  // Where the browser refuses the clipboard, the code is selected instead.
+  // Where the browser has no clipboard to offer (a page served over plain http
+  // from anywhere but this machine) or refuses it, the code is selected instead.
   document.addEventListener("click", function (event) {
     var button = event.target.closest(".code-block .copy");
     if (!button) return;
 
     var code = button.closest(".code-block").querySelector("pre code");
+    var select = function () { window.getSelection().selectAllChildren(code); };
+    if (!navigator.clipboard) return select();
+
     navigator.clipboard.writeText(code.textContent).then(function () {
       button.textContent = "Copied";
       setTimeout(function () { button.textContent = "Copy"; }, 2000);
-    }, function () {
-      window.getSelection().selectAllChildren(code);
-    });
+    }, select);
   });
 
   // The bench's line: the last request, as the browser sent it.
