@@ -504,6 +504,13 @@ with its hidden input folded into a component as the guide suggests. A new form
 that writes needs the line; a GET action does not. In request specs,
 `post_form` fetches a token the way a browser would and posts with it.
 
+Ahead of the session, `Rack::Protection::HttpOrigin` answers `403` to a write
+whose `Origin` header names another site, token or no token. Weft's router runs
+the same check further in, but its reaction there is to clear the session and
+let the write through: a visitor whose browser and this app disagree about the
+site's own address would lose their data on every save, and see no error. The
+outer check refuses first and leaves the session alone.
+
 ### A Secure Cookie Needs a Truthful Proxy
 
 In production the session cookie is marked `secure`, and rack-session takes that

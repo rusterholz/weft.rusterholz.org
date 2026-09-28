@@ -5,6 +5,8 @@ require_relative "config/environment"
 require "rack/protection"
 require "rack/session"
 
+use Rack::Protection::HttpOrigin # weft's router answers a foreign Origin by clearing the session; refuse it first
+
 # Weft ships no session handling, on purpose: identity is the application's to
 # wire, out of ordinary Rack parts, in front of the Router. This is that wiring;
 # docs/development.md covers what the secret is, why it has no fallback, and what
