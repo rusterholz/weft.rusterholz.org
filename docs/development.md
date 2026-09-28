@@ -447,7 +447,8 @@ native extension can resolve on your machine and fail there, which is exactly
 why the lockfile carries the `x86_64-linux` platform alongside your own. When
 you change the `Gemfile`, check the lockfile picked up both.
 
-There is no deploy job and there are no secrets. Deploying is separate work.
+CI needs no secrets. A green run on a push to `main` is what the deploy
+workflow waits for; see [Deploying](#deploying).
 
 A red run is a stop. Nothing here is flaky by design, so a failure means a real
 disagreement between your machine and a clean checkout on Linux.
@@ -521,11 +522,19 @@ bug. Sending `X-Forwarded-Proto: https` brings it back.
 
 That matters once something terminates TLS in front of this app, because the app
 sees plain http from the proxy and decides from the forwarded scheme. If the
-proxy does not send one, or Rack does not trust the address it came from, every
-request looks like a brand-new visit and nobody keeps anything, and every form
-post is refused with a `403`, since its token belongs to a session the cookie
-never carried back. Check it against a real request, not a local one, the first time this
-site is deployed.
+proxy does not send one, every request looks like a brand-new visit and nobody
+keeps anything, and every form post is refused with a `403`, since its token
+belongs to a session the cookie never carried back. No spec can see this, so
+`bin/smoke` checks it against the deployed site after every deploy.
+
+Rack believes forwarded headers from whoever sends them: `X-Forwarded-Proto`,
+`X-Forwarded-Host` and `Forwarded` all count, and only `request.ip` asks whether
+the sender was a trusted proxy. That is sound on Fly, where the proxy is the only
+way in and redirects plain http, and where a client that forges one of these
+headers changes only its own response. It stops being sound behind anything that
+caches responses: a forged `X-Forwarded-Host` changes the `Location` of a
+redirect, and a shared cache would serve that redirect to everyone. Put a caching
+CDN in front of this site and the forwarded host has to be pinned first.
 
 ## What Every Response Tells the Browser
 
@@ -549,7 +558,8 @@ nowhere else:
   filter needs `'unsafe-eval'` added to `script-src` in the same change.
 
 Styles allow `'unsafe-inline'`, since htmx injects a `<style>` element for its
-request indicators and examples use `style` attributes.
+request indicators, and weft's documented examples, which this site ports, use
+`style` attributes.
 
 **Nothing may sit in a shared cache.** Every response renews the session cookie,
 static files included, so a shared cache holding one would hand a visitor's
@@ -563,13 +573,71 @@ weft's router runs already sends them.
 
 ## Deploying
 
-Not yet. The site runs locally and builds into an image; putting it on the
-internet is separate work, and nothing here is wired for it.
+The site runs on Fly.io as the app `weft-rusterholz-org`: one machine in `dfw`,
+always on, described by `fly.toml`. It answers at
+<https://weft-rusterholz-org.fly.dev>. A custom domain comes later; when it does,
+the address changes in one place, `SITE_URL` in the deploy workflow.
 
-The image is the deployable unit, and it is worth running by hand when the
-Dockerfile changes:
+Visitor state lives in that machine's memory, so every deploy starts every
+visitor's examples afresh. That is expected: the state is throwaway by design.
+
+### Continuously, on Every Push to Main
+
+`.github/workflows/deploy.yml` waits for CI to finish on a push to `main`, and
+deploys only if it passed, building exactly the commit CI checked. It runs
+`flyctl deploy --remote-only`, so Fly's builders make the image, and then runs
+`bin/smoke` against the live site. A pull request never deploys, and a deploy in
+progress is never cancelled by a newer push; the newer one waits.
+
+It needs one repository secret, `FLY_API_TOKEN`, a deploy token scoped to this
+one app. The application's own secret, `SESSION_SECRET`, lives on Fly and
+nowhere else:
 
 ```bash
-docker build -t weft-site .
-docker run --rm -p 8080:8080 weft-site
+fly secrets set SESSION_SECRET=$(openssl rand -hex 64) -a weft-rusterholz-org
+```
+
+Changing it signs every visitor out, which here costs them nothing but their
+edits.
+
+### By Hand, From a Checkout
+
+```bash
+fly deploy --local-only --ha=false --build-arg GIT_SHA=$(git rev-parse HEAD)
+bin/smoke https://weft-rusterholz-org.fly.dev --sha $(git rev-parse HEAD)
+```
+
+**`--ha=false` matters.** Fly's default for a new app is two machines, and two
+machines here would be two separate memories: a visitor's edit would vanish
+whenever the proxy sent their next request to the other one. `fly.toml` asks for
+one, and both paths pass the flag so that the first deploy honors it.
+
+`--local-only` builds with your Docker rather than Fly's remote builder, which
+some networks cannot reach. Without `GIT_SHA`, "open the hood" links point at
+`main` rather than at the commit that is running.
+
+If `docker build` hangs with no output at all on macOS, the keychain credential
+helper is the usual cause. Build with an empty Docker config instead:
+
+```bash
+export DOCKER_CONFIG=$(mktemp -d); echo '{}' > "$DOCKER_CONFIG/config.json"
+fly auth token | tr -d '\n' | docker login registry.fly.io -u x --password-stdin
+```
+
+### Checking a Copy of the Site
+
+`bin/smoke` walks the site as a visitor would, and needs nothing but Ruby. It
+checks that `/` sets a secure session cookie, that the pages, a fragment and the
+static files answer, that a save carrying the token and this site's `Origin`
+persists to the next request, and that a save without the token, or from another
+`Origin`, is refused without touching the visitor's earlier edit.
+
+The image is worth running by hand when the Dockerfile or the middleware
+changes. It needs a session key of its own, and, since nothing in front of it
+terminates TLS, the smoke check has to say it is behind https:
+
+```bash
+docker build --build-arg GIT_SHA=$(git rev-parse HEAD) -t weft-site .
+docker run --rm -p 8080:8080 -e SESSION_SECRET=$(openssl rand -hex 64) weft-site
+bin/smoke http://localhost:8080 --forwarded-https   # in a second terminal
 ```

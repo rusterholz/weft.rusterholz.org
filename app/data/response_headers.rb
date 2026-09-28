@@ -16,7 +16,7 @@ module SiteData
     CONTENT_SECURITY_POLICY = [
       "default-src 'none'",
       "script-src 'self' 'sha256-thcqbt0TDLqzGDbsIMcZ6vA04lFE20xPPAHu3hb3WQ8='",
-      "style-src 'self' 'unsafe-inline'", # htmx injects its indicator styles; examples use style attributes
+      "style-src 'self' 'unsafe-inline'", # htmx injects its indicator styles; weft's examples use style attributes
       "font-src 'self'",
       "img-src 'self'",
       "connect-src 'self'", # htmx's requests, and server-sent events
