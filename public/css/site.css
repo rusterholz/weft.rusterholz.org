@@ -160,6 +160,8 @@ code, pre, kbd { font-family: var(--face-mono); }
   color: var(--ink);
 }
 .site-search input:focus { outline: none; }
+.site-search kbd { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.site-search:focus-within kbd { visibility: hidden; } /* the shortcut has done its job */
 .site-search .pill:focus-within { border-color: var(--prussian); }
 
 /* Open while the search has focus or the pointer is over it, and only with

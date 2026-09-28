@@ -30,6 +30,21 @@
     light(xhr.getResponseHeader(HANDLED));
   });
 
+  // ⌘K, or Ctrl K off Apple's platforms, puts the cursor in the search.
+  var apple = /mac|iphone|ipad/i.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform);
+  var shortcutHint = document.querySelector(".site-search kbd");
+  if (shortcutHint && !apple) shortcutHint.textContent = "Ctrl K";
+
+  document.addEventListener("keydown", function (event) {
+    var modifier = apple ? event.metaKey : event.ctrlKey;
+    if (!modifier || event.altKey || event.shiftKey || event.key.toLowerCase() !== "k") return;
+
+    var search = document.querySelector(".site-search input");
+    if (!search) return;
+    event.preventDefault();
+    search.focus();
+  });
+
   // A code block's Copy button: the file as shown, then "Copied" for a moment.
   // Where the browser refuses the clipboard, the code is selected instead.
   document.addEventListener("click", function (event) {

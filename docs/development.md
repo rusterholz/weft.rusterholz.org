@@ -611,7 +611,9 @@ answered: the action's declaration, or the component's block when it rendered
 itself. The light stays until the next request.
 
 It also works each code block's Copy button, which copies the file as shown;
-where the browser refuses the clipboard, it selects the code instead.
+where the browser refuses the clipboard, it selects the code instead. And ⌘K,
+or Ctrl K off Apple's platforms, puts the cursor in the search, whose pill shows
+whichever applies.
 
 **This is weft not fitting the need yet.** Knowing what answered takes a hook
 weft 0.2 does not have. Its companions (`includes`) ride action responses,
