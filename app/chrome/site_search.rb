@@ -7,7 +7,7 @@ require "active_support/core_ext/string/output_safety"
 # site's own catalog: `live_search:` asks SearchResults for matches as the
 # visitor types and fills the panel under the field. The panel shows while the
 # search has focus or the pointer is over it, which is how it closes without a
-# script.
+# script. The ⌘K shortcut is the site's script's, which also reveals its hint.
 class SiteSearch < ApplicationComponent
   builder_method :site_search
 
@@ -25,6 +25,7 @@ class SiteSearch < ApplicationComponent
             "aria-label": "Search the examples",
             # One of weft's built-in presets: trigger on input, fill the target.
             live_search: SearchResults, with: {}, target: "#site-search-results"
+      kbd "⌘K", hidden: true, "data-reveal": true
     end
     div id: "site-search-results", class: "search-panel"
   end

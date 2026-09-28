@@ -24,7 +24,12 @@ RSpec.describe Bench do
     expect(link["href"]).to eq("#{WEFT_REPO_URL}/blob/v#{Weft::VERSION}/CHANGELOG.md")
   end
 
-  it "keeps a place for the last request, empty until one is made" do
-    expect(bench.at(".bench-request").text).to be_empty
+  # The site's script replaces the line with each request; without the script it never would, so it stays hidden.
+  it "keeps a place for the last request, hidden until the site's script reveals it" do
+    line = bench.at(".bench-request")
+
+    expect(line.text).to eq("Your requests show here as you click.")
+    expect(line).to have_attribute("hidden")
+    expect(line).to have_attribute("data-reveal")
   end
 end

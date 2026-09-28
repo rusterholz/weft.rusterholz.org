@@ -239,7 +239,8 @@ public surface, so **re-verify it whenever the pin moves**: a release that renam
 or inlines that method takes every example page's URL with it. The neighboring
 `title_declaration` override is public API and needs no such care.
 
-The full list of weft internals this site overrides, to re-check at every pin move:
+The full list of weft internals this site overrides or relies on, to re-check at
+every pin move:
 
 - `default_page_path`, in `ExamplePage`: every example page's URL.
 - `weft_dom_id`, in `CodeBlock`, `Callout`, `SearchResults` and
@@ -253,6 +254,13 @@ The full list of weft internals this site overrides, to re-check at every pin mo
   stylesheet shows one of the two toggles by the ids weft derives for them,
   `#theme-toggle-dark` and `#theme-toggle-light`. A release that names elements
   differently leaves both toggles showing, or neither.
+- The router's walk from a path to the component and action that answer it,
+  which weft 0.2 keeps private. `SiteData::HandledBy` repeats it through the
+  registry's public API, on the path as the router sees it (cleaned by
+  Rack::Protection's path-traversal guard, then percent-decoded as Sinatra's
+  patterns do), to name what answered each request, in the
+  `Weft-Site-Handled` header the bench and the margin read. A release that walks
+  differently makes the margin light the wrong declaration, or none.
 
 When a page needs to tell the reader something prominent, such as a name a later
 weft changes, or a rough edge they will meet on this version, it wraps the prose
@@ -377,6 +385,12 @@ closes the column.
 
 The components the article renders before anyone clicks are the tinted ones,
 found by walking the article as built rather than by the page saying so.
+
+Each block carries its component's name in `data-component`, and each `performs`,
+`transfers` or `dismisses` in it carries `data-handles`, the name the
+`Weft-Site-Handled` header gives when that action answers: the component's name,
+a `#`, and the action's. A request spec walks Click to Edit and holds
+every header it sees to a name the page's margin carries.
 
 ## When the Site Is Wired Wrong
 
@@ -574,8 +588,9 @@ cookie to the next.
 
 **Nothing is kept long, because no URL here carries a version.** A font swapped
 under the same name reaches a returning visitor only once their copy expires, so
-fonts are kept for a week, and vendored scripts for a day, since
-`/static/js/htmx.min.js` changes whenever the pin moves. An expired copy costs
+fonts are kept for a week, and scripts for a day, since
+`/static/js/htmx.min.js` changes whenever the pin moves and `/static/js/site.js`
+with any deploy. An expired copy costs
 little: static files carry `Last-Modified`, so the browser revalidates and gets a
 `304` rather than the file. Pages, fragments and the stylesheet revalidate on
 every use, and a font or script that was not found is not kept at all, so adding
@@ -584,6 +599,46 @@ a digest in each file's name, would justify.
 
 `X-Frame-Options` and `X-XSS-Protection` are not set here: the `Rack::Protection`
 weft's router runs already sends them.
+
+## The Site's One Script
+
+`public/js/site.js` is the only script the site writes, and it serves the chrome
+alone: the examples run on htmx and nothing else. `ApplicationPage` registers it,
+deferred, after htmx. It is a file on this origin rather than an inline script, so
+the content security policy's `'self'` already allows it and no hash has to follow
+its edits. It is kept a day, like htmx.
+
+It fills the bench with each htmx request as the browser sent it (method, path,
+status and round-trip time) and lights, in the declarations margin, whatever
+answered: the action's declaration, or the component's block when it rendered
+itself. The light moves only to something this page's margin carries, so a
+request the chrome makes, such as the search's, shows on the bench and leaves
+the light where it was.
+
+It also works each code block's Copy button, which copies the file as shown.
+Where the browser offers no clipboard, as on `bin/dev` reached from another
+machine over plain http, or refuses it, the button selects the code instead. And ⌘K,
+or Ctrl K off Apple's platforms, puts the cursor in the search, whose pill shows
+whichever applies.
+
+**This is weft not fitting the need yet.** Weft 0.2 has no hook for what
+answered a request. Its companions (`includes`) ride action responses, pushes
+and transfer arrivals, and a plain fetch carries none: whatever `loads:` or a
+preset fetches renders alone. The bench moves on every request, so it is a
+script reading a response header, and `SiteData::HandledBy` supplies that header,
+`Weft-Site-Handled`, by walking the router's route table itself. Weft is growing
+a hook of its own: request ids are planned for v0.3, and middleware around
+renders and actions is on its roadmap. When they land, revisit both the
+middleware and this script.
+
+Anything the script drives is rendered `hidden` and marked `data-reveal`, and the
+script reveals it on load. Without the script, nothing on the page promises what
+only the script can do.
+
+Request specs see the header and the markup, never the script running. To see it
+run, drive headless Chrome over the DevTools protocol against `bin/dev` (a fresh
+`--user-data-dir` each run, and stop the browser afterward): click through an
+example, then read the bench's text and which declaration carries `lit`.
 
 ## Deploying
 

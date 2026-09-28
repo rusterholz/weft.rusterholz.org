@@ -160,6 +160,8 @@ code, pre, kbd { font-family: var(--face-mono); }
   color: var(--ink);
 }
 .site-search input:focus { outline: none; }
+.site-search kbd { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.site-search:focus-within kbd { visibility: hidden; } /* the shortcut has done its job */
 .site-search .pill:focus-within { border-color: var(--prussian); }
 
 /* Open while the search has focus or the pointer is over it, and only with
@@ -267,13 +269,13 @@ main.example-layout {
 }
 
 /* The side columns scroll with the article until they run out, then hold while
-   it goes on. Stuck to the viewport's bottom, kept inside the row, and at least
-   as tall as what the viewport shows above the bench at the page's end: a
-   column that fits holds near the top, one that does not holds once its end is
-   in view. */
+   it goes on. Stuck just above the bench, kept inside the row, and at least as
+   tall as what the viewport shows above the bench at the page's end: a column
+   that fits holds near the top, one that does not holds once its end is in
+   view. Both lean on the bench being one line of fixed height. */
 main.example-layout > :is(.examples-bar, .declarations) {
   position: sticky;
-  bottom: 0;
+  bottom: var(--bench-height);
   align-self: end;
   box-sizing: border-box;
   min-height: calc(100vh - var(--main-foot) - var(--bench-height));
@@ -363,6 +365,18 @@ h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
 }
 .declaration.at-rest .name { color: var(--prussian); }
 .declaration.at-rest pre { color: var(--ink); }
+.declarations .hint { margin-top: -14px; font-size: 13px; font-style: italic; }
+
+/* What answered the last request, lit in copper: an action's declaration, or a
+   component's name when it rendered itself. */
+.declaration pre [data-handles] { display: inline-block; vertical-align: top; } /* lit as one box, not ragged lines */
+.declaration pre .lit {
+  background: color-mix(in oklab, var(--copper) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--copper) 22%, transparent);
+  border-radius: 2px;
+}
+.declaration.lit .name { color: var(--copper); }
+.declaration.lit { box-shadow: inset 2px 0 0 var(--copper); }
 .declarations .behind { font-size: 13px; }
 .declarations .behind code { font-size: 12px; }
 .reset-example form { display: block; margin: -20px 0 0 -8px; }
@@ -406,6 +420,9 @@ article pre {
 .piece details[open] pre { margin-top: 12px; }
 .piece > a { font-size: 15px; }
 .glue > .pieces { margin: 12px 0 0 18px; }
+.code-block { position: relative; }
+.code-block .copy { position: absolute; top: 0; right: 0; font-size: 13px; color: var(--muted); background: var(--ground); }
+.piece details[open] .copy { top: 12px; } /* level with the first line, below the pre's margin */
 article :not(pre) > code { font-size: 0.8em; }
 
 pre code { color: var(--ink); }
@@ -469,7 +486,11 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
   main.example-layout > .declarations { position: relative; min-height: 0; align-self: start; }
 }
 
+/* Held at the foot of the window, so a click's request lands where it is seen. */
 .bench {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -481,4 +502,13 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
   font-size: var(--size-bench);
   color: var(--muted);
 }
-.bench .bench-request { flex-grow: 1; color: var(--ink); }
+/* One line whatever the URL, since the columns' sticky offsets assume the bench's height. */
+.bench .bench-request {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.bench .bench-request[hidden] { display: block; visibility: hidden; } /* still holds the links to the right */

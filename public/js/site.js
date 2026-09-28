@@ -1,0 +1,91 @@
+// The site's one script, for its chrome only: the examples run on htmx alone.
+// Registered on ApplicationPage; docs/development.md, "The Site's One Script",
+// says what it does and why it is a script at all.
+//
+// It is here because weft does not fit this need yet. Weft 0.2 has no hook for
+// what served a request, so the site works that out itself (SiteData::HandledBy,
+// in the Weft-Site-Handled header) and shows it from here. Weft is growing one:
+// request ids are planned for v0.3, and middleware around renders and actions
+// is on its roadmap. Revisit this file when they land.
+//
+// Everything it drives is rendered hidden and marked data-reveal, so without the
+// script nothing on the page promises what only the script can do.
+(function () {
+  "use strict";
+
+  var HANDLED = "Weft-Site-Handled";
+  var started = new WeakMap();
+
+  document.querySelectorAll("[data-reveal]").forEach(function (element) {
+    element.hidden = false;
+  });
+
+  document.addEventListener("htmx:beforeRequest", function (event) {
+    started.set(event.detail.xhr, performance.now());
+  });
+
+  document.addEventListener("htmx:afterRequest", function (event) {
+    var xhr = event.detail.xhr;
+    showRequest(event.detail, Math.round(performance.now() - started.get(xhr)));
+    light(xhr.getResponseHeader(HANDLED));
+  });
+
+  // ⌘K, or Ctrl K off Apple's platforms, puts the cursor in the search.
+  var apple = /mac|iphone|ipad/i.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform);
+  var shortcutHint = document.querySelector(".site-search kbd");
+  if (shortcutHint && !apple) shortcutHint.textContent = "Ctrl K";
+
+  document.addEventListener("keydown", function (event) {
+    var modifier = apple ? event.metaKey : event.ctrlKey;
+    if (!modifier || event.altKey || event.shiftKey || event.key.toLowerCase() !== "k") return;
+
+    var search = document.querySelector(".site-search input");
+    if (!search) return;
+    event.preventDefault();
+    search.focus();
+  });
+
+  // A code block's Copy button: the file as shown, then "Copied" for a moment.
+  // Where the browser has no clipboard to offer (a page served over plain http
+  // from anywhere but this machine) or refuses it, the code is selected instead.
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest(".code-block .copy");
+    if (!button) return;
+
+    var code = button.closest(".code-block").querySelector("pre code");
+    var select = function () { window.getSelection().selectAllChildren(code); };
+    if (!navigator.clipboard) return select();
+
+    navigator.clipboard.writeText(code.textContent).then(function () {
+      button.textContent = "Copied";
+      setTimeout(function () { button.textContent = "Copy"; }, 2000);
+    }, select);
+  });
+
+  // The bench's line: the last request, as the browser sent it.
+  function showRequest(detail, ms) {
+    var line = document.querySelector(".bench-request");
+    if (!line) return;
+
+    var status = detail.xhr.status || "no response";
+    var text = detail.requestConfig.verb.toUpperCase() + " " + detail.pathInfo.finalRequestPath +
+      " · " + status + " · " + ms + " ms";
+    line.textContent = text;
+    line.title = text;
+  }
+
+  // The margin's light: the declaration of the action that answered, or the
+  // block of the component that rendered. It moves only to something this page's
+  // margin carries, so a request from the chrome (the search) leaves it be.
+  function light(handled) {
+    var name = handled && CSS.escape(handled);
+    var target = name && (document.querySelector('.declarations [data-handles="' + name + '"]') ||
+      document.querySelector('.declarations [data-component="' + name + '"]'));
+    if (!target) return;
+
+    document.querySelectorAll(".declarations .lit").forEach(function (element) {
+      element.classList.remove("lit");
+    });
+    target.classList.add("lit");
+  }
+})();

@@ -27,6 +27,13 @@ RSpec.describe ApplicationPage do
       expect(rendered.css("link[rel=stylesheet]").map { |link| link["href"] }).to eq(["/static/css/site.css"])
     end
 
+    it "loads htmx, then the site's one script, deferred, both from this origin" do
+      scripts = rendered.css("script[src]")
+
+      expect(scripts.map { |script| script["src"] }).to eq(["/static/js/htmx.min.js", "/static/js/site.js"])
+      expect(scripts.last).to have_attribute("defer")
+    end
+
     it "puts the header, then the page's own content, then the bench" do
       body = rendered.at("body")
 

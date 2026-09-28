@@ -18,6 +18,15 @@ RSpec.describe SiteSearch do
     expect(search.at("#site-search-results")).not_to be_nil
   end
 
+  # The shortcut is the site's script's to keep, so its hint shows only where the script runs.
+  it "hints at the keyboard shortcut, hidden until the site's script reveals it" do
+    hint = search.at(".pill kbd")
+
+    expect(hint.text).to eq("⌘K")
+    expect(hint).to have_attribute("hidden")
+    expect(hint).to have_attribute("data-reveal")
+  end
+
   it "labels the field for someone who cannot see the magnifier" do
     expect(search.at("input[type=search]")["aria-label"]).to eq("Search the examples")
   end
