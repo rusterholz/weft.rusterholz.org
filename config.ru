@@ -12,7 +12,7 @@ require "rack/session"
 use Rack::Session::Cookie,
     key: "weft_site_session",
     secret: ENV.fetch("SESSION_SECRET"),
-    expire_after: Store::TTL.to_i, # the id is worthless once its data has gone
+    expire_after: SiteData::Store::TTL.to_i, # the id is worthless once its data has gone
     same_site: :lax,
     secure: ENV.fetch("RACK_ENV", "production") == "production",
     httponly: true
@@ -20,6 +20,6 @@ use Rack::Session::Cookie,
 # Weft actions are plain POSTs, so any site could forge one; refuse those lacking the session's token.
 use Rack::Protection::AuthenticityToken
 
-use VisitorScope
+use SiteData::VisitorScope
 
 run Weft::Router

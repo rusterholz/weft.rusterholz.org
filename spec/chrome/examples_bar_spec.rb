@@ -9,7 +9,7 @@ RSpec.describe ExamplesBar do
   end
 
   it "lists every example in the catalog, in its order" do
-    expect(bar.css(".entry").map { |entry| entry.text.delete_suffix(" (coming)") }).to eq(Catalog.entries.map(&:title))
+    expect(bar.css(".entry").map { |entry| entry.text.delete_suffix(" (coming)") }).to eq(SiteData::Catalog.entries.map(&:title))
   end
 
   it "marks the page you are on" do
@@ -17,13 +17,13 @@ RSpec.describe ExamplesBar do
   end
 
   it "links the examples that are running, and only those" do
-    expect(bar.css("a").map { |link| link["href"] }).to eq(Catalog.entries.select(&:live?).map(&:path))
+    expect(bar.css("a").map { |link| link["href"] }).to eq(SiteData::Catalog.entries.select(&:live?).map(&:path))
   end
 
   it "tells a screen reader which examples are still to come" do
     coming = bar.css(".entry.coming")
 
-    expect(coming.size).to eq(Catalog.entries.count { |entry| !entry.live? })
+    expect(coming.size).to eq(SiteData::Catalog.entries.count { |entry| !entry.live? })
     expect(coming.first.at(".visually-hidden").text).to eq(" (coming)")
   end
 

@@ -5,7 +5,7 @@ require "nokogiri"
 require "securerandom"
 
 RSpec.describe ClickToEdit::ContactCard do
-  before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+  before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   let(:card) { Nokogiri::HTML5.fragment(described_class.render(contact_id: "1")).at("div") }
 

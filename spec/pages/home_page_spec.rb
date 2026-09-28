@@ -20,14 +20,14 @@ RSpec.describe HomePage do
   end
 
   it "lists every example in the catalog, in its order, with what it shows" do
-    expect(index.map { |item| item.at(".title").text }).to eq(Catalog.entries.map(&:title))
-    expect(index.first.at(".summary").text).to eq(Catalog.entries.first.summary)
+    expect(index.map { |item| item.at(".title").text }).to eq(SiteData::Catalog.entries.map(&:title))
+    expect(index.first.at(".summary").text).to eq(SiteData::Catalog.entries.first.summary)
   end
 
   it "links the running examples and marks the rest as coming" do
     running, coming = index.partition { |item| item.at("a") }
 
-    expect(running.map { |item| item.at("a")["href"] }).to eq(Catalog.entries.select(&:live?).map(&:path))
+    expect(running.map { |item| item.at("a")["href"] }).to eq(SiteData::Catalog.entries.select(&:live?).map(&:path))
     expect(coming).to all(satisfy { |item| item.at(".coming").text == "coming" })
   end
 end

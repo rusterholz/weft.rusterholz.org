@@ -3,7 +3,7 @@
 require "rack/mock_request"
 require "rack/protection"
 
-RSpec.describe VisitorScope do
+RSpec.describe SiteData::VisitorScope do
   let(:session) { {} }
   let(:seen) { {} }
 
@@ -12,9 +12,9 @@ RSpec.describe VisitorScope do
   # thing that observes it.
   let(:downstream) do
     lambda do |_env|
-      seen[:visitor] = Current.visitor
-      seen[:request] = Current.request
-      seen[:csrf_token] = Current.csrf_token
+      seen[:visitor] = SiteData::Current.visitor
+      seen[:request] = SiteData::Current.request
+      seen[:csrf_token] = SiteData::Current.csrf_token
       [200, {}, ["ok"]]
     end
   end
@@ -70,20 +70,20 @@ RSpec.describe VisitorScope do
     expect(seen[:visitor]).not_to be_nil
     expect(seen[:request]).to be_a(Rack::Request)
     expect(seen[:csrf_token]).not_to be_nil
-    expect(Current.visitor).to be_nil
-    expect(Current.request).to be_nil
-    expect(Current.csrf_token).to be_nil
+    expect(SiteData::Current.visitor).to be_nil
+    expect(SiteData::Current.request).to be_nil
+    expect(SiteData::Current.csrf_token).to be_nil
   end
 
   it "clears them even when the request fails" do
     expect { call(->(_env) { raise "deliberate failure" }) }.to raise_error("deliberate failure")
 
-    expect(Current.visitor).to be_nil
-    expect(Current.request).to be_nil
-    expect(Current.csrf_token).to be_nil
+    expect(SiteData::Current.visitor).to be_nil
+    expect(SiteData::Current.request).to be_nil
+    expect(SiteData::Current.csrf_token).to be_nil
   end
 
   it "says what is wrong when no session middleware ran ahead of it" do
-    expect { call(session: nil) }.to raise_error(VisitorScope::NoSession, /session middleware/)
+    expect { call(session: nil) }.to raise_error(SiteData::VisitorScope::NoSession, /session middleware/)
   end
 end

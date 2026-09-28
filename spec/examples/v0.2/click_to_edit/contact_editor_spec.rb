@@ -5,7 +5,7 @@ require "nokogiri"
 require "securerandom"
 
 RSpec.describe ClickToEdit::ContactEditor do
-  before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+  before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   let(:editor) { Nokogiri::HTML5.fragment(described_class.render(contact_id: "1")).at("div") }
   let(:form) { editor.at("form") }
@@ -31,7 +31,7 @@ RSpec.describe ClickToEdit::ContactEditor do
   end
 
   it "carries the visitor's CSRF token as a hidden field" do
-    Current.csrf_token = "this-visitors-token"
+    SiteData::Current.csrf_token = "this-visitors-token"
 
     expect(form.at("input[type=hidden][name=authenticity_token]")["value"]).to eq("this-visitors-token")
   end

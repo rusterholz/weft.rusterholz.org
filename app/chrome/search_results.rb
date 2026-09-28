@@ -7,7 +7,7 @@ class SearchResults < Weft::Component
 
   param :q, default: ""
   derives(:query) { |p| p.q.to_s.strip }
-  derives(:matches) { |p| Catalog.matching(p.query) }
+  derives(:matches) { |p| SiteData::Catalog.matching(p.query) }
 
   # Weft would suffix the id with the query itself, typed by anyone.
   def weft_dom_id = "search-results"

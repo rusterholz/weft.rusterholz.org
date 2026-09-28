@@ -7,7 +7,7 @@ class Bench < Weft::Component
   builder_method :bench
 
   receives :source_path
-  derives(:source_href) { |p| Source.url(p.source_path) }
+  derives(:source_href) { |p| SiteData::Source.url(p.source_path) }
 
   def tag_name = "footer"
 

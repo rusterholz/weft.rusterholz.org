@@ -28,7 +28,7 @@ module ClickToEdit
 
       private
 
-      def store = Store.for("click_to_edit", seed: SEED)
+      def store = SiteData::Store.for("click_to_edit", seed: SEED)
 
       # Reading and writing a contact nobody has are the same question, and get
       # the same answer: Weft renders its not-found page or fragment.

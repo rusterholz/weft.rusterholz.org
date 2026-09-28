@@ -15,7 +15,7 @@ RSpec.describe ApplicationPage do
     end
 
     def rendered(session: {})
-      Current.request = Rack::Request.new(Rack::MockRequest.env_for("/", "rack.session" => session))
+      SiteData::Current.request = Rack::Request.new(Rack::MockRequest.env_for("/", "rack.session" => session))
       Nokogiri::HTML5(page_class.render)
     end
 
@@ -47,7 +47,8 @@ RSpec.describe ApplicationPage do
     end
 
     def return_to_after(method, path)
-      Current.request = Rack::Request.new(Rack::MockRequest.env_for(path, method: method, "rack.session" => {}))
+      env = Rack::MockRequest.env_for(path, method: method, "rack.session" => {})
+      SiteData::Current.request = Rack::Request.new(env)
       Nokogiri::HTML5(page_class.render).at("#theme-toggle-dark input[name=return_to]")["value"]
     end
 

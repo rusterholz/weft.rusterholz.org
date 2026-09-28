@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Catalog do
+RSpec.describe SiteData::Catalog do
   it "lists every example weft documents" do
     expect(described_class.entries.length).to eq(21)
   end
@@ -31,7 +31,7 @@ RSpec.describe Catalog do
   end
 
   it "says so when asked for a slug it does not have" do
-    expect { described_class.find("no-such-example") }.to raise_error(Catalog::Unknown, /no-such-example/)
+    expect { described_class.find("no-such-example") }.to raise_error(SiteData::Catalog::Unknown, /no-such-example/)
   end
 
   describe ".neighbors_of" do
@@ -58,6 +58,6 @@ RSpec.describe Catalog do
   # A page named for something the catalog does not list would route at a URL
   # nothing links to, which is a typo nobody would notice.
   it "refuses a page that is not an example" do
-    expect { described_class.slug_for(HomePage) }.to raise_error(Catalog::Unknown, /home/)
+    expect { described_class.slug_for(HomePage) }.to raise_error(SiteData::Catalog::Unknown, /home/)
   end
 end

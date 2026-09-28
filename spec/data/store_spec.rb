@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-RSpec.describe Store do
+RSpec.describe SiteData::Store do
   let(:seed) { { "1" => { "name" => "Joe" } }.freeze }
 
   # One cache serves the whole process, so examples that shared a visitor would
   # inherit each other's writes -- and a first read is a different code path
   # from every read after it, which is the one worth arriving at clean.
-  before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+  before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   def slice(example = "widgets") = described_class.for(example, seed: seed)
 
   it "hands out one example's slice" do
-    expect(slice).to be_a(Store::ExampleSlice)
+    expect(slice).to be_a(SiteData::Store::ExampleSlice)
   end
 
   it "hands out the seed until something is written" do
@@ -33,7 +33,7 @@ RSpec.describe Store do
   it "gives each visitor their own copy" do
     slice.update { |widgets| widgets["1"]["name"] = "Joseph" }
 
-    Current.visitor = "a-different-visitor"
+    SiteData::Current.visitor = "a-different-visitor"
 
     expect(slice.fetch).to eq("1" => { "name" => "Joe" })
   end
@@ -55,14 +55,14 @@ RSpec.describe Store do
   it "forgets a visitor's data once its time is up" do
     slice.update { |widgets| widgets["1"]["name"] = "Joseph" }
 
-    travel(Store::TTL + 60) do
+    travel(SiteData::Store::TTL + 60) do
       expect(slice.fetch).to eq("1" => { "name" => "Joe" })
     end
   end
 
   it "says what is wrong when there is no visitor to scope to" do
-    Current.reset
+    SiteData::Current.reset
 
-    expect { slice }.to raise_error(Store::NoVisitor, /VisitorScope/)
+    expect { slice }.to raise_error(SiteData::Store::NoVisitor, /VisitorScope/)
   end
 end

@@ -3,7 +3,7 @@
 require "nokogiri"
 
 RSpec.describe AuthenticityTokenField do
-  before { Current.csrf_token = "this-visitors-token" }
+  before { SiteData::Current.csrf_token = "this-visitors-token" }
 
   let(:fields) do
     html = Weft::Context.new({}, nil, wire_params: {}) do

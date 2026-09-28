@@ -14,6 +14,6 @@ class AuthenticityTokenField < Weft::Component
   def tag_name = "input"
 
   def build(attributes = {})
-    super(attributes.merge(type: "hidden", name: "authenticity_token", value: Current.csrf_token))
+    super(attributes.merge(type: "hidden", name: "authenticity_token", value: SiteData::Current.csrf_token))
   end
 end

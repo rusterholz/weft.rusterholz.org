@@ -5,7 +5,7 @@ require "nokogiri"
 require "securerandom"
 
 RSpec.describe ClickToEditPage do
-  before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+  before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   let(:page) { Nokogiri::HTML5(described_class.render) }
   # In reading order: the data class, then the components.

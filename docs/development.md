@@ -185,10 +185,18 @@ it. So an example never has to arrange its own load order, however its classes
 refer to each other: the card and the editor each name the other, and they load
 in either order, lazily or eagerly.
 
-`app/data` is loaded by a second Zeitwerk loader that never reloads, because the
-store's cache lives on a class-level variable there. Reloaded, the class is a new
-object with an empty cache, and every request in development would look like a
-first visit. The price is that changing something in `app/data` needs a restart.
+`app/data` holds the site's own support code, apart from anything weft, and
+everything in it lives under the `SiteData` namespace: `app/data/store.rb`
+defines `SiteData::Store`. So a reader meeting `SiteData::Store.for` in an
+example knows on sight that it is this site's, and the part an adopter replaces
+with their own persistence. Weft 0.2's `configure_autoloading` takes no
+namespace, so `config/environment.rb` gives the directory a plain Zeitwerk loader
+of its own.
+
+That loader never reloads, because the store's cache lives on a class-level
+variable there. Reloaded, the class is a new object with an empty cache, and
+every request in development would look like a first visit. The price is that
+changing something in `app/data` needs a restart.
 
 **Components never touch the store.** The example's data class does, and exposes
 the two or three verbs its components need:
@@ -203,7 +211,7 @@ module ClickToEdit
 
       private
 
-      def store = Store.for("click_to_edit", seed: SEED)
+      def store = SiteData::Store.for("click_to_edit", seed: SEED)
     end
   end
 end
@@ -211,8 +219,8 @@ end
 
 That is the "bring your own persistence" lesson in the shape weft's
 [application patterns](https://github.com/rusterholz/weft/blob/v0.2.0/docs/app-patterns.md)
-prescribe for service classes. `Store.for` hands back the example's
-`Store::ExampleSlice`: that example's data for the current visitor. The seed is
+prescribe for service classes. `SiteData::Store.for` hands back the example's
+`SiteData::Store::ExampleSlice`: that example's data for the current visitor. The seed is
 declared once, where the slice is asked for, so a read and a write cannot
 disagree about where an example starts.
 
@@ -305,7 +313,7 @@ and ask of each component, "does a keyword at its call site supply this?"
 ### Specs
 
 Two layers. **Unit specs** render each class directly, `ContactCard.render(contact_id: "1")`
-or `ClickToEditPage.render`, against the real store with `Current.visitor` set,
+or `ClickToEditPage.render`, against the real store with `SiteData::Current.visitor` set,
 and assert what it renders: one file per class, under `spec/examples/` in the same
 layout as the example. **One request spec per example** drives the whole stack,
 because one spec is one visitor. Assert the flow a person actually walks, then
@@ -449,9 +457,9 @@ The real secret appears for the first time at deploy, and only there.
 ### Every Form That Writes Carries the Session's Token
 
 `Rack::Protection::AuthenticityToken` sits between the session and
-`VisitorScope`, and answers `403` to any POST without the session's CSRF token,
-before weft sees it. `VisitorScope` publishes the token as `Current.csrf_token`,
-and each form that writes carries it in one hidden field, rendered by the
+`SiteData::VisitorScope`, and answers `403` to any POST without the session's
+CSRF token, before weft sees it. `VisitorScope` publishes the token as
+`SiteData::Current.csrf_token`, and each form that writes carries it in one hidden field, rendered by the
 `AuthenticityTokenField` component:
 
 ```ruby

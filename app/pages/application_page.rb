@@ -19,7 +19,7 @@ class ApplicationPage < Weft::Page
   adds_children_to :@content
 
   def build(attributes = {})
-    super(attributes.merge(lang: "en", "data-theme": Theme.current).compact)
+    super(attributes.merge(lang: "en", "data-theme": SiteData::Theme.current).compact)
     site_header trail: trail, return_to: return_to
     @content = main(class: "single-column")
     within(@content.parent) { bench source_path: page_source_path }
@@ -30,7 +30,10 @@ class ApplicationPage < Weft::Page
   def trail = [[SITE_NAME, "/"]]
 
   # Where a theme choice comes back to: this page, when a GET is what showed it.
-  def return_to = Current.request&.get? ? Current.request.fullpath : "/"
+  def return_to
+    request = SiteData::Current.request
+    request&.get? ? request.fullpath : "/"
+  end
 
   # The file that defines the page, which is what "open the hood" opens.
   def page_source_path = repo_path(self.class.instance_method(:build).source_location.first)
@@ -40,7 +43,7 @@ class ApplicationPage < Weft::Page
     text.split(/\n\s*\n/).map(&:squish).reject(&:empty?).each { |paragraph| para paragraph }
   end
 
-  def repo_path(absolute_path) = Source.path_of(absolute_path)
+  def repo_path(absolute_path) = SiteData::Source.path_of(absolute_path)
 
-  def source_url(repo_path) = Source.url(repo_path)
+  def source_url(repo_path) = SiteData::Source.url(repo_path)
 end

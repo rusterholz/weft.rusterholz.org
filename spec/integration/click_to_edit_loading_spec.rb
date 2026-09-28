@@ -30,8 +30,10 @@ RSpec.describe "loading the Click to Edit components" do
       require "active_support"
       require "weft"
       require "zeitwerk"
+      module SiteData; end
       loader = Zeitwerk::Loader.new
-      %w[app/data app/chrome app/pages].each { |dir| loader.push_dir(dir) }
+      loader.push_dir("app/data", namespace: SiteData)
+      %w[app/chrome app/pages].each { |dir| loader.push_dir(dir) }
       loader.push_dir(Dir["examples/v*"].max)
       loader.setup
       #{first}

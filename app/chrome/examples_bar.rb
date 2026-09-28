@@ -9,7 +9,7 @@ class ExamplesBar < Weft::Component
   builder_method :examples_bar
 
   receives :current
-  defines entries: Catalog.entries
+  defines entries: SiteData::Catalog.entries
 
   def tag_name = "nav"
 
