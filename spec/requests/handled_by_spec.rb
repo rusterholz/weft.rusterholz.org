@@ -71,6 +71,64 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(lightable).to include(*named)
   end
 
+  # Weft's router sees the path after Rack::Protection cleans it and Sinatra
+  # decodes it, and the header has to name what the router served, no more.
+  describe "at the edges of a path, agreeing with weft's router" do
+    it "names nothing for a trailing slash, which weft answers 404" do
+      get "#{card_path}/", contact_id: "1"
+
+      expect(last_response.status).to eq(404)
+      expect(handled).to be_nil
+    end
+
+    it "names the component under a doubled slash, which weft collapses" do
+      get "/_components//click_to_edit/contact_card", contact_id: "1"
+
+      expect(last_response.status).to eq(200)
+      expect(handled).to eq("ClickToEdit::ContactCard")
+    end
+
+    it "names the component under a leading doubled slash" do
+      get card_path, { contact_id: "1" }, "PATH_INFO" => "//_components/click_to_edit/contact_card"
+
+      expect(last_response.status).to eq(200)
+      expect(handled).to eq("ClickToEdit::ContactCard")
+    end
+
+    it "names an action spelled with percent-escapes, which weft decodes" do
+      get "#{card_path}/%65dit", contact_id: "1"
+
+      expect(last_response.status).to eq(200)
+      expect(handled).to eq("ClickToEdit::ContactCard#edit")
+    end
+
+    it "names a page spelled with percent-escapes" do
+      get "/examples/click%2Dto-edit"
+
+      expect(last_response.status).to eq(200)
+      expect(handled).to eq("ClickToEditPage")
+    end
+
+    it "names what a path with a parent step resolves to" do
+      get "#{card_path}/../contact_card", contact_id: "1"
+
+      expect(last_response.status).to eq(200)
+      expect(handled).to eq("ClickToEdit::ContactCard")
+    end
+
+    it "names a page under a component's path, where the next segment is no action" do
+      about_path = "#{card_path}/about"
+      stub_const("CardAboutPage", Class.new(ApplicationPage) { self.page_path = about_path })
+
+      get "#{card_path}/about"
+
+      expect(last_response.status).to eq(200)
+      expect(handled).to eq("CardAboutPage")
+    ensure
+      Weft.registry.evict(CardAboutPage)
+    end
+  end
+
   it "names nothing for an action the component does not declare for that verb" do
     post_form "#{card_path}/edit", contact_id: "1"
 

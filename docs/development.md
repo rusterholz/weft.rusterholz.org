@@ -256,7 +256,9 @@ every pin move:
   differently leaves both toggles showing, or neither.
 - The router's walk from a path to the component and action that answer it,
   which weft 0.2 keeps private. `SiteData::HandledBy` repeats it through the
-  registry's public API to name what answered each request, in the
+  registry's public API, on the path as the router sees it (cleaned by
+  Rack::Protection's path-traversal guard, then percent-decoded as Sinatra's
+  patterns do), to name what answered each request, in the
   `Weft-Site-Handled` header the bench and the margin read. A release that walks
   differently makes the margin light the wrong declaration, or none.
 
