@@ -73,16 +73,17 @@
   }
 
   // The margin's light: the declaration of the action that answered, or the
-  // block of the component that rendered. It stays until the next request.
+  // block of the component that rendered. It moves only to something this page's
+  // margin carries, so a request from the chrome (the search) leaves it be.
   function light(handled) {
+    var name = handled && CSS.escape(handled);
+    var target = name && (document.querySelector('.declarations [data-handles="' + name + '"]') ||
+      document.querySelector('.declarations [data-component="' + name + '"]'));
+    if (!target) return;
+
     document.querySelectorAll(".declarations .lit").forEach(function (element) {
       element.classList.remove("lit");
     });
-    if (!handled) return;
-
-    var name = CSS.escape(handled);
-    var target = document.querySelector('.declarations [data-handles="' + name + '"]') ||
-      document.querySelector('.declarations [data-component="' + name + '"]');
-    if (target) target.classList.add("lit");
+    target.classList.add("lit");
   }
 })();

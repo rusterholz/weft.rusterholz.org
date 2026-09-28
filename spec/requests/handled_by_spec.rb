@@ -135,6 +135,18 @@ RSpec.describe "the Weft-Site-Handled header" do
     end
   end
 
+  # The site's script moves the light only to a name the margin carries, so the
+  # search, answering from the header on every page, leaves an example's light alone.
+  it "names the search as nothing an example's margin carries" do
+    get "/examples/click-to-edit"
+    marks = margin_marks("data-component") + margin_marks("data-handles")
+
+    get "/_components/search_results", q: "edit"
+
+    expect(handled).to eq("SearchResults")
+    expect(marks).not_to include(handled)
+  end
+
   it "names nothing for an action the component does not declare for that verb" do
     post_form "#{card_path}/edit", contact_id: "1"
 

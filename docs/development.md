@@ -611,7 +611,9 @@ its edits. It is kept a day, like htmx.
 It fills the bench with each htmx request as the browser sent it (method, path,
 status and round-trip time) and lights, in the declarations margin, whatever
 answered: the action's declaration, or the component's block when it rendered
-itself. The light stays until the next request.
+itself. The light moves only to something this page's margin carries, so a
+request the chrome makes, such as the search's, shows on the bench and leaves
+the light where it was.
 
 It also works each code block's Copy button, which copies the file as shown;
 where the browser refuses the clipboard, it selects the code instead. And ⌘K,
