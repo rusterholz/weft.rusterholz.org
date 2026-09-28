@@ -53,6 +53,14 @@ RSpec.describe "response headers" do
     expect(last_response.headers["cache-control"]).to eq("private, no-cache")
   end
 
+  it "revalidates a font or script that is not there" do
+    %w[/static/fonts/nope.woff2 /static/js/nope.js].each do |path|
+      get path
+      expect(last_response.status).to eq(404), path
+      expect(last_response.headers["cache-control"]).to eq("private, no-cache"), path
+    end
+  end
+
   # A script the policy does not name is not run, and nothing on the server
   # notices: the page loads, and htmx is quietly misconfigured.
   it "allows every inline script any page carries, by its hash" do

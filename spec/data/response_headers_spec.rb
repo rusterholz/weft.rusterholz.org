@@ -3,8 +3,8 @@
 require "rack/mock_request"
 
 RSpec.describe SiteData::ResponseHeaders do
-  def headers_for(path, inner_headers = {})
-    inner = ->(_env) { [200, inner_headers.dup, ["ok"]] }
+  def headers_for(path, inner_headers = {}, status: 200)
+    inner = ->(_env) { [status, inner_headers.dup, ["ok"]] }
     _status, headers, _body = described_class.new(inner).call(Rack::MockRequest.env_for(path))
     headers
   end
@@ -58,8 +58,20 @@ RSpec.describe SiteData::ResponseHeaders do
       end
     end
 
+    # A missing file kept for a year would stay missing for a year after it is added.
+    it "revalidates a font or script that was not found" do
+      %w[/static/fonts/nope.woff2 /static/js/nope.js].each do |path|
+        expect(headers_for(path, status: 404)["cache-control"]).to eq("private, no-cache"), path
+      end
+    end
+
+    it "keeps the long lifetime on a not-modified answer" do
+      expect(headers_for("/static/fonts/spectral-400.woff2", status: 304)["cache-control"]).
+        to eq("private, max-age=31536000, immutable")
+    end
+
     it "leaves a cache policy the application chose alone" do
-      expect(headers_for("/", "cache-control" => "no-store")["cache-control"]).to eq("no-store")
+      expect(headers_for("/", { "cache-control" => "no-store" })["cache-control"]).to eq("no-store")
     end
   end
 end

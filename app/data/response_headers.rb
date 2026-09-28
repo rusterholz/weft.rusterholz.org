@@ -43,13 +43,16 @@ module SiteData
       headers["strict-transport-security"] = "max-age=31536000" # no includeSubDomains: this host only
       headers["referrer-policy"] = "strict-origin-when-cross-origin" # other sites learn the origin, not the page
       headers["x-content-type-options"] ||= "nosniff" # weft sets it, but not on the 403s in front of it
-      headers["cache-control"] ||= cache_control(env["PATH_INFO"])
+      headers["cache-control"] ||= cache_control(env["PATH_INFO"], status)
       [status, headers, body]
     end
 
     private
 
-    def cache_control(path)
+    # Only a file that was found is kept: a 404 kept for a year outlives the fix.
+    def cache_control(path, status)
+      return REVALIDATE unless [200, 304].include?(status)
+
       CACHE_CONTROL.find { |prefix, _| path.start_with?(prefix) }&.last || REVALIDATE
     end
   end
