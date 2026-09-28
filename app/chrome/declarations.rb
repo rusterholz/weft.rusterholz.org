@@ -60,27 +60,23 @@ class Declarations < ApplicationComponent
   end
 
   class << self
-    def of(klass) = laid_out(klass) { |node| dedented(node) }
-
-    # The same text as markup: each action's declaration in a span naming what
-    # answers when that action runs, "ClickToEdit::ContactCard#edit".
+    # The declarations as the file writes them, one per line, keeping the blank
+    # lines between groups; each action's in a span naming what answers when it
+    # runs, "ClickToEdit::ContactCard#edit".
     def marked(klass)
-      laid_out(klass) do |node|
-        text = ERB::Util.html_escape(dedented(node))
-        handles = handles(klass, node)
-        handles ? %(<span data-handles="#{ERB::Util.html_escape(handles)}">#{text}</span>) : text
-      end.html_safe
+      statements = statements_of(klass)
+      statements.each_with_index.map do |node, index|
+        gap = index.positive? && node.location.start_line > statements[index - 1].location.end_line + 1
+        "#{"\n" if gap}#{markup(klass, node)}"
+      end.join("\n").html_safe
     end
 
     private
 
-    # One per line, keeping the blank lines the file puts between groups.
-    def laid_out(klass)
-      statements = statements_of(klass)
-      statements.each_with_index.map do |node, index|
-        gap = index.positive? && node.location.start_line > statements[index - 1].location.end_line + 1
-        "#{"\n" if gap}#{yield node}"
-      end.join("\n")
+    def markup(klass, node)
+      text = ERB::Util.html_escape(dedented(node))
+      handles = handles(klass, node)
+      handles ? %(<span data-handles="#{ERB::Util.html_escape(handles)}">#{text}</span>) : text
     end
 
     def statements_of(klass)
