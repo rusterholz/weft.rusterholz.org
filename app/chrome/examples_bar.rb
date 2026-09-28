@@ -5,7 +5,7 @@ require "erb"
 
 # The flat bar down the left of an example page: every example in the catalog,
 # the running ones linked, the rest named so the whole shape of the section shows.
-class ExamplesBar < Weft::Component
+class ExamplesBar < ApplicationComponent
   builder_method :examples_bar
 
   receives :current

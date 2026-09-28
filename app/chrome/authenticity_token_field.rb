@@ -3,7 +3,7 @@
 # The hidden field every form that writes carries: the session's CSRF token,
 # which Rack::Protection::AuthenticityToken in config.ru checks on each POST.
 # htmx sends a form's fields and so does a plain submit, so one field covers both.
-class AuthenticityTokenField < Weft::Component
+class AuthenticityTokenField < ApplicationComponent
   extend SiteHelper
 
   builder_method :authenticity_token

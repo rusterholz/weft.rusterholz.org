@@ -8,7 +8,7 @@ require "active_support/core_ext/string/output_safety"
 # that changes something, which depends on the system setting only the browser
 # can see. Choosing stores the theme in the session and reloads the page it was
 # chosen on, since the theme is an attribute of the whole document.
-class ThemeToggle < Weft::Component
+class ThemeToggle < ApplicationComponent
   builder_method :theme_toggle
 
   MOON = <<~SVG.squish.freeze

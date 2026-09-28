@@ -2,7 +2,7 @@
 
 # The header across the top of every page: where you are, on the left, and the
 # site-wide widgets, borderless, on the right.
-class SiteHeader < Weft::Component
+class SiteHeader < ApplicationComponent
   builder_method :site_header
 
   receives :trail

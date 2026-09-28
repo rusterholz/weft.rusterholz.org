@@ -11,7 +11,7 @@ require "prism"
 # show nothing the running class does not say. A declaration is any bare call in
 # the class body except the few that are Ruby's or Arbre's rather than weft's.
 # The components on the page at rest are the tinted ones.
-class Declarations < Weft::Component
+class Declarations < ApplicationComponent
   builder_method :declarations
 
   receives :components

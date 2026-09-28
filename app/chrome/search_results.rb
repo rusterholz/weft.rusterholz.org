@@ -2,7 +2,7 @@
 
 # What the header's search finds: catalog entries whose title or summary holds
 # the typed text. The running examples link; the rest are named as coming.
-class SearchResults < Weft::Component
+class SearchResults < ApplicationComponent
   builder_method :search_results
 
   param :q, default: ""

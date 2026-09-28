@@ -3,7 +3,7 @@
 # The breadcrumb that opens every page's header, wordmark first. Each step is a
 # label and a path; the last is the page itself, named but not linked, unless
 # it is the wordmark, which is always the way home.
-class Crumbs < Weft::Component
+class Crumbs < ApplicationComponent
   builder_method :crumbs
 
   receives :trail

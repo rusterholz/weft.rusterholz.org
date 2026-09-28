@@ -3,7 +3,7 @@
 # The strip along the foot of every page, in the bench tone: anything that
 # touches the wire sits here. The request line is a place held for the last
 # request a visitor makes; the site fills it once pages report their traffic.
-class Bench < Weft::Component
+class Bench < ApplicationComponent
   builder_method :bench
 
   receives :source_path

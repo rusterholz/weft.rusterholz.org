@@ -6,7 +6,7 @@ require "rouge"
 # Shows a file, highlighted, as the code that produced whatever is above it.
 # Reading it at render time is what keeps the code on the page the code that ran,
 # and every example goes through here, so presentation is one place.
-class CodeBlock < Weft::Component
+class CodeBlock < ApplicationComponent
   builder_method :code_block
 
   # A path inside this repository, all that is needed to find the file; the call
