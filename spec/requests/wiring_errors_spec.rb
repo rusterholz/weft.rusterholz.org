@@ -3,8 +3,10 @@
 require "rack/session"
 
 # Each of the site's wiring errors, raised by really wiring the site wrong, and
-# answered with the site's error page and an honest 500. Test mode shows the
-# exception, so each spec can name the error it reached.
+# answered with an honest 500: the site's error page for a page, weft's error
+# fragment in place for a fragment or an action. Catalog::Unknown reaches the
+# error page through Weft::Page's built-in edge. Test mode shows the exception,
+# so each spec can name the error it reached.
 RSpec.describe "a site wired wrong" do
   let(:title) { "<title>Something Went Wrong · weft</title>" }
 
@@ -59,14 +61,14 @@ RSpec.describe "a site wired wrong" do
   it "answers an example calling a site component that does not describe itself with the error page" do
     stub_const("Tabs", Module.new)
     stub_const("TabsPage", Class.new(ExamplePage))
-    load File.join(APP_ROOT, "spec", "fixtures", "tabs_calling_callout.rb")
+    load_fixture "tabs_calling_callout.rb"
 
     get "/examples/tabs"
 
     expect(last_response.status).to eq(500)
     expect(last_response.body).to include(title, "SiteHelper::Undescribed")
   ensure
-    Weft.registry.evict(Tabs::TabStrip) if defined?(Tabs::TabStrip)
+    forget_fixture(Tabs::TabStrip)
   end
 
   it "answers every page with the error page when a page is named for no example" do

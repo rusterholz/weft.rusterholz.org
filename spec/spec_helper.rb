@@ -19,6 +19,7 @@ RSpec.configure do |config|
   config.include ActiveSupport::Testing::TimeHelpers
   config.include Rack::Test::Methods
   config.include RackHarness
+  config.include FixtureExamples
 
   config.after { SiteData::Current.reset } # a spec that sets Current leaves none behind
 

@@ -56,11 +56,11 @@ RSpec.describe ExamplePage do
     before do
       stub_const("Tabs", Module.new)
       stub_const("TabsPage", Class.new(described_class))
-      load File.join(APP_ROOT, "spec", "fixtures", "tabs_example.rb")
+      load_fixture "tabs_example.rb"
       SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}"
     end
 
-    after { [TabsPage, Tabs::TabStrip].each { |klass| Weft.registry.evict(klass) } }
+    after { forget_fixture(TabsPage, Tabs::TabStrip) }
 
     it "lists its pieces, the page last, and no glue after them" do
       page = Nokogiri::HTML5(TabsPage.render)
