@@ -18,6 +18,8 @@ class ApplicationPage < Weft::Page
 
   register_stylesheet "css/site.css"
   register_script "js/htmx.min.js"
+  # Chrome only; the examples run on htmx alone. docs/development.md, "The Site's One Script".
+  register_script "js/site.js", defer: true
 
   adds_children_to :@content
 

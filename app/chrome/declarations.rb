@@ -32,6 +32,7 @@ class Declarations < ApplicationComponent
     super(attributes.merge("aria-label": "Declarations"))
     add_class "declarations"
     span "Declarations", class: "heading"
+    span "The one that answered your last click is lit.", class: "hint", hidden: true, "data-reveal": true
     params.components.each { |klass| block_for(klass) }
     behind
   end

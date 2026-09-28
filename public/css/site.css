@@ -363,6 +363,18 @@ h2 { margin: 18px 0 0; font-weight: 500; font-size: 28px; line-height: 1.2; }
 }
 .declaration.at-rest .name { color: var(--prussian); }
 .declaration.at-rest pre { color: var(--ink); }
+.declarations .hint { margin-top: -14px; font-size: 13px; font-style: italic; }
+
+/* What answered the last request, lit in copper: an action's declaration, or a
+   component's name when it rendered itself. */
+.declaration pre [data-handles] { display: inline-block; vertical-align: top; } /* lit as one box, not ragged lines */
+.declaration pre .lit {
+  background: color-mix(in oklab, var(--copper) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--copper) 22%, transparent);
+  border-radius: 2px;
+}
+.declaration.lit .name { color: var(--copper); }
+.declaration.lit { box-shadow: inset 2px 0 0 var(--copper); }
 .declarations .behind { font-size: 13px; }
 .declarations .behind code { font-size: 12px; }
 .reset-example form { display: block; margin: -20px 0 0 -8px; }
@@ -485,4 +497,13 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
   font-size: var(--size-bench);
   color: var(--muted);
 }
-.bench .bench-request { flex-grow: 1; color: var(--ink); }
+/* One line whatever the URL, since the columns' sticky offsets assume the bench's height. */
+.bench .bench-request {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.bench .bench-request[hidden] { display: block; visibility: hidden; } /* still holds the links to the right */

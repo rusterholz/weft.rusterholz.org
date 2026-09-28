@@ -66,6 +66,14 @@ RSpec.describe Declarations do
       expect(margin.css(".declaration pre").first.text).to eq(described_class.of(ClickToEdit::ContactCard))
     end
 
+    it "says a click lights what answered it, where the site's script is there to do it" do
+      hint = margin.at(".heading + .hint")
+
+      expect(hint.text).to eq("The one that answered your last click is lit.")
+      expect(hint).to have_attribute("hidden")
+      expect(hint).to have_attribute("data-reveal")
+    end
+
     it "names each block's component, as the Weft-Site-Handled header names a fragment" do
       expect(margin.css(".declaration").map { |block| block["data-component"] }).
         to eq(%w[ClickToEdit::ContactCard ClickToEdit::ContactEditor])

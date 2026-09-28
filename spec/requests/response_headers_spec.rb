@@ -50,6 +50,9 @@ RSpec.describe "response headers" do
     expect(last_response.headers["cache-control"]).to eq("private, max-age=604800")
     get "/static/js/htmx.min.js"
     expect(last_response.headers["cache-control"]).to eq("private, max-age=86400")
+    get "/static/js/site.js"
+    expect(last_response.status).to eq(200)
+    expect(last_response.headers["cache-control"]).to eq("private, max-age=86400")
     get "/examples/click-to-edit"
     expect(last_response.headers["cache-control"]).to eq("private, no-cache")
   end

@@ -597,6 +597,39 @@ a digest in each file's name, would justify.
 `X-Frame-Options` and `X-XSS-Protection` are not set here: the `Rack::Protection`
 weft's router runs already sends them.
 
+## The Site's One Script
+
+`public/js/site.js` is the only script the site writes, and it serves the chrome
+alone: the examples run on htmx and nothing else. `ApplicationPage` registers it,
+deferred, after htmx. It is a file on this origin rather than an inline script, so
+the content security policy's `'self'` already allows it and no hash has to follow
+its edits. It is kept a day, like htmx.
+
+It fills the bench with each htmx request as the browser sent it (method, path,
+status and round-trip time) and lights, in the declarations margin, whatever
+answered: the action's declaration, or the component's block when it rendered
+itself. The light stays until the next request.
+
+**This is weft not fitting the need yet.** Knowing what answered takes a hook
+weft 0.2 does not have. Its companions (`includes`) ride action responses,
+pushes and transfer arrivals, but not a plain fetch: `loads:` and every preset
+render with none, so a bench built from companions would never move on eight of
+the twenty-one examples, and every example would have to include site chrome in
+the code it shows. So `SiteData::HandledBy` works out what answered by walking
+the router's route table itself, and names it in a `Weft-Site-Handled` header
+the script reads. Weft is growing a hook of its own: request ids are planned for
+v0.3, and middleware around renders and actions is on its roadmap. When they
+land, revisit both the middleware and this script.
+
+Anything the script drives is rendered `hidden` and marked `data-reveal`, and the
+script reveals it on load. Without the script, nothing on the page promises what
+only the script can do.
+
+Request specs see the header and the markup, never the script running. To see it
+run, drive headless Chrome over the DevTools protocol against `bin/dev` (a fresh
+`--user-data-dir` each run, and stop the browser afterward): click through an
+example, then read the bench's text and which declaration carries `lit`.
+
 ## Deploying
 
 The site runs on Fly.io as the app `weft-rusterholz-org`: one machine in `dfw`,
