@@ -17,7 +17,7 @@ module SiteData
     TTL = 2.hours
     MAX_BYTES = 32.megabytes
 
-    NoVisitor = Class.new(StandardError)
+    NoVisitor = Class.new(Misassembled)
 
     class << self
       # The example's slice for the visitor in scope, holding `seed` until written.

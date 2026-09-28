@@ -21,7 +21,9 @@ module SiteData
       def page_name = "#{slug.tr('-', '_').camelize}Page"
     end
 
-    Unknown = Class.new(StandardError)
+    # Raised as weft first builds its route table, before any page is chosen, so it
+    # lands on Weft::Page's built-in edge: the error page, 500, for every request.
+    Unknown = Class.new(Misassembled)
 
     ENTRIES = [
       Entry["click-to-edit", "Click to Edit", "Swap a read-only view for an edit form in place -- transfers"],

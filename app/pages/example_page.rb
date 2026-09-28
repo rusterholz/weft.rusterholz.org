@@ -12,8 +12,9 @@ require "active_support/core_ext/string/inflections"
 class ExamplePage < ApplicationPage
   abstract!
 
-  Undescribed = Class.new(StandardError)
-  NoSuchExample = Class.new(StandardError)
+  Undescribed = Class.new(SiteData::Misassembled)
+  NoSuchExample = Class.new(SiteData::Misassembled)
+  NoWalkthrough = Class.new(SiteData::Misassembled)
 
   GLUE = "Glue"
 
@@ -31,7 +32,7 @@ class ExamplePage < ApplicationPage
   # Without this, a page that forgot to write one would render nothing and say
   # nothing about it.
   def walkthrough
-    raise NotImplementedError, "#{self.class} needs a walkthrough"
+    raise NoWalkthrough, "#{self.class} needs a walkthrough"
   end
 
   private

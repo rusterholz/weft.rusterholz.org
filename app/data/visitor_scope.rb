@@ -7,15 +7,15 @@ require "securerandom"
 module SiteData
   # Rack middleware, used in config.ru right after the session cookie middleware.
   # Gives every visitor an opaque id and publishes it on Current for one request.
-  # That id is the whole of this site's identity, and it is what namespaces a
-  # visitor's copy of an example's data in the Store. It lives in the session, an
-  # encrypted cookie, so a visitor can neither read their own id nor forge anyone
-  # else's. It also publishes the session's CSRF token, for every form that writes
-  # to carry.
+  # That id is the whole of this site's identity, and it namespaces a visitor's
+  # copy of an example's data in the Store. It lives in the session, an encrypted
+  # cookie, so a visitor can neither read their own id nor forge anyone else's.
+  # It also publishes the session's CSRF token, for every form that writes.
   class VisitorScope
     SESSION_KEY = "visitor"
 
-    NoSession = Class.new(StandardError)
+    # In Rack, before weft, so no recovers edge sees it: Puma answers with its own 500.
+    NoSession = Class.new(Misassembled)
 
     def initialize(app)
       @app = app

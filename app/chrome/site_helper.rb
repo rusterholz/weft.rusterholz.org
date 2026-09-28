@@ -7,7 +7,7 @@ require "prism"
 # itself once; which helpers an example uses is read from the example's files,
 # as the declarations margin reads them, so the list follows the code.
 module SiteHelper
-  Undescribed = Class.new(StandardError)
+  Undescribed = Class.new(SiteData::Misassembled)
 
   APP = File.join(APP_ROOT, "app", "")
 
