@@ -447,7 +447,8 @@ native extension can resolve on your machine and fail there, which is exactly
 why the lockfile carries the `x86_64-linux` platform alongside your own. When
 you change the `Gemfile`, check the lockfile picked up both.
 
-There is no deploy job and there are no secrets. Deploying is separate work.
+CI needs no secrets. A green run on a push to `main` is what the deploy
+workflow waits for; see [Deploying](#deploying).
 
 A red run is a stop. Nothing here is flaky by design, so a failure means a real
 disagreement between your machine and a clean checkout on Linux.
@@ -504,6 +505,13 @@ with its hidden input folded into a component as the guide suggests. A new form
 that writes needs the line; a GET action does not. In request specs,
 `post_form` fetches a token the way a browser would and posts with it.
 
+Ahead of the session, `Rack::Protection::HttpOrigin` answers `403` to a write
+whose `Origin` header names another site, token or no token. Weft's router runs
+the same check further in, but its reaction there is to clear the session and
+let the write through: a visitor whose browser and this app disagree about the
+site's own address would lose their data on every save, and see no error. The
+outer check refuses first and leaves the session alone.
+
 ### A Secure Cookie Needs a Truthful Proxy
 
 In production the session cookie is marked `secure`, and rack-session takes that
@@ -514,21 +522,140 @@ bug. Sending `X-Forwarded-Proto: https` brings it back.
 
 That matters once something terminates TLS in front of this app, because the app
 sees plain http from the proxy and decides from the forwarded scheme. If the
-proxy does not send one, or Rack does not trust the address it came from, every
-request looks like a brand-new visit and nobody keeps anything, and every form
-post is refused with a `403`, since its token belongs to a session the cookie
-never carried back. Check it against a real request, not a local one, the first time this
-site is deployed.
+proxy does not send one, every request looks like a brand-new visit and nobody
+keeps anything, and every form post is refused with a `403`, since its token
+belongs to a session the cookie never carried back. No spec can see this, so
+`bin/smoke` checks it against the deployed site after every deploy.
+
+Rack believes forwarded headers from whoever sends them: `X-Forwarded-Proto`,
+`X-Forwarded-Host` and `Forwarded` all count, and only `request.ip` asks whether
+the sender was a trusted proxy. That is sound on Fly, where the proxy is the only
+way in and redirects plain http, and where a client that forges one of these
+headers changes only its own response. It stops being sound behind anything that
+caches responses: a forged `X-Forwarded-Host` changes the `Location` of a
+redirect, and a shared cache would serve that redirect to everyone. Put a caching
+CDN in front of this site and the forwarded host has to be pinned first.
+
+## What Every Response Tells the Browser
+
+`SiteData::ResponseHeaders` wraps the whole stack in `config.ru`, so the `403`s
+refused before weft carry its headers too: the content security policy, HSTS,
+the referrer policy, `nosniff`, and a cache policy chosen by path.
+
+**The content security policy names only what the pages load.** Scripts come
+from this origin, plus the one inline `<script>` weft 0.2 writes into every page
+to configure htmx. Weft gives that script no nonce, so the policy allows it by
+its SHA-256 hash. `'unsafe-eval'` is left out: htmx needs it only to evaluate
+trigger filters (`keyup[ctrlKey]`), `hx-on` handlers and `js:` values, and with
+it allowed, any markup injected into a page could run script through htmx. Two
+specs guard the policy, because a script it blocks fails in the browser and
+nowhere else:
+
+- Every inline script is hashed and checked against the policy. A pin move that
+  changes weft's script, or a page registering one of its own, turns it red; add
+  the new hash from the failure message.
+- Nothing may ask htmx to evaluate code: no `hx-on` handler, no `hx-vars`, no
+  trigger filter in `hx-trigger`, no `js:` value, each with or without the
+  `data-` prefix. An example that needs a trigger filter needs `'unsafe-eval'`
+  added to `script-src` in the same change.
+
+Both scan the home page, every live example page, the not-found and error pages,
+and every fragment those pages fetch with `hx-get`, requested with the page's
+own `hx-vals`, as each renders on arrival. A fragment reached only from another
+fragment, or only after a write, is not scanned.
+
+Styles allow `'unsafe-inline'`, since htmx injects a `<style>` element for its
+request indicators, and weft's documented examples, which this site ports, use
+`style` attributes.
+
+**Nothing may sit in a shared cache.** Every response renews the session cookie,
+static files included, so a shared cache holding one would hand a visitor's
+cookie to the next.
+
+**Nothing is kept long, because no URL here carries a version.** A font swapped
+under the same name reaches a returning visitor only once their copy expires, so
+fonts are kept for a week, and vendored scripts for a day, since
+`/static/js/htmx.min.js` changes whenever the pin moves. An expired copy costs
+little: static files carry `Last-Modified`, so the browser revalidates and gets a
+`304` rather than the file. Pages, fragments and the stylesheet revalidate on
+every use, and a font or script that was not found is not kept at all, so adding
+it takes effect at once. A long, `immutable` cache is what fingerprinted URLs,
+a digest in each file's name, would justify.
+
+`X-Frame-Options` and `X-XSS-Protection` are not set here: the `Rack::Protection`
+weft's router runs already sends them.
 
 ## Deploying
 
-Not yet. The site runs locally and builds into an image; putting it on the
-internet is separate work, and nothing here is wired for it.
+The site runs on Fly.io as the app `weft-rusterholz-org`: one machine in `dfw`,
+always on, described by `fly.toml`. It answers at
+<https://weft-rusterholz-org.fly.dev>. A custom domain comes later. When it
+does, the deploy workflow's check follows its `SITE_URL`, a single line; the
+address also appears in the examples on this page and in `bin/smoke`'s usage
+comment, and the old one keeps answering, so those can follow at leisure.
 
-The image is the deployable unit, and it is worth running by hand when the
-Dockerfile changes:
+Visitor state lives in that machine's memory, so every deploy starts every
+visitor's examples afresh. That is expected: the state is throwaway by design.
+
+### Continuously, on Every Push to Main
+
+`.github/workflows/deploy.yml` waits for CI to finish on a push to `main`, and
+deploys only if it passed, building exactly the commit CI checked, and only
+while that commit is still `main`'s tip: re-running an old CI run never rolls
+production back. It runs `flyctl deploy --remote-only`, so Fly's builders make
+the image, and then runs `bin/smoke` against the live site. A pull request never
+deploys, and a deploy in progress is never canceled by a newer push; the newer
+one waits.
+
+It needs one repository secret, `FLY_API_TOKEN`, a deploy token scoped to this
+one app. The application's own secret, `SESSION_SECRET`, lives on Fly and
+nowhere else:
 
 ```bash
-docker build -t weft-site .
-docker run --rm -p 8080:8080 weft-site
+fly secrets set SESSION_SECRET=$(openssl rand -hex 64) -a weft-rusterholz-org
+```
+
+Changing it signs every visitor out, which here costs them nothing but their
+edits.
+
+### By Hand, From a Checkout
+
+```bash
+fly deploy --local-only --ha=false --build-arg GIT_SHA=$(git rev-parse HEAD)
+bin/smoke https://weft-rusterholz-org.fly.dev --sha $(git rev-parse HEAD)
+```
+
+**`--ha=false` matters.** Fly's default for a new app is two machines, and two
+machines here would be two separate memories: a visitor's edit would vanish
+whenever the proxy sent their next request to the other one. `fly.toml` asks for
+one, and both paths pass the flag so that the first deploy honors it.
+
+`--local-only` builds with your Docker rather than Fly's remote builder, which
+some networks cannot reach. Without `GIT_SHA`, "open the hood" links point at
+`main` rather than at the commit that is running.
+
+If `docker build` hangs with no output at all on macOS, the keychain credential
+helper is the usual cause. Build with an empty Docker config instead:
+
+```bash
+export DOCKER_CONFIG=$(mktemp -d); echo '{}' > "$DOCKER_CONFIG/config.json"
+fly auth token | tr -d '\n' | docker login registry.fly.io -u x --password-stdin
+```
+
+### Checking a Copy of the Site
+
+`bin/smoke` walks the site as a visitor would, and needs nothing but Ruby. It
+checks that `/` sets a secure session cookie, that the pages, a fragment and the
+static files answer, that a save carrying the token and this site's `Origin`
+persists to the next request, and that a save without the token, or from another
+`Origin`, is refused without touching the visitor's earlier edit.
+
+The image is worth running by hand when the Dockerfile or the middleware
+changes. It needs a session key of its own, and, since nothing in front of it
+terminates TLS, the smoke check has to say it is behind https:
+
+```bash
+docker build --build-arg GIT_SHA=$(git rev-parse HEAD) -t weft-site .
+docker run --rm -p 8080:8080 -e SESSION_SECRET=$(openssl rand -hex 64) weft-site
+bin/smoke http://localhost:8080 --forwarded-https   # in a second terminal
 ```

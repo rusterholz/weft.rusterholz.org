@@ -1,0 +1,80 @@
+name: Deploy
+
+# Every push to main that CI passes goes live, and is then checked the way a
+# visitor uses it. See docs/development.md, "Deploying".
+
+permissions:
+  contents: read
+
+# Runs once CI finishes, rather than as a job inside it: CI cancels a run when a
+# newer push arrives, and a deploy must never be cut off halfway.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+# One deploy at a time, each allowed to finish; a newer one waits its turn.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://weft-rusterholz-org.fly.dev
+
+jobs:
+  # Re-running an old CI run fires this workflow again, for an old commit;
+  # deploying it would roll production back. Only main's current tip deploys.
+  current:
+    name: Still main's tip
+    # Only a push: a pull request from a fork's branch named main also matches
+    # the branch filter above, and must never deploy.
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      deploy: ${{ steps.tip.outputs.deploy }}
+    env:
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - id: tip
+        run: |
+          tip=$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)
+          if [ "$tip" = "$HEAD_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Not deploying $HEAD_SHA: main is now at $tip, which deploys on its own."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: current
+    if: needs.current.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      # The commit CI passed, not whatever main is by now.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # Pinned to a commit, not a tag, since it runs beside the deploy token.
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # v1.6
+
+      # Fly builds the image on its own builders. --ha=false: one machine, as
+      # fly.toml intends; Fly's default is two.
+      - name: Deploy
+        run: flyctl deploy --remote-only --ha=false --build-arg GIT_SHA="$HEAD_SHA"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # bin/smoke needs no gems, only the Ruby in .ruby-version.
+      - uses: ruby/setup-ruby@v1
+
+      # A deploy that exits 0 is not the same as a site that works.
+      - name: Check the deployed site
+        run: ruby bin/smoke "$SITE_URL" --sha "$HEAD_SHA"

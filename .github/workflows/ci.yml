@@ -1,8 +1,8 @@
 name: CI
 
 # The same three checks bin/check runs, plus the image build, so a green run
-# here and a green run locally mean the same thing. No deploy and no secrets:
-# see docs/development.md, "Continuous Integration".
+# here and a green run locally mean the same thing. No secrets: a green run on
+# main is what deploy.yml waits for. See docs/development.md, "Continuous Integration".
 
 permissions:
   contents: read
