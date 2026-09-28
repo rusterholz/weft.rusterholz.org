@@ -384,6 +384,12 @@ closes the column.
 The components the article renders before anyone clicks are the tinted ones,
 found by walking the article as built rather than by the page saying so.
 
+Each block carries its component's name in `data-component`, and each `performs`,
+`transfers` or `dismisses` in it carries `data-handles`, the name the
+`Weft-Site-Handled` header gives when that action answers: the component's name,
+a `#`, and the action's. A request spec walks Click to Edit and holds
+every header it sees to a name the page's margin carries.
+
 ## When the Site Is Wired Wrong
 
 A page with no walkthrough, a class its page does not describe, a stack missing

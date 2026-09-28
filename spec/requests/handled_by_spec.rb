@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+
 # Which class answered, in the header the bench and the margin read: through the
 # whole stack, as a visitor's browser gets it.
 RSpec.describe "the Weft-Site-Handled header" do
@@ -45,6 +47,28 @@ RSpec.describe "the Weft-Site-Handled header" do
       get path
       expect(handled).to be_nil, path
     end
+  end
+
+  # The contract the page's script leans on: whatever the header says, the margin
+  # has something marked with that name to light.
+  it "names only what the example's margin can light, through the whole Click to Edit flow" do
+    get "/examples/click-to-edit"
+    margin = Nokogiri::HTML5(last_response.body).at("aside.declarations")
+    lightable = margin.css("[data-component]").map { |block| block["data-component"] } +
+                margin.css("[data-handles]").map { |declaration| declaration["data-handles"] }
+
+    named = []
+    get card_path, contact_id: "1"
+    named << handled
+    get "#{card_path}/edit", contact_id: "1"
+    named << handled
+    get "#{editor_path}/cancel", contact_id: "1"
+    named << handled
+    post_form "#{editor_path}/save", contact_id: "1", first_name: "Joseph"
+    named << handled
+
+    expect(named.compact.size).to eq(4)
+    expect(lightable).to include(*named)
   end
 
   it "names nothing for an action the component does not declare for that verb" do

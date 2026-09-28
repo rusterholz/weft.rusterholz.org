@@ -66,6 +66,21 @@ RSpec.describe Declarations do
       expect(margin.css(".declaration pre").first.text).to eq(described_class.of(ClickToEdit::ContactCard))
     end
 
+    it "names each block's component, as the Weft-Site-Handled header names a fragment" do
+      expect(margin.css(".declaration").map { |block| block["data-component"] }).
+        to eq(%w[ClickToEdit::ContactCard ClickToEdit::ContactEditor])
+    end
+
+    it "marks each action's declaration with what the header names when that action answers" do
+      marked = margin.css("pre [data-handles]").map { |span| [span["data-handles"], span.text.lines.first.strip] }
+
+      expect(marked).to eq([
+                             ["ClickToEdit::ContactCard#edit", "transfers :edit, to: ContactEditor,"],
+                             ["ClickToEdit::ContactEditor#save", "transfers :save, to: ContactCard do |params|"],
+                             ["ClickToEdit::ContactEditor#cancel", "transfers :cancel, to: ContactCard,"]
+                           ])
+    end
+
     it "closes with what the components stand on" do
       expect(margin.element_children.last.text).to eq("Behind both: ContactData, where a visitor's contact is kept.")
     end

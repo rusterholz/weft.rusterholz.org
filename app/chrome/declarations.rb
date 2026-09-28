@@ -11,6 +11,10 @@ require "prism"
 # show nothing the running class does not say. A declaration is any bare call in
 # the class body except the few that are Ruby's or Arbre's rather than weft's.
 # The components on the page at rest are the tinted ones.
+#
+# Each block, and each action's declaration within it, carries the name the
+# Weft-Site-Handled header gives when it answers (SiteData::HandledBy), so the
+# page can light whatever handled the visitor's last request.
 class Declarations < ApplicationComponent
   builder_method :declarations
 
@@ -19,6 +23,7 @@ class Declarations < ApplicationComponent
   receives :behind
 
   NOT_WEFT = %i[builder_method private protected public].freeze
+  ACTIONS = %i[performs transfers dismisses].freeze
   BEHIND = { 1 => "Behind it", 2 => "Behind both" }.freeze
 
   def tag_name = "aside"
@@ -34,9 +39,10 @@ class Declarations < ApplicationComponent
   private
 
   def block_for(klass)
-    div class: ["declaration", ("at-rest" if params.at_rest.include?(klass))].compact.join(" ") do
+    div class: ["declaration", ("at-rest" if params.at_rest.include?(klass))].compact.join(" "),
+        "data-component": klass.name do
       span klass.name.demodulize, class: "name"
-      pre self.class.of(klass)
+      pre { text_node self.class.marked(klass) }
     end
   end
 
@@ -53,19 +59,40 @@ class Declarations < ApplicationComponent
   end
 
   class << self
-    def of(klass)
-      path, = Object.const_source_location(klass.name)
-      laid_out(declarations_in(class_node(Prism.parse_file(path).value, klass.name.demodulize)))
+    def of(klass) = laid_out(klass) { |node| dedented(node) }
+
+    # The same text as markup: each action's declaration in a span naming what
+    # answers when that action runs, "ClickToEdit::ContactCard#edit".
+    def marked(klass)
+      laid_out(klass) do |node|
+        text = ERB::Util.html_escape(dedented(node))
+        handles = handles(klass, node)
+        handles ? %(<span data-handles="#{ERB::Util.html_escape(handles)}">#{text}</span>) : text
+      end.html_safe
     end
 
     private
 
     # One per line, keeping the blank lines the file puts between groups.
-    def laid_out(statements)
+    def laid_out(klass)
+      statements = statements_of(klass)
       statements.each_with_index.map do |node, index|
         gap = index.positive? && node.location.start_line > statements[index - 1].location.end_line + 1
-        "#{"\n" if gap}#{dedented(node)}"
+        "#{"\n" if gap}#{yield node}"
       end.join("\n")
+    end
+
+    def statements_of(klass)
+      path, = Object.const_source_location(klass.name)
+      declarations_in(class_node(Prism.parse_file(path).value, klass.name.demodulize))
+    end
+
+    # A nameless action answers at the component's own path, so it is named as the component is.
+    def handles(klass, node)
+      return unless ACTIONS.include?(node.name)
+
+      name = node.arguments&.arguments&.first
+      name.is_a?(Prism::SymbolNode) ? "#{klass.name}##{name.unescaped}" : klass.name
     end
 
     def class_node(node, name)
