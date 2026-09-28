@@ -10,6 +10,11 @@ RSpec.describe "the Weft-Site-Handled header" do
 
   def handled = last_response.headers["weft-site-handled"]
 
+  # The names the page just fetched carries in its margin, under one attribute.
+  def margin_marks(attribute)
+    Nokogiri::HTML5(last_response.body).css("aside.declarations [#{attribute}]").map { |node| node[attribute] }
+  end
+
   it "names the component a fragment renders" do
     get card_path, contact_id: "1"
 
@@ -53,22 +58,23 @@ RSpec.describe "the Weft-Site-Handled header" do
   # has something marked with that name to light.
   it "names only what the example's margin can light, through the whole Click to Edit flow" do
     get "/examples/click-to-edit"
-    margin = Nokogiri::HTML5(last_response.body).at("aside.declarations")
-    lightable = margin.css("[data-component]").map { |block| block["data-component"] } +
-                margin.css("[data-handles]").map { |declaration| declaration["data-handles"] }
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
 
-    named = []
     get card_path, contact_id: "1"
-    named << handled
+    rendered = handled
+    actions = []
     get "#{card_path}/edit", contact_id: "1"
-    named << handled
+    actions << handled
     get "#{editor_path}/cancel", contact_id: "1"
-    named << handled
+    actions << handled
     post_form "#{editor_path}/save", contact_id: "1", first_name: "Joseph"
-    named << handled
+    actions << handled
 
-    expect(named.compact.size).to eq(4)
-    expect(lightable).to include(*named)
+    # An action is lit by its own declaration, so a header that dropped the action would light nothing.
+    expect(blocks).to include(rendered)
+    expect(actions.compact.size).to eq(3)
+    expect(declarations).to include(*actions)
   end
 
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra
