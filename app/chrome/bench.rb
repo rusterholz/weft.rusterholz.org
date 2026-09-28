@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# The strip along the foot of every page, in the bench tone: anything that
-# touches the wire sits here. The request line is a place held for the last
+# The strip held along the foot of the window on every page, in the bench tone:
+# anything that touches the wire sits here. The request line is a place held for the last
 # request a visitor makes; the site fills it once pages report their traffic.
 class Bench < ApplicationComponent
   builder_method :bench

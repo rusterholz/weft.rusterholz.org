@@ -267,13 +267,13 @@ main.example-layout {
 }
 
 /* The side columns scroll with the article until they run out, then hold while
-   it goes on. Stuck to the viewport's bottom, kept inside the row, and at least
-   as tall as what the viewport shows above the bench at the page's end: a
-   column that fits holds near the top, one that does not holds once its end is
-   in view. */
+   it goes on. Stuck just above the bench, kept inside the row, and at least as
+   tall as what the viewport shows above the bench at the page's end: a column
+   that fits holds near the top, one that does not holds once its end is in
+   view. Both lean on the bench being one line of fixed height. */
 main.example-layout > :is(.examples-bar, .declarations) {
   position: sticky;
-  bottom: 0;
+  bottom: var(--bench-height);
   align-self: end;
   box-sizing: border-box;
   min-height: calc(100vh - var(--main-foot) - var(--bench-height));
@@ -469,7 +469,11 @@ article div > strong { display: inline-block; width: 140px; font-size: 15px; fon
   main.example-layout > .declarations { position: relative; min-height: 0; align-self: start; }
 }
 
+/* Held at the foot of the window, so a click's request lands where it is seen. */
 .bench {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 24px;
