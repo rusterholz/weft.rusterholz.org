@@ -598,7 +598,9 @@ visitor's examples afresh. That is expected: the state is throwaway by design.
 ### Continuously, on Every Push to Main
 
 `.github/workflows/deploy.yml` waits for CI to finish on a push to `main`, and
-deploys only if it passed, building exactly the commit CI checked. It runs
+deploys only if it passed, building exactly the commit CI checked, and only
+while that commit is still `main`'s tip: re-running an old CI run never rolls
+production back. It runs
 `flyctl deploy --remote-only`, so Fly's builders make the image, and then runs
 `bin/smoke` against the live site. A pull request never deploys, and a deploy in
 progress is never cancelled by a newer push; the newer one waits.

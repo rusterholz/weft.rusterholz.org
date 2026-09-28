@@ -23,12 +23,37 @@ env:
   SITE_URL: https://weft-rusterholz-org.fly.dev
 
 jobs:
-  deploy:
-    name: Deploy to Fly.io
+  # Re-running an old CI run fires this workflow again, for an old commit;
+  # deploying it would roll production back. Only main's current tip deploys.
+  current:
+    name: Still main's tip
     # Only a push: a pull request from a fork's branch named main also matches
     # the branch filter above, and must never deploy.
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      deploy: ${{ steps.tip.outputs.deploy }}
+    env:
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - id: tip
+        run: |
+          tip=$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)
+          if [ "$tip" = "$HEAD_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Not deploying $HEAD_SHA: main is now at $tip, which deploys on its own."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: current
+    if: needs.current.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
@@ -37,7 +62,8 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - uses: superfly/flyctl-actions/setup-flyctl@v1
+      # Pinned to a commit, not a tag, since it runs beside the deploy token.
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # v1.6
 
       # Fly builds the image on its own builders. --ha=false: one machine, as
       # fly.toml intends; Fly's default is two.
