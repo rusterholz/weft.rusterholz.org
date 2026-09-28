@@ -28,7 +28,10 @@ WORKDIR /app
 COPY --from=gems /usr/local/bundle /usr/local/bundle
 COPY . .
 
-RUN useradd --create-home --shell /usr/sbin/nologin site && chown -R site:site /app
+# The code stays root's and read-only to the user that serves it: the site keeps
+# its state in memory and writes no file, so a compromised process cannot
+# rewrite the application.
+RUN useradd --create-home --shell /usr/sbin/nologin site
 USER site
 
 # The commit this image was built from, so every "open the hood" link points at
