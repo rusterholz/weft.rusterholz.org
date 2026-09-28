@@ -2,6 +2,7 @@
 
 require "base64"
 require "digest"
+require "json"
 require "nokogiri"
 
 # What the browser is told about every response, through the whole stack: the
@@ -72,40 +73,76 @@ RSpec.describe "response headers" do
     end
   end
 
+  # Every page, the error page included, and every fragment a page fetches with
+  # hx-get, with the hx-vals it would send: one level deep, as rendered on arrival.
+  def each_document(&)
+    [*pages, ExplodingPage.page_path].each do |path|
+      get path
+      page = Nokogiri::HTML5(last_response.body)
+      yield path, page
+      each_fragment_of(page, &)
+    end
+  end
+
+  def each_fragment_of(page)
+    page.css("[hx-get]").each do |element|
+      params = JSON.parse(element["hx-vals"] || "{}")
+      where = "#{element['hx-get']} #{params}"
+      get element["hx-get"], params
+      expect(last_response.status).to be < 400, where
+      yield where, Nokogiri::HTML5(last_response.body)
+    end
+  end
+
+  # What htmx runs as code: hx-on handlers, hx-vars, trigger filters and js: values,
+  # each also spelled with a data- prefix.
+  def evaluates?(attribute)
+    name = attribute.name.delete_prefix("data-")
+    name.start_with?("hx-on") || name == "hx-vars" ||
+      (name == "hx-trigger" && attribute.value.include?("[")) ||
+      attribute.value.match?(/\A\s*(js|javascript):/)
+  end
+
   # A script the policy does not name is not run, and nothing on the server
   # notices: the page loads, and htmx is quietly misconfigured.
-  it "allows every inline script any page carries, by its hash" do
-    pages.each do |path|
-      get path
-      Nokogiri::HTML5(last_response.body).css("script:not([src])").each do |script|
+  it "allows every inline script any page or fragment carries, by its hash" do
+    each_document do |where, html|
+      html.css("script:not([src])").each do |script|
         hash = "'sha256-#{Base64.strict_encode64(Digest::SHA256.digest(script.text))}'"
-        expect(policy_sources("script-src")).to include(hash), "#{path}: #{script.text[0, 60].inspect}"
+        expect(policy_sources("script-src")).to include(hash), "#{where}: #{script.text[0, 60].inspect}"
       end
     end
   end
 
   it "loads every script from this origin" do
-    pages.each do |path|
-      get path
-      Nokogiri::HTML5(last_response.body).css("script[src]").each do |script|
-        expect(script["src"]).to start_with("/"), "#{path}: #{script['src']}"
+    each_document do |where, html|
+      html.css("script[src]").each do |script|
+        expect(script["src"]).to start_with("/"), "#{where}: #{script['src']}"
       end
     end
   end
 
-  # htmx evaluates trigger filters, hx-on handlers and js: values as code, which
-  # the policy does not allow, so they would fail in the browser without a word.
-  it "asks htmx to evaluate nothing" do
-    pages.each do |path|
-      get path
-      Nokogiri::HTML5(last_response.body).css("*").each do |element|
+  # The policy does not allow evaluation, so any of these would fail in the
+  # browser without a word.
+  it "asks htmx to evaluate nothing, on any page or fragment" do
+    each_document do |where, html|
+      html.css("*").each do |element|
         element.attributes.each_value do |attribute|
-          evaluates = attribute.name.start_with?("hx-on") ||
-                      (attribute.name == "hx-trigger" && attribute.value.include?("[")) ||
-                      attribute.value.match?(/\A\s*(js|javascript):/)
-          expect(evaluates).to be(false), "#{path}: #{attribute.name}=#{attribute.value.inspect}"
+          expect(evaluates?(attribute)).to be(false), "#{where}: #{attribute.name}=#{attribute.value.inspect}"
         end
       end
     end
+  end
+
+  it "recognizes every form htmx evaluates" do
+    evaluating = Nokogiri::HTML5.fragment(<<~HTML).at("p")
+      <p hx-on:click="x" hx-on::after-request="x" data-hx-on:click="x" hx-vars="x" data-hx-vars="x"
+         hx-trigger="keyup[ctrlKey]" data-hx-trigger="keyup[ctrlKey]" hx-vals="js:{a: 1}"
+         data-hx-vals="js:{a: 1}" href="javascript:void(0)"></p>
+    HTML
+    inert = Nokogiri::HTML5.fragment(%(<p hx-trigger="click" hx-vals='{"a":1}' data-hx-get="/x"></p>)).at("p")
+
+    expect(evaluating.attributes.values.reject { |attribute| evaluates?(attribute) }.map(&:name)).to be_empty
+    expect(inert.attributes.values.select { |attribute| evaluates?(attribute) }.map(&:name)).to be_empty
   end
 end

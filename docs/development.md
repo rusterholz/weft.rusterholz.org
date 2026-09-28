@@ -551,11 +551,18 @@ it allowed, any markup injected into a page could run script through htmx. Two
 specs guard the policy, because a script it blocks fails in the browser and
 nowhere else:
 
-- Every page's inline scripts are hashed and checked against the policy. A pin
-  move that changes weft's script, or a page registering one of its own, turns
-  it red; add the new hash from the failure message.
-- No page may ask htmx to evaluate anything. An example that needs a trigger
-  filter needs `'unsafe-eval'` added to `script-src` in the same change.
+- Every inline script is hashed and checked against the policy. A pin move that
+  changes weft's script, or a page registering one of its own, turns it red; add
+  the new hash from the failure message.
+- Nothing may ask htmx to evaluate code: no `hx-on` handler, no `hx-vars`, no
+  trigger filter in `hx-trigger`, no `js:` value, each with or without the
+  `data-` prefix. An example that needs a trigger filter needs `'unsafe-eval'`
+  added to `script-src` in the same change.
+
+Both scan the home page, every live example page, the not-found and error pages,
+and every fragment those pages fetch with `hx-get`, requested with the page's
+own `hx-vals`, as each renders on arrival. A fragment reached only from another
+fragment, or only after a write, is not scanned.
 
 Styles allow `'unsafe-inline'`, since htmx injects a `<style>` element for its
 request indicators, and weft's documented examples, which this site ports, use
