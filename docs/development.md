@@ -378,6 +378,31 @@ closes the column.
 The components the article renders before anyone clicks are the tinted ones,
 found by walking the article as built rather than by the page saying so.
 
+## When the Site Is Wired Wrong
+
+A page with no walkthrough, a class its page does not describe, a stack missing
+`VisitorScope`: the site's own mistakes raise subclasses of
+`SiteData::Misassembled`. Only a developer meets one, and each message says what
+is missing. Where they land:
+
+- **In a page render:** `ApplicationPage` recovers with the configured error
+  page, as a 500.
+- **In a site component's fragment or action:** `ApplicationComponent` recovers
+  with weft's error fragment, in place, as a 500. Its target is the
+  `:error_component` knob, not a page: weft answers a page target from a
+  component with a redirect.
+- **In an example's component:** weft's built-in `StandardError` edge, with the
+  same fragment. The examples subclass `Weft::Component`, as weft's docs write
+  them.
+- **Before any of those:** `SiteData::Catalog::Unknown` raises as weft first
+  builds its route table, so it lands on `Weft::Page`'s built-in edge, for every
+  request; `SiteData::VisitorScope::NoSession` raises in Rack, before weft, and
+  Puma answers.
+
+A new wiring error subclasses `SiteData::Misassembled`. Never raise
+`NotImplementedError` from a page or component: it is a `ScriptError`, not a
+`StandardError`, so no weft edge catches it and the visitor gets a bare 500.
+
 ## Documentation Drift
 
 ```bash
