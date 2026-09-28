@@ -239,7 +239,8 @@ public surface, so **re-verify it whenever the pin moves**: a release that renam
 or inlines that method takes every example page's URL with it. The neighboring
 `title_declaration` override is public API and needs no such care.
 
-The full list of weft internals this site overrides, to re-check at every pin move:
+The full list of weft internals this site overrides or relies on, to re-check at
+every pin move:
 
 - `default_page_path`, in `ExamplePage`: every example page's URL.
 - `weft_dom_id`, in `CodeBlock`, `Callout`, `SearchResults` and
@@ -253,6 +254,11 @@ The full list of weft internals this site overrides, to re-check at every pin mo
   stylesheet shows one of the two toggles by the ids weft derives for them,
   `#theme-toggle-dark` and `#theme-toggle-light`. A release that names elements
   differently leaves both toggles showing, or neither.
+- The router's walk from a path to the component and action that answer it,
+  which weft 0.2 keeps private. `SiteData::HandledBy` repeats it through the
+  registry's public API to name what answered each request, in the
+  `Weft-Site-Handled` header the bench and the margin read. A release that walks
+  differently makes the margin light the wrong declaration, or none.
 
 When a page needs to tell the reader something prominent, such as a name a later
 weft changes, or a rough edge they will meet on this version, it wraps the prose
