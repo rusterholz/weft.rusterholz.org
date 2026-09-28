@@ -3,11 +3,11 @@
 # The strip along the foot of every page, in the bench tone: anything that
 # touches the wire sits here. The request line is a place held for the last
 # request a visitor makes; the site fills it once pages report their traffic.
-class Bench < Weft::Component
+class Bench < ApplicationComponent
   builder_method :bench
 
   receives :source_path
-  derives(:source_href) { |p| Source.url(p.source_path) }
+  derives(:source_href) { |p| SiteData::Source.url(p.source_path) }
 
   def tag_name = "footer"
 

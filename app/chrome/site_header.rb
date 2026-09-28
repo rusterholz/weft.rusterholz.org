@@ -2,7 +2,7 @@
 
 # The header across the top of every page: where you are, on the left, and the
 # site-wide widgets, borderless, on the right.
-class SiteHeader < Weft::Component
+class SiteHeader < ApplicationComponent
   builder_method :site_header
 
   receives :trail
@@ -17,7 +17,7 @@ class SiteHeader < Weft::Component
     div class: "widgets" do
       site_search
       version_picker
-      Theme::CHOICES.reverse_each { |theme| theme_toggle theme: theme, return_to: params.return_to }
+      SiteData::Theme::CHOICES.reverse_each { |theme| theme_toggle theme: theme, return_to: params.return_to }
       a "GitHub", href: WEFT_REPO_URL, class: "flat"
     end
   end

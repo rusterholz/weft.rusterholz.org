@@ -2,12 +2,12 @@
 
 # What the header's search finds: catalog entries whose title or summary holds
 # the typed text. The running examples link; the rest are named as coming.
-class SearchResults < Weft::Component
+class SearchResults < ApplicationComponent
   builder_method :search_results
 
   param :q, default: ""
   derives(:query) { |p| p.q.to_s.strip }
-  derives(:matches) { |p| Catalog.matching(p.query) }
+  derives(:matches) { |p| SiteData::Catalog.matching(p.query) }
 
   # Weft would suffix the id with the query itself, typed by anyone.
   def weft_dom_id = "search-results"

@@ -3,7 +3,7 @@
 require "securerandom"
 
 RSpec.describe ClickToEdit::ContactData do
-  before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+  before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
   it "finds a contact as it was seeded" do
     expect(described_class.find("1")).to eq(first_name: "Joe", last_name: "Blow", email: "joe@blow.com")

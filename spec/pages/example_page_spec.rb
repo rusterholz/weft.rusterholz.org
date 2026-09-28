@@ -5,7 +5,7 @@ require "securerandom"
 
 RSpec.describe ExamplePage do
   describe "the three columns, on a live example" do
-    before { Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
+    before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
     let(:page) { Nokogiri::HTML5(ClickToEditPage.render) }
 
@@ -56,11 +56,11 @@ RSpec.describe ExamplePage do
     before do
       stub_const("Tabs", Module.new)
       stub_const("TabsPage", Class.new(described_class))
-      load File.join(APP_ROOT, "spec", "fixtures", "tabs_example.rb")
-      Current.visitor = "visitor-#{SecureRandom.hex(4)}"
+      load_fixture "tabs_example.rb"
+      SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}"
     end
 
-    after { [TabsPage, Tabs::TabStrip].each { |klass| Weft.registry.evict(klass) } }
+    after { forget_fixture(TabsPage, Tabs::TabStrip) }
 
     it "lists its pieces, the page last, and no glue after them" do
       page = Nokogiri::HTML5(TabsPage.render)
@@ -94,7 +94,7 @@ RSpec.describe ExamplePage do
   # described stops the page, and a description naming nothing is dead copy that
   # would otherwise sit in the file unnoticed.
   it "describes exactly the classes it is made of, and itself, on every live example page" do
-    live_pages = Catalog.entries.select(&:live?).map do |entry|
+    live_pages = SiteData::Catalog.entries.select(&:live?).map do |entry|
       Object.const_get("#{entry.slug.tr('-', '_').camelize}Page")
     end
 

@@ -12,8 +12,9 @@ require "active_support/core_ext/string/inflections"
 class ExamplePage < ApplicationPage
   abstract!
 
-  Undescribed = Class.new(StandardError)
-  NoSuchExample = Class.new(StandardError)
+  Undescribed = Class.new(SiteData::Misassembled)
+  NoSuchExample = Class.new(SiteData::Misassembled)
+  NoWalkthrough = Class.new(SiteData::Misassembled)
 
   GLUE = "Glue"
 
@@ -31,7 +32,7 @@ class ExamplePage < ApplicationPage
   # Without this, a page that forgot to write one would render nothing and say
   # nothing about it.
   def walkthrough
-    raise NotImplementedError, "#{self.class} needs a walkthrough"
+    raise NoWalkthrough, "#{self.class} needs a walkthrough"
   end
 
   private
@@ -110,7 +111,7 @@ class ExamplePage < ApplicationPage
 
   # Previous and next walk the running examples; the first one's "previous" is the list of all of them.
   def pagination
-    previous, following = Catalog.neighbors_of(entry.slug)
+    previous, following = SiteData::Catalog.neighbors_of(entry.slug)
     nav "aria-label": "Pagination", class: "pagination" do
       a "← #{previous ? "Previous: #{previous.title}" : 'All UI Examples'}", href: previous&.path || "/"
       a "Next: #{following.title} →", href: following.path if following
@@ -121,16 +122,16 @@ class ExamplePage < ApplicationPage
     # Every data class of a running example back to its seed, for this visitor;
     # answers the page's path. A slug that is not a running example is not found.
     def reset!(slug)
-      entry = Catalog.entries.find { |candidate| candidate.slug == slug && candidate.live? }
+      entry = SiteData::Catalog.entries.find { |candidate| candidate.slug == slug && candidate.live? }
       raise Weft::NotFound, "No running example #{slug.inspect}" unless entry
 
       Object.const_get(entry.page_name).example_classes.select { |klass| klass.respond_to?(:reset!) }.each(&:reset!)
       entry.path
     end
 
-    def slug = Catalog.slug_for(self)
+    def slug = SiteData::Catalog.slug_for(self)
 
-    def entry = Catalog.find(slug)
+    def entry = SiteData::Catalog.find(slug)
 
     # Each example's browser title comes from its catalog entry, so no example
     # page declares a `title` of its own.

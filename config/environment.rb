@@ -5,6 +5,7 @@ APP_ROOT = File.expand_path("..", __dir__)
 require "bundler/setup"
 require "active_support" # the base, before app/data cherry-picks from it
 require "weft"
+require "zeitwerk"
 
 # One weft version's examples are loadable at a time: the version this site runs.
 # Move the pin without porting them and the boot says so: no such directory.
@@ -14,12 +15,19 @@ WEFT_REPO_URL = "https://github.com/rusterholz/weft"
 WEFT_CHANGELOG_URL = "#{WEFT_REPO_URL}/blob/v#{Weft::VERSION}/CHANGELOG.md".freeze
 SITE_REPO_URL = "https://github.com/rusterholz/weft.rusterholz.org"
 
-# Each directory under app/ is its own Zeitwerk root (app/pages/home_page.rb
-# defines HomePage, not Pages::HomePage), and both calls eager-load, so the
-# constants Weft.configure names below exist by then. app/data has a loader of its
-# own and is never reloaded: the store's cache has to outlive a request.
-Weft.configure_autoloading(paths: File.join(APP_ROOT, "app", "data"))
+# The site's own support code, apart from anything weft: app/data/store.rb
+# defines SiteData::Store. Never reloaded, since the store's cache has to outlive
+# a request. A plain loader because weft 0.2's configure_autoloading takes no namespace.
+module SiteData; end
 
+data_loader = Zeitwerk::Loader.new
+data_loader.push_dir(File.join(APP_ROOT, "app", "data"), namespace: SiteData)
+data_loader.setup
+data_loader.eager_load
+
+# Each other directory is a root with no namespace (app/pages/home_page.rb
+# defines HomePage, not Pages::HomePage), and the call eager-loads, so the
+# constants Weft.configure names below exist by then.
 Weft.configure_autoloading(
   paths: [File.join(APP_ROOT, "app", "chrome"),
           File.join(APP_ROOT, "app", "pages"),

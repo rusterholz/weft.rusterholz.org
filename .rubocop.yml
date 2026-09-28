@@ -85,6 +85,9 @@ RSpec/NestedGroups:
   Max: 5
 
 RSpec/SpecFilePathFormat:
+  # app/data/store.rb defines SiteData::Store; its spec sits at spec/data/store_spec.rb, like the code.
+  CustomTransform:
+    SiteData: data
   Exclude:
     - "spec/integration/**/*"
     - "spec/requests/**/*"

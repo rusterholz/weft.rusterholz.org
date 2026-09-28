@@ -11,7 +11,7 @@ class HomePage < ApplicationPage
     super
     h1 "UI Examples"
     pitch
-    ol(class: "index") { Catalog.entries.each { |entry| li { listing(entry) } } }
+    ol(class: "index") { SiteData::Catalog.entries.each { |entry| li { listing(entry) } } }
   end
 
   private

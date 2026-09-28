@@ -8,7 +8,7 @@ require "active_support/core_ext/string/output_safety"
 # visitor types and fills the panel under the field. The panel shows while the
 # search has focus or the pointer is over it, which is how it closes without a
 # script.
-class SiteSearch < Weft::Component
+class SiteSearch < ApplicationComponent
   builder_method :site_search
 
   MAGNIFIER = <<~SVG.squish.freeze

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe LocalPath do
+RSpec.describe SiteData::LocalPath do
   it "keeps a path on this site, query and all" do
     expect(described_class.or_home("/examples/click-to-edit?x=1")).to eq("/examples/click-to-edit?x=1")
   end

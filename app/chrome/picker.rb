@@ -7,7 +7,7 @@
 #
 # Choosing navigates: htmx sends the form on change and weft answers with a
 # redirect, and without htmx the button inside <noscript> sends it instead.
-class Picker < Weft::Component
+class Picker < ApplicationComponent
   builder_method :picker
   abstract! # a subclass has the list; on its own there is nothing to serve
 
@@ -17,7 +17,7 @@ class Picker < Weft::Component
   receives :disabled_reason
 
   param :to
-  derives(:destination) { |p| LocalPath.or_home(p.to) }
+  derives(:destination) { |p| SiteData::LocalPath.or_home(p.to) }
 
   performs :go, method: :get do |params|
     Weft.redirect(params.destination)

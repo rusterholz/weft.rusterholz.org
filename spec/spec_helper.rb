@@ -19,8 +19,9 @@ RSpec.configure do |config|
   config.include ActiveSupport::Testing::TimeHelpers
   config.include Rack::Test::Methods
   config.include RackHarness
+  config.include FixtureExamples
 
-  config.after { Current.reset } # a spec that sets Current leaves none behind
+  config.after { SiteData::Current.reset } # a spec that sets Current leaves none behind
 
   config.disable_monkey_patching!
   config.expect_with(:rspec) { |expectations| expectations.syntax = :expect }

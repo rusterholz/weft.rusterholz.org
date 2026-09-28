@@ -8,7 +8,7 @@ require "active_support/core_ext/string/output_safety"
 # that changes something, which depends on the system setting only the browser
 # can see. Choosing stores the theme in the session and reloads the page it was
 # chosen on, since the theme is an attribute of the whole document.
-class ThemeToggle < Weft::Component
+class ThemeToggle < ApplicationComponent
   builder_method :theme_toggle
 
   MOON = <<~SVG.squish.freeze
@@ -32,10 +32,10 @@ class ThemeToggle < Weft::Component
     ICONS.fetch(p.theme) { raise Weft::NotFound, "No theme #{p.theme.inspect}" }
   end
 
-  derives(:destination) { |p| LocalPath.or_home(p.return_to) }
+  derives(:destination) { |p| SiteData::LocalPath.or_home(p.return_to) }
 
   performs :choose do |params|
-    Theme.choose(params.theme)
+    SiteData::Theme.choose(params.theme)
     Weft.redirect(params.destination)
   end
 

@@ -14,6 +14,7 @@ gem "activesupport" # app/data uses its cache and CurrentAttributes; weft's floo
 gem "puma", "~> 7.2"
 gem "rack-session", "~> 2.1" # Rack::Session::Cookie, the session seam
 gem "rouge", "~> 5.1"        # server-side highlighting for the code each example shows
+gem "zeitwerk"               # app/data's own loader; weft's floor governs the version
 
 group :development, :test do
   gem "nokogiri", "~> 1.18"

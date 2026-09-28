@@ -2,7 +2,7 @@
 
 # "Reset This Example": puts the visitor's copy of an example's data back as it
 # started, then reloads the example. A form, so it works with or without htmx.
-class ResetExample < Weft::Component
+class ResetExample < ApplicationComponent
   builder_method :reset_example
 
   param :slug

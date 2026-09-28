@@ -3,7 +3,7 @@
 # The one prominent note an article can carry: a name weft changes later, or a
 # rough edge an adopter will meet. Tint tone on a copper rule, the grammar of the
 # highlighted declaration in the margin, around whatever the page writes in it.
-class Callout < Weft::Component
+class Callout < ApplicationComponent
   builder_method :callout
 
   # Weft would give every callout the one id its class name yields.
