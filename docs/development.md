@@ -527,6 +527,40 @@ post is refused with a `403`, since its token belongs to a session the cookie
 never carried back. Check it against a real request, not a local one, the first time this
 site is deployed.
 
+## What Every Response Tells the Browser
+
+`SiteData::ResponseHeaders` wraps the whole stack in `config.ru`, so the `403`s
+refused before weft carry its headers too: the content security policy, HSTS,
+the referrer policy, `nosniff`, and a cache policy chosen by path.
+
+**The content security policy names only what the pages load.** Scripts come
+from this origin, plus the one inline `<script>` weft 0.2 writes into every page
+to configure htmx. Weft gives that script no nonce, so the policy allows it by
+its SHA-256 hash. `'unsafe-eval'` is left out: htmx needs it only to evaluate
+trigger filters (`keyup[ctrlKey]`), `hx-on` handlers and `js:` values, and with
+it allowed, any markup injected into a page could run script through htmx. Two
+specs guard the policy, because a script it blocks fails in the browser and
+nowhere else:
+
+- Every page's inline scripts are hashed and checked against the policy. A pin
+  move that changes weft's script, or a page registering one of its own, turns
+  it red; add the new hash from the failure message.
+- No page may ask htmx to evaluate anything. An example that needs a trigger
+  filter needs `'unsafe-eval'` added to `script-src` in the same change.
+
+Styles allow `'unsafe-inline'`, since htmx injects a `<style>` element for its
+request indicators and examples use `style` attributes.
+
+**Nothing may sit in a shared cache.** Every response renews the session cookie,
+static files included, so a shared cache holding one would hand a visitor's
+cookie to the next. Fonts are kept privately for a year, `immutable`. Vendored
+scripts are kept for a day, because `/static/js/htmx.min.js` carries no version
+and changes when the pin moves. Pages, fragments and the stylesheet revalidate
+on every use.
+
+`X-Frame-Options` and `X-XSS-Protection` are not set here: the `Rack::Protection`
+weft's router runs already sends them.
+
 ## Deploying
 
 Not yet. The site runs locally and builds into an image; putting it on the
