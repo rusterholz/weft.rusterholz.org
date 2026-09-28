@@ -382,15 +382,19 @@ found by walking the article as built rather than by the page saying so.
 
 A page with no walkthrough, a class its page does not describe, a stack missing
 `VisitorScope`: the site's own mistakes raise subclasses of
-`SiteData::Misassembled`. Only a developer meets one, and each message says what
-is missing. Where they land:
+`SiteData::Misassembled`. They are the developer's to fix, and each message says
+what is missing, but a stack deployed wired wrong shows them to every visitor, so
+each still has to land somewhere honest. Where they land:
 
 - **In a page render:** `ApplicationPage` recovers with the configured error
   page, as a 500.
 - **In a site component's fragment or action:** `ApplicationComponent` recovers
   with weft's error fragment, in place, as a 500. Its target is the
   `:error_component` knob, not a page: weft answers a page target from a
-  component with a redirect.
+  component with a redirect. "In place" holds while `htmx_errors` keeps its
+  default, `:fragment`; under `:redirect`, weft treats any edge whose target is a
+  configuration knob as its own default and sends an htmx request to the error
+  page, this edge included.
 - **In an example's component, or a Glue helper's:** weft's built-in
   `StandardError` edge, with the same fragment. Code a page shows as something
   to copy stands on weft alone, so these subclass `Weft::Component`.
