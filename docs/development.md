@@ -621,16 +621,15 @@ machine over plain http, or refuses it, the button selects the code instead. And
 or Ctrl K off Apple's platforms, puts the cursor in the search, whose pill shows
 whichever applies.
 
-**This is weft not fitting the need yet.** Knowing what answered takes a hook
-weft 0.2 does not have. Its companions (`includes`) ride action responses,
-pushes and transfer arrivals, but not a plain fetch: `loads:` and every preset
-render with none, so a bench built from companions would never move on eight of
-the twenty-one examples, and every example would have to include site chrome in
-the code it shows. So `SiteData::HandledBy` works out what answered by walking
-the router's route table itself, and names it in a `Weft-Site-Handled` header
-the script reads. Weft is growing a hook of its own: request ids are planned for
-v0.3, and middleware around renders and actions is on its roadmap. When they
-land, revisit both the middleware and this script.
+**This is weft not fitting the need yet.** Weft 0.2 has no hook for what
+answered a request. Its companions (`includes`) ride action responses, pushes
+and transfer arrivals, and a plain fetch carries none: whatever `loads:` or a
+preset fetches renders alone. The bench moves on every request, so it is a
+script reading a response header, and `SiteData::HandledBy` supplies that header,
+`Weft-Site-Handled`, by walking the router's route table itself. Weft is growing
+a hook of its own: request ids are planned for v0.3, and middleware around
+renders and actions is on its roadmap. When they land, revisit both the
+middleware and this script.
 
 Anything the script drives is rendered `hidden` and marked `data-reveal`, and the
 script reveals it on load. Without the script, nothing on the page promises what
