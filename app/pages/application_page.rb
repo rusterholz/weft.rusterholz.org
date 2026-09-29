@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/core_ext/string/filters"
+require "json"
 
 # The document every page renders inside: the header, the page's own content in
 # <main>, and the bench along the foot. abstract! keeps it out of the route table
@@ -24,7 +25,7 @@ class ApplicationPage < Weft::Page
   adds_children_to :@content
 
   def build(attributes = {})
-    super(attributes.merge(lang: "en", "data-theme": SiteData::Theme.current).compact)
+    super(attributes.merge(lang: "en", "data-theme": SiteData::Theme.current, "hx-headers": csrf_header).compact)
     site_header trail: trail, return_to: return_to
     @content = main(class: "single-column")
     within(@content.parent) { bench source_path: page_source_path }
@@ -33,6 +34,13 @@ class ApplicationPage < Weft::Page
   private
 
   def trail = [[SITE_NAME, "/"]]
+
+  # Every htmx request inherits this from <html>, so a write with no form, such as a
+  # button's DELETE, still carries the token. Forms keep the field for no-JS submits.
+  def csrf_header
+    token = SiteData::Current.csrf_token
+    JSON.generate("X-CSRF-Token" => token) if token
+  end
 
   # Where a theme choice comes back to: this page, when a GET is what showed it.
   def return_to

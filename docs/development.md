@@ -498,13 +498,32 @@ Three paths, deliberately different:
 
 The real secret appears for the first time at deploy, and only there.
 
-### Every Form That Writes Carries the Session's Token
+### Every Write Carries the Session's Token
 
 `Rack::Protection::AuthenticityToken` sits between the session and
-`SiteData::VisitorScope`, and answers `403` to any POST without the session's
-CSRF token, before weft sees it. `VisitorScope` publishes the token as
-`SiteData::Current.csrf_token`, and each form that writes carries it in one hidden field, rendered by the
-`AuthenticityTokenField` component:
+`SiteData::VisitorScope`, and answers `403` to any write (a POST, a DELETE,
+anything but a GET) without the session's CSRF token, before weft sees it.
+`VisitorScope` publishes the token as `SiteData::Current.csrf_token`, and it
+reaches a write by two paths.
+
+**As a header, on every htmx request.** `ApplicationPage` puts the token on the
+page's `<html>` element as `hx-headers`, a plain JSON object:
+
+```html
+<html lang="en" hx-headers='{"X-CSRF-Token":"..."}'>
+```
+
+htmx inherits the attribute from any ancestor, so every request it sends from
+the page carries an `X-CSRF-Token` header, which `AuthenticityToken` accepts in
+place of a field. This is the path for a write with no form at all, such as Delete
+Row's button, whose DELETE has no fields to carry anything. Copying an example
+like that into an app of your own means copying this attribute too. Being JSON,
+it asks htmx to evaluate nothing, so the content security policy's eval guard
+has no quarrel with it.
+
+**As a field, in every form that writes.** A form submitted without JavaScript
+sends no htmx headers, so each form carries the token in one hidden field,
+rendered by the `AuthenticityTokenField` component:
 
 ```ruby
 form(action: :save) do
@@ -513,11 +532,11 @@ form(action: :save) do
 end
 ```
 
-That one field serves both transports, since htmx sends a form's fields and so
-does a plain submit. This is the recipe from weft 0.2.0's `docs/app-patterns.md`,
-with its hidden input folded into a component as the guide suggests. A new form
-that writes needs the line; a GET action does not. In request specs,
-`post_form` fetches a token the way a browser would and posts with it.
+This is the recipe from weft 0.2.0's `docs/app-patterns.md`, with its hidden
+input folded into a component as the guide suggests. A new form that writes
+needs the line; a GET action does not. In request specs, `post_form` fetches a
+token the way a browser would and posts with it, and `bin/smoke` checks both
+paths against the deployed site.
 
 Ahead of the session, `Rack::Protection::HttpOrigin` answers `403` to a write
 whose `Origin` header names another site, token or no token. Weft's router runs
@@ -702,7 +721,8 @@ fly auth token | tr -d '\n' | docker login registry.fly.io -u x --password-stdin
 `bin/smoke` walks the site as a visitor would, and needs nothing but Ruby. It
 checks that `/` sets a secure session cookie, that the pages, a fragment and the
 static files answer, that a save carrying the token and this site's `Origin`
-persists to the next request, and that a save without the token, or from another
+persists to the next request, whether the token rides as a form field or as the
+header htmx sends, and that a save without the token, or from another
 `Origin`, is refused without touching the visitor's earlier edit.
 
 The image is worth running by hand when the Dockerfile or the middleware

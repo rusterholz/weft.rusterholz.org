@@ -35,7 +35,8 @@ class Smoke
     check_home
     token = check_example
     check_assets
-    name = check_save(token)
+    check_save(token)
+    name = check_header_save
     check_refusals(token, name)
     check_source_links if @sha
     puts "all checks passed"
@@ -74,6 +75,17 @@ class Smoke
     name
   end
 
+  # htmx sends the page's hx-headers on every request: the path a write with no form takes.
+  def check_header_save
+    response = request(:get, "/examples/click-to-edit")
+    token = response.body[/hx-headers="\{&quot;X-CSRF-Token&quot;:&quot;([^&"]+)&quot;\}"/, 1]
+    expect(token, "the page hands htmx the CSRF token as a header", response)
+    name = "Smoke-#{SecureRandom.hex(4)}"
+    response = save(name, origin: own_origin, headers: { "X-CSRF-Token" => token })
+    expect(response.code == "200" && card_shows?(name), "a save carrying the token only as a header persists", response)
+    name
+  end
+
   def check_refusals(token, name)
     expect(save("Mallory", origin: own_origin).code == "403", "a save without the token is refused")
     response = save("Mallory", token: token, origin: "https://evil.example")
@@ -86,9 +98,10 @@ class Smoke
     expect(body.include?("/blob/#{@sha}/"), "source links point at #{@sha}")
   end
 
-  def save(first_name, origin:, token: nil)
+  def save(first_name, origin:, token: nil, headers: {})
     fields = { contact_id: "1", first_name: first_name, authenticity_token: token }.compact
-    request(:post, SAVE, form: fields, headers: { "Origin" => origin, "HX-Request" => "true" }) # as htmx sends it
+    headers = headers.merge("Origin" => origin, "HX-Request" => "true") # as htmx sends it
+    request(:post, SAVE, form: fields, headers: headers)
   end
 
   def card_shows?(name) = request(:get, "#{CARD}?contact_id=1").body.include?(name)
