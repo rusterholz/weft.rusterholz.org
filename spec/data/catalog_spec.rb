@@ -47,7 +47,7 @@ RSpec.describe SiteData::Catalog do
     end
 
     it "walks the running examples unless told otherwise" do
-      expect(described_class.neighbors_of("click-to-edit")).to eq([nil, nil])
+      expect(described_class.neighbors_of("click-to-edit")).to eq([nil, described_class.find("edit-row")])
     end
   end
 

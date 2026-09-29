@@ -42,12 +42,14 @@ RSpec.describe ExamplePage do
       expect(page.css(".reset-example").size).to eq(1)
     end
 
-    # Prev and next walk the running examples only; there is no next one yet.
-    it "ends the article on the way back to every example" do
+    # The first running example has nothing before it, so its way back is the list of them all.
+    it "ends the article on the way back to every example and on to the next one" do
       pagination = page.at("article > nav[aria-label='Pagination']")
 
       expect(page.at("article").element_children.last).to eq(pagination)
-      expect(pagination.css("a").map { |link| [link.text, link["href"]] }).to eq([["← All UI Examples", "/"]])
+      expect(pagination.css("a").map { |link| [link.text, link["href"]] }).to eq(
+        [["← All UI Examples", "/"], ["Next: Edit Row →", "/examples/edit-row"]]
+      )
     end
   end
 

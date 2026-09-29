@@ -77,6 +77,26 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(declarations).to include(*actions)
   end
 
+  it "names only what the example's margin can light, through the whole Edit Row flow" do
+    get "/examples/edit-row"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/edit_row/person_row", person_id: "2"
+    rendered = handled
+    actions = []
+    get "/_components/edit_row/person_row/edit", person_id: "2"
+    actions << handled
+    get "/_components/edit_row/person_row_editor/cancel", person_id: "2"
+    actions << handled
+    post_form "/_components/edit_row/person_row_editor/save", person_id: "2", name: "Angie M."
+    actions << handled
+
+    expect(blocks).to include(rendered)
+    expect(actions).to eq(%w[EditRow::PersonRow#edit EditRow::PersonRowEditor#cancel EditRow::PersonRowEditor#save])
+    expect(declarations).to include(*actions)
+  end
+
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra
   # decodes it, and the header has to name what the router served, no more.
   describe "at the edges of a path, agreeing with weft's router" do
