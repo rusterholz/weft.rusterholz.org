@@ -198,31 +198,49 @@ variable there. Reloaded, the class is a new object with an empty cache, and
 every request in development would look like a first visit. The price is that
 changing something in `app/data` needs a restart.
 
-**Components never touch the store.** The example's data class does, and exposes
-the two or three verbs its components need:
+**Components never touch the store.** The example's data class does, standing
+in for the model class your ORM would give you. It subclasses `SiteData::Records`
+and declares where its records live and what they start as:
 
 ```ruby
 module ClickToEdit
-  class ContactData
+  class ContactData < SiteData::Records
     SEED = { "1" => { first_name: "Joe", last_name: "Blow" } }.freeze
 
-    class << self
-      def all = store.fetch
-
-      private
-
-      def store = SiteData::Store.for("click_to_edit", seed: SEED)
-    end
+    stored_in "click_to_edit", seed: SEED
   end
 end
 ```
 
+From there it reads the way a model does. `ContactData.find("1")` answers a
+record, or `Weft::NotFound` for an id the visitor does not have; `all` lists them
+in order; `create(**fields)` keeps a new one under the next id. A record reads a
+field with `contact[:first_name]`, and changes itself with `update(**fields)`,
+where a field left out stays as it was, or `destroy`. So a component derives its
+record once, and its actions work on that:
+
+```ruby
+derives(:contact) do |p|
+  ContactData.find(p.contact_id)
+end
+
+transfers :save, to: ContactCard do |params|
+  params.contact.update(first_name: params.first_name)
+  nil
+end
+```
+
+`update` changes the record it was called on as well as the store. That is what
+the card rendered after the transfer shows, since weft hands it the record the
+block already derived rather than finding it again.
+
 That is the "bring your own persistence" lesson in the shape weft's
 [application patterns](https://github.com/rusterholz/weft/blob/v0.2.0/docs/app-patterns.md)
-prescribe for service classes. `SiteData::Store.for` hands back the example's
-`SiteData::Store::ExampleSlice`: that example's data for the current visitor. The seed is
-declared once, where the slice is asked for, so a read and a write cannot
-disagree about where an example starts.
+prescribe for service classes: swap `SiteData::Records` for your own model and
+the components read the same. Underneath, `SiteData::Store.for` hands back the
+example's `SiteData::Store::ExampleSlice`: that example's data for the current
+visitor. The seed is declared once, where the slice is asked for, so a read and
+a write cannot disagree about where an example starts.
 
 **A page declares nothing but its prose and its composition.** Its URL, heading
 and document title all come from the catalog, found from the page's own class

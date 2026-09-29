@@ -21,7 +21,7 @@ RSpec.describe EditRow::PersonRowEditor do
   end
 
   it "fills each field from the visitor's store" do
-    EditRow::PersonData.update("2", email: "angie@example.com")
+    EditRow::PersonData.find("2").update(email: "angie@example.com")
 
     values = row.css("td > input[type=text]").to_h { |input| [input["name"], input["value"]] }
 

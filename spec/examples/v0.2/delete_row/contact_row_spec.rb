@@ -33,7 +33,7 @@ RSpec.describe DeleteRow::ContactRow do
   end
 
   it "refuses a contact the visitor does not have" do
-    DeleteRow::ContactData.delete("1")
+    DeleteRow::ContactData.find("1").destroy
 
     expect { described_class.render(contact_id: "1") }.to raise_error(Weft::NotFound)
   end

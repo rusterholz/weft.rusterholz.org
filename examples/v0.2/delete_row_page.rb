@@ -60,9 +60,9 @@ class DeleteRowPage < ExamplePage
 
       A delete can still bring other components along: one declared with includes rides the
       response, so a count beside the table could shrink with it. That is why the block ends
-      with nil. ContactData.delete returns the remaining contacts, and a hash returned from an
-      action becomes params for everything the response renders, companions included. In weft
-      0.3, includes becomes brings.
+      with nil: a hash returned from an action becomes params for everything the response
+      renders, companions included, so a block run only for what it changes returns nothing.
+      In weft 0.3, includes becomes brings.
 
       The table hands each row its contact with contact_row contact_id: id, since every row needs
       a different value, which is what receives is for. ContactRow declares contact_id as a

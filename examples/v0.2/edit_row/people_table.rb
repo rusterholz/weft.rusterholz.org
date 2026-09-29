@@ -15,7 +15,7 @@ module EditRow
           end
         end
         tbody do
-          PersonData.all.each_key { |id| person_row person_id: id }
+          PersonData.all.each { |person| person_row person_id: person.id }
         end
       end
     end

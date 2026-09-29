@@ -16,7 +16,7 @@ module DeleteRow
           end
         end
         tbody do
-          ContactData.all.each_key { |id| contact_row contact_id: id }
+          ContactData.all.each { |contact| contact_row contact_id: contact.id }
         end
       end
     end

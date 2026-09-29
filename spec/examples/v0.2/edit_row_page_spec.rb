@@ -23,7 +23,7 @@ RSpec.describe EditRowPage do
   end
 
   it "embeds the visitor's own people, live, in a frame of their own, ahead of the explanation" do
-    EditRow::PersonData.update("2", name: "Angie M.")
+    EditRow::PersonData.find("2").update(name: "Angie M.")
 
     frame = page.at(".live-example")
 

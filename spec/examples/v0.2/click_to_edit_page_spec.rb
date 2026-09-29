@@ -23,7 +23,7 @@ RSpec.describe ClickToEditPage do
   end
 
   it "embeds the visitor's own contact, live, ahead of the explanation" do
-    ClickToEdit::ContactData.update("1", first_name: "Joseph")
+    ClickToEdit::ContactData.find("1").update(first_name: "Joseph")
 
     card = page.at("#click-to-edit-contact-card-1")
 

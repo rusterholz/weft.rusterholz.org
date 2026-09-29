@@ -19,7 +19,7 @@ RSpec.describe EditRow::PeopleTable do
   end
 
   it "shows each person as the visitor's store has them" do
-    EditRow::PersonData.update("3", name: "Fran Tarkenton")
+    EditRow::PersonData.find("3").update(name: "Fran Tarkenton")
 
     expect(table.css("tbody > tr > td:first-child").map(&:text)).to eq(
       ["Joe Smith", "Angie MacDowell", "Fran Tarkenton"]

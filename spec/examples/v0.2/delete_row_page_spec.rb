@@ -22,7 +22,7 @@ RSpec.describe DeleteRowPage do
   end
 
   it "embeds the visitor's own contacts, live, in a frame of their own, ahead of the explanation" do
-    DeleteRow::ContactData.delete("2")
+    DeleteRow::ContactData.find("2").destroy
 
     frame = page.at(".live-example")
 

@@ -13,7 +13,7 @@ module DeleteRow
     end
 
     dismisses :destroy do |params|
-      ContactData.delete(params.contact_id)
+      params.contact.destroy
       nil
     end
 

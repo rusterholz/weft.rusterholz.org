@@ -13,10 +13,9 @@ module ClickToEdit
     end
 
     transfers :save, to: ContactCard do |params|
-      ContactData.update(params.contact_id,
-                         first_name: params.first_name,
-                         last_name: params.last_name,
-                         email: params.email)
+      params.contact.update(first_name: params.first_name,
+                            last_name: params.last_name,
+                            email: params.email)
       nil
     end
 

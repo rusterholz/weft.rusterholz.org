@@ -12,9 +12,8 @@ module EditRow
     end
 
     transfers :save, to: PersonRow do |params|
-      PersonData.update(params.person_id,
-                        name: params.name,
-                        email: params.email)
+      params.person.update(name: params.name,
+                           email: params.email)
       nil
     end
 

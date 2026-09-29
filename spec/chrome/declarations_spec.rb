@@ -31,10 +31,9 @@ RSpec.describe Declarations do
     it "keeps a block whole, at its own indentation" do
       expect(shown(ClickToEdit::ContactEditor)).to include(<<~RUBY.chomp)
         transfers :save, to: ContactCard do |params|
-          ContactData.update(params.contact_id,
-                             first_name: params.first_name,
-                             last_name: params.last_name,
-                             email: params.email)
+          params.contact.update(first_name: params.first_name,
+                                last_name: params.last_name,
+                                email: params.email)
           nil
         end
       RUBY

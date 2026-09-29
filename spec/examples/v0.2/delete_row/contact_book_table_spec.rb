@@ -19,7 +19,7 @@ RSpec.describe DeleteRow::ContactBookTable do
   end
 
   it "leaves out a contact the visitor has deleted" do
-    DeleteRow::ContactData.delete("2")
+    DeleteRow::ContactData.find("2").destroy
 
     expect(table.css("tbody > tr > td:first-child").map(&:text)).to eq(["Angie MacDowell", "Kim Yee"])
   end

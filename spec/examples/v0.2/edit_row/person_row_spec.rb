@@ -15,7 +15,7 @@ RSpec.describe EditRow::PersonRow do
   end
 
   it "shows an edit the visitor has saved" do
-    EditRow::PersonData.update("2", name: "Angie M.")
+    EditRow::PersonData.find("2").update(name: "Angie M.")
 
     expect(row.at("td").text).to eq("Angie M.")
   end
