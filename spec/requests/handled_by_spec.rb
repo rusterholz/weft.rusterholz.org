@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "json"
 require "nokogiri"
 
 # Which class answered, in the header the bench and the margin read: through the
@@ -95,6 +96,23 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(blocks).to include(rendered)
     expect(actions).to eq(%w[EditRow::PersonRow#edit EditRow::PersonRowEditor#cancel EditRow::PersonRowEditor#save])
     expect(declarations).to include(*actions)
+  end
+
+  it "names only what the example's margin can light, through the whole Delete Row flow" do
+    get "/examples/delete-row"
+    page = Nokogiri::HTML5(last_response.body)
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+    token = JSON.parse(page.at("html")["hx-headers"]).fetch("X-CSRF-Token")
+
+    get "/_components/delete_row/contact_row", contact_id: "2"
+    rendered = handled
+    delete "/_components/delete_row/contact_row/destroy", { contact_id: "2" }, "HTTP_X_CSRF_TOKEN" => token
+
+    expect(last_response.status).to eq(200)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("DeleteRow::ContactRow#destroy")
+    expect(declarations).to include(handled)
   end
 
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra
