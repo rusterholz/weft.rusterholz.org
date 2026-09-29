@@ -438,8 +438,7 @@ pre code :is(.o, .p) { color: var(--muted); }
 /* ---- The live example, as the article hosts it ---- */
 
 /* Whatever htmx wires is live, and wears the dotted copper underline. */
-article :is(button, a, span)[hx-get],
-article :is(button, a, span)[hx-post] {
+article :is(button, a, span):is([hx-get], [hx-post], [hx-delete]) {
   padding: 0;
   border: 0;
   border-bottom: 1.5px dotted var(--copper);
@@ -449,8 +448,7 @@ article :is(button, a, span)[hx-post] {
   cursor: pointer;
   text-decoration: none;
 }
-article :is(button, a, span)[hx-get]:hover,
-article :is(button, a, span)[hx-post]:hover { color: var(--copper); }
+article :is(button, a, span):is([hx-get], [hx-post], [hx-delete]):hover { color: var(--copper); }
 
 article form { display: flex; flex-direction: column; gap: 10px; }
 article form label { display: inline-block; width: 140px; font-size: 15px; color: var(--muted); }
@@ -477,6 +475,11 @@ article input[type="submit"] {
 }
 article form button[hx-get] { align-self: flex-start; font-size: 15px; color: var(--muted); }
 article div > strong { display: inline-block; width: 140px; font-size: 15px; font-weight: 400; color: var(--muted); }
+
+/* Tables: rules between rows, room between columns. */
+article table { border-collapse: collapse; }
+article :is(th, td) { padding: 6px 16px 6px 0; text-align: left; vertical-align: middle; }
+article tbody tr { border-top: 1px solid var(--hairline); }
 
 /* Narrower than the three columns: one column until the mobile layout lands. */
 @media (max-width: 1167px) {
