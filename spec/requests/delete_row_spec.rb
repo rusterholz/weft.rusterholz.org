@@ -64,8 +64,10 @@ RSpec.describe "the Delete Row example" do
 
     destroy("2", token: token)
 
+    error = Nokogiri::HTML5.fragment(last_response.body, context: "tbody").element_children.first
     expect(last_response.status).to eq(404)
     expect(last_response.headers["hx-reswap"]).to eq("outerHTML")
+    expect([error.name, error["id"]]).to eq(%w[tr delete-row-contact-row-2])
     get row_path, contact_id: "2"
     expect(last_response.status).to eq(404)
   end

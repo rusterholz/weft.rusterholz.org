@@ -53,14 +53,16 @@ class DeleteRowPage < ExamplePage
 
       A successful delete answers with nothing. htmx removes the row itself, so Weft does not
       render the component it just helped remove, and build never has to cope with a contact
-      that is gone. If the block raises, Weft keeps the row in place and shows the error there,
-      itself a table row, so it fits in the table.
+      that is gone. If the block raises, Weft does not take the row out: its error answers in the
+      row's place, wearing the row's id and its tr tag.
 
       A delete can still bring other components along: one declared with includes rides the
-      response, so a count beside the table could shrink with it. That is why the block ends
-      with nil: a hash returned from an action becomes params for everything the response
-      renders, companions included, so a block run only for what it changes returns nothing.
-      In weft 0.3, includes becomes brings.
+      response, so a count beside the table could shrink with it. In weft 0.3, includes becomes
+      brings.
+
+      The block ends with nil, as Weft's own examples do for an action run only for what it
+      changes. A hash returned from an action becomes params for everything the response
+      renders, companions included, and ending on nil means a stray hash never can.
 
       This site sends every htmx request the visitor's CSRF token as a header, and that is how
       the DELETE carries it, with no form to hold a field. An app of your own needs the same, or
