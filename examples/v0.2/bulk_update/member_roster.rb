@@ -9,7 +9,7 @@ module BulkUpdate
     param :active_ids, default: []
     param :status
 
-    performs :update, target: "#member-roster" do |params|
+    performs :update do |params|
       activated = 0
       deactivated = 0
       MemberData.all.each do |member|
@@ -21,9 +21,12 @@ module BulkUpdate
       { status: "Activated #{activated} and deactivated #{deactivated} members." }
     end
 
+    # Weft would take the id from the first param, which is an array here and
+    # cannot name an element. A fixed one is where the update aims.
+    def weft_dom_id = "member-roster"
+
     def build(attributes = {})
       super
-      set_attribute :id, "member-roster"
       form(action: :update) do
         authenticity_token
         member_table
