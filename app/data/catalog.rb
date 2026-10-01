@@ -47,7 +47,7 @@ module SiteData
       Entry["progress-bar", "Progress Bar", "A job-runner progress bar -- refreshes every:"],
       Entry["live-ticker", "Live Ticker", "Server-pushed updates over SSE -- pushes every:"],
       Entry["updating-other-content", "Updating Other Content",
-            "One action updating several regions -- includes + triggers"]
+            "One action updating several regions -- includes + triggers (brings + announces in weft 0.3)"]
     ].freeze
 
     private_constant :ENTRIES

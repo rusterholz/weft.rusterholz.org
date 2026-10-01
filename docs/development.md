@@ -157,10 +157,17 @@ else, and nothing else lives there with it.
 
 Two reasons, and the second is the one that bites.
 
-**Namespacing keeps the catalog from colliding with itself.** Two of the
-twenty-one examples define a `ContactsTable` and two define a `PEOPLE`, while weft
-validates a single global route table. The namespace keeps them apart and gives
-each component an unsurprising route: `/_components/click_to_edit/contact_card`.
+**Namespacing keeps the catalog from colliding with itself.** Several examples
+define a `ContactData`, while weft validates a single global route table. The
+namespace keeps them apart and gives each component an unsurprising route:
+`/_components/click_to_edit/contact_card`.
+
+**A builder name is the one thing a namespace does not cover.** Arbre defines
+each `builder_method` on a module every element shares, so two classes declaring
+`contacts_table` leave one name for both, and whichever loaded last renders on
+both pages. Delete Row's table is therefore `ContactBookTable`, and Updating
+Other Content keeps `ContactsTable`. A spec reads every `builder_method` out of
+`app/` and `examples/` and fails on a name claimed twice.
 
 **A constant that belongs to a class goes inside it.** An example's seed data is
 `ClickToEdit::ContactData::SEED`, not `ClickToEdit::SEED`, which under this rule would

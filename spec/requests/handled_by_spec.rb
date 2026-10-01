@@ -160,6 +160,18 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(declarations).to include(handled)
   end
 
+  # The table rides along out of band; the header names the form, whose action ran.
+  it "names only what the example's margin can light, through Updating Other Content" do
+    get "/examples/updating-other-content"
+    declarations = margin_marks("data-handles")
+
+    post_form "/_components/updating_other_content/new_contact_form/add", name: "Angie", email: "a@example.com"
+
+    expect(last_response.status).to eq(200)
+    expect(handled).to eq("UpdatingOtherContent::NewContactForm#add")
+    expect(declarations).to include(handled)
+  end
+
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra
   # decodes it, and the header has to name what the router served, no more.
   describe "at the edges of a path, agreeing with weft's router" do

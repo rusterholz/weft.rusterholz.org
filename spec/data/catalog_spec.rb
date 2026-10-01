@@ -12,6 +12,12 @@ RSpec.describe SiteData::Catalog do
     expect(slugs.last).to eq("updating-other-content")
   end
 
+  it "names includes and triggers in the summary with the names weft 0.3 gives them" do
+    expect(described_class.find("updating-other-content").summary).to eq(
+      "One action updating several regions -- includes + triggers (brings + announces in weft 0.3)"
+    )
+  end
+
   it "gives every entry a slug, a Title Case title and a one-line summary" do
     expect(described_class.entries).to all(have_attributes(slug: a_string_matching(/\A[a-z-]+\z/),
                                                            title: a_string_matching(/\A[A-Z]/),
