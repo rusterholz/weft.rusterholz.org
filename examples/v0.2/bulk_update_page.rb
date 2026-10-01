@@ -57,8 +57,8 @@ class BulkUpdatePage < ExamplePage
 
       The checkboxes show what was saved. build ticks each box from the stored member, not from
       what was submitted, so the response reflects the store. And because form(action: :update)
-      also writes a plain action and method, the form works as an ordinary POST without
-      JavaScript.
+      also writes a plain action and method, the form still posts without JavaScript, though
+      what comes back is the roster on its own rather than the page around it.
     TEXT
   end
 end

@@ -51,9 +51,9 @@ class ResetUserInputPage < ExamplePage
       required attribute on the inputs would be a courtesy on top, but the check on the server is
       the one that holds.
 
-      The reset needs no JavaScript either. form(action: :post) also writes a plain action and
-      method, so without htmx the same POST works as a full-page submit, and the fresh page has
-      empty fields for the same reason the fragment does.
+      Without JavaScript the form still posts, because form(action: :post) also writes a plain
+      action and method, and the comment is still added. What comes back is this component on
+      its own, though, rather than the page around it.
     TEXT
   end
 end

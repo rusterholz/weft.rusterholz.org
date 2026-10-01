@@ -48,6 +48,17 @@ RSpec.describe "the Reset User Input example" do
     expect(authors).to eq(%w[Rosa])
   end
 
+  # What the page says happens without JavaScript, and no more.
+  it "adds the comment from a plain form post too, answering with the section alone" do
+    get "/examples/reset-user-input"
+
+    add("Elena", "See you there!")
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).not_to include("<html")
+    expect(authors).to eq(%w[Rosa Elena])
+  end
+
   it "refuses a comment without the visitor's CSRF token" do
     get "/examples/reset-user-input"
 

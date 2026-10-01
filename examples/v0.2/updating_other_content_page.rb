@@ -64,8 +64,8 @@ class UpdatingOtherContentPage < ExamplePage
 
       Form fields pair with declared params. The form declares name and email, so the submitted
       fields reach the action as params.name and params.email. And since form(action: :add) also
-      writes a plain action and method, the add works without JavaScript; only the table's
-      update needs htmx.
+      writes a plain action and method, the add still happens without JavaScript, though the
+      response is the form on its own rather than the page around it.
 
       includes points one way: the form knows the table exists. When it shouldn't, because the
       components that react are many, elsewhere, or someone else's, the form can announce
