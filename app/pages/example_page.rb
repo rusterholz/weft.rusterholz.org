@@ -2,6 +2,8 @@
 
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/string/inflections"
+require "active_support/core_ext/string/output_safety"
+require "erb"
 
 # The frame every example page renders in: the list of examples down the left,
 # the article (heading, the page's own walkthrough, the code that produced it,
@@ -43,7 +45,7 @@ class ExamplePage < ApplicationPage
 
   def article_body
     h1 entry.title
-    reset_example slug: entry.slug
+    reset_example slug: entry.slug if self.class.example_classes.any? { |klass| klass.respond_to?(:reset!) }
     walkthrough
     pieces_you_need
     pagination
@@ -101,12 +103,23 @@ class ExamplePage < ApplicationPage
   end
 
   def piece(klass, phrase, path)
-    para "#{klass.name.demodulize} -- #{phrase}", class: "about"
+    para(class: "about") { text_node about(klass, phrase) }
     details do
       summary path
       code_block path: path
     end
     a "View on GitHub", href: source_url(path)
+  end
+
+  # A data class standing on SiteData::Records names it, linked, and nothing more:
+  # the base is there to follow, not one more piece to collect. As one text node,
+  # since Arbre indents a nested tag and inside a sentence the indent shows.
+  def about(klass, phrase)
+    line = ERB::Util.html_escape("#{klass.name.demodulize} -- #{phrase}")
+    return line unless klass < SiteData::Records
+
+    records = repo_path(Object.const_source_location(SiteData::Records.name).first)
+    %(#{line} (<a href="#{ERB::Util.html_escape(source_url(records))}">SiteData::Records</a>)).html_safe
   end
 
   # Previous and next walk the running examples; the first one's "previous" is the list of all of them.

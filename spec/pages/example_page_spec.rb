@@ -30,7 +30,18 @@ RSpec.describe ExamplePage do
 
     it "closes the margin on the example's data class, in the page's own words" do
       expect(page.at("aside").element_children.last.text).
-        to eq("Behind both: ContactData, where a visitor's contact is kept, standing in for your database.")
+        to eq("Behind both: ContactData, where a visitor's contact is kept, standing in for your ORM model.")
+    end
+
+    # Brief on purpose: the base is a link to follow, not one more piece to collect.
+    it "links a data class's piece to the source of SiteData::Records, which it stands on" do
+      about = page.at("h2:contains('Pieces You Need') + ul > li.piece .about")
+      link = about.at("a")
+
+      expect(about.text).to end_with("standing in for your ORM model (SiteData::Records)")
+      expect(link.text).to eq("SiteData::Records")
+      expect(link["href"]).to eq("https://github.com/rusterholz/weft.rusterholz.org/blob/main/app/data/records.rb")
+      expect(page.css("h2:contains('Pieces You Need') + ul .about a").size).to eq(1)
     end
 
     it "offers to reset the whole example right under its title" do
@@ -42,12 +53,14 @@ RSpec.describe ExamplePage do
       expect(page.css(".reset-example").size).to eq(1)
     end
 
-    # Prev and next walk the running examples only; there is no next one yet.
-    it "ends the article on the way back to every example" do
+    # The first running example has nothing before it, so its way back is the list of them all.
+    it "ends the article on the way back to every example and on to the next one" do
       pagination = page.at("article > nav[aria-label='Pagination']")
 
       expect(page.at("article").element_children.last).to eq(pagination)
-      expect(pagination.css("a").map { |link| [link.text, link["href"]] }).to eq([["← All UI Examples", "/"]])
+      expect(pagination.css("a").map { |link| [link.text, link["href"]] }).to eq(
+        [["← All UI Examples", "/"], ["Next: Edit Row →", "/examples/edit-row"]]
+      )
     end
   end
 

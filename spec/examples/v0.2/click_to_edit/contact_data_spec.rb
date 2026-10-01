@@ -2,41 +2,21 @@
 
 require "securerandom"
 
+# What SiteData::Records does is its own spec's; this is Click to Edit's data.
 RSpec.describe ClickToEdit::ContactData do
   before { SiteData::Current.visitor = "visitor-#{SecureRandom.hex(4)}" }
 
-  it "finds a contact as it was seeded" do
-    expect(described_class.find("1")).to eq(first_name: "Joe", last_name: "Blow", email: "joe@blow.com")
+  it "holds the one contact as seeded" do
+    contact = described_class.find("1")
+
+    expect(described_class.all.map(&:id)).to eq(%w[1])
+    expect([contact[:first_name], contact[:last_name], contact[:email]]).to eq(%w[Joe Blow joe@blow.com])
   end
 
-  it "keeps an update" do
-    described_class.update("1", first_name: "Joseph")
+  it "keeps its contacts apart from every other example's" do
+    described_class.find("1").update(first_name: "Joseph")
 
-    expect(described_class.find("1")).to include(first_name: "Joseph", last_name: "Blow")
-  end
-
-  it "goes back to the seed when reset" do
-    described_class.update("1", first_name: "Joseph")
-
-    described_class.reset!
-
-    expect(described_class.find("1")).to include(first_name: "Joe")
-  end
-
-  it "reads a missing attribute as unchanged, not blank" do
-    described_class.update("1", first_name: nil, email: "joseph@blow.com")
-
-    expect(described_class.find("1")).to include(first_name: "Joe", email: "joseph@blow.com")
-  end
-
-  it "ignores an attribute a contact does not have" do
-    described_class.update("1", admin: true)
-
-    expect(described_class.find("1").keys).to eq(%i[first_name last_name email])
-  end
-
-  it "answers a missing contact the same way whether reading or writing" do
-    expect { described_class.find("2") }.to raise_error(Weft::NotFound, /"2"/)
-    expect { described_class.update("2", first_name: "Joseph") }.to raise_error(Weft::NotFound, /"2"/)
+    expect(EditRow::PersonData.find("1")[:name]).to eq("Joe Smith")
+    expect(described_class.find("1")[:first_name]).to eq("Joseph")
   end
 end

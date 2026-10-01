@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "json"
 require "nokogiri"
 
 # Which class answered, in the header the bench and the margin read: through the
@@ -75,6 +76,100 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(blocks).to include(rendered)
     expect(actions.compact.size).to eq(3)
     expect(declarations).to include(*actions)
+  end
+
+  it "names only what the example's margin can light, through the whole Edit Row flow" do
+    get "/examples/edit-row"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/edit_row/person_row", person_id: "2"
+    rendered = handled
+    actions = []
+    get "/_components/edit_row/person_row/edit", person_id: "2"
+    actions << handled
+    get "/_components/edit_row/person_row_editor/cancel", person_id: "2"
+    actions << handled
+    post_form "/_components/edit_row/person_row_editor/save", person_id: "2", name: "Angie M."
+    actions << handled
+
+    expect(blocks).to include(rendered)
+    expect(actions).to eq(%w[EditRow::PersonRow#edit EditRow::PersonRowEditor#cancel EditRow::PersonRowEditor#save])
+    expect(declarations).to include(*actions)
+  end
+
+  it "names only what the example's margin can light, through the whole Delete Row flow" do
+    get "/examples/delete-row"
+    page = Nokogiri::HTML5(last_response.body)
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+    token = JSON.parse(page.at("html")["hx-headers"]).fetch("X-CSRF-Token")
+
+    get "/_components/delete_row/contact_row", contact_id: "2"
+    rendered = handled
+    delete "/_components/delete_row/contact_row/destroy", { contact_id: "2" }, "HTTP_X_CSRF_TOKEN" => token
+
+    expect(last_response.status).to eq(200)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("DeleteRow::ContactRow#destroy")
+    expect(declarations).to include(handled)
+  end
+
+  it "names only what the example's margin can light, through the whole Bulk Update flow" do
+    get "/examples/bulk-update"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/bulk_update/member_roster"
+    rendered = handled
+    post_form "/_components/bulk_update/member_roster/update", active_ids: %w[1]
+
+    expect(last_response.status).to eq(200)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("BulkUpdate::MemberRoster#update")
+    expect(declarations).to include(handled)
+  end
+
+  it "names only what the example's margin can light, through Inline Validation, complaint included" do
+    get "/examples/inline-validation"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/inline_validation/signup_email_field"
+    rendered = handled
+    post_form "/_components/inline_validation/signup_email_field/validate", email: "not-an-email"
+
+    expect(last_response.status).to eq(422)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("InlineValidation::SignupEmailField#validate")
+    expect(declarations).to include(handled)
+  end
+
+  it "names only what the example's margin can light, through the whole Reset User Input flow" do
+    get "/examples/reset-user-input"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/reset_user_input/comment_section"
+    rendered = handled
+    post_form "/_components/reset_user_input/comment_section/post", author: "Elena", body: "Hi"
+
+    expect(last_response.status).to eq(200)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("ResetUserInput::CommentSection#post")
+    expect(declarations).to include(handled)
+  end
+
+  # The table rides along out of band; the header names the form, whose action ran.
+  it "names only what the example's margin can light, through Updating Other Content" do
+    get "/examples/updating-other-content"
+    declarations = margin_marks("data-handles")
+
+    post_form "/_components/updating_other_content/new_contact_form/add", name: "Angie", email: "a@example.com"
+
+    expect(last_response.status).to eq(200)
+    expect(handled).to eq("UpdatingOtherContent::NewContactForm#add")
+    expect(declarations).to include(handled)
   end
 
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra

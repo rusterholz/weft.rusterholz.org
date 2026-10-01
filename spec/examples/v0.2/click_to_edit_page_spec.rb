@@ -19,11 +19,19 @@ RSpec.describe ClickToEditPage do
   end
 
   it "frames the walkthrough between the heading and the source" do
-    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Pieces You Need"])
+    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Pieces You Need"])
+  end
+
+  # The path of one click first, then what to know before copying it.
+  it "ends How It Works on the note about Cancel's button type" do
+    paragraphs = page.xpath("//h2[.='How It Works']/following-sibling::*").take_while { |node| node.name == "p" }
+
+    expect(paragraphs.first.text).to start_with("Every button here hands this piece of the page")
+    expect(paragraphs.last.text).to start_with('Note type: "button" on Cancel')
   end
 
   it "embeds the visitor's own contact, live, ahead of the explanation" do
-    ClickToEdit::ContactData.update("1", first_name: "Joseph")
+    ClickToEdit::ContactData.find("1").update(first_name: "Joseph")
 
     card = page.at("#click-to-edit-contact-card-1")
 
@@ -68,7 +76,7 @@ RSpec.describe ClickToEditPage do
     # names the class and says what it is for.
     it "lists every piece in reading order, the page last, each named and described" do
       expect(pieces.map { |piece| piece.at(".about").text }).to eq(
-        ["ContactData -- where a visitor's contact is kept, standing in for your database",
+        ["ContactData -- where a visitor's contact is kept, standing in for your ORM model (SiteData::Records)",
          "ContactCard -- the contact at rest, and the button that opens it for editing",
          "ContactEditor -- the form in its editable expanded view",
          "ClickToEditPage -- a page to put it on (yours needs only the contact_card call; " \
@@ -96,7 +104,10 @@ RSpec.describe ClickToEditPage do
     end
 
     it "links each piece's file on GitHub" do
-      expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(piece_paths.map { |path| blob + path })
+      links = pieces.map { |piece| piece.at("> a") }
+
+      expect(links.map(&:text).uniq).to eq(["View on GitHub"])
+      expect(links.map { |link| link["href"] }).to eq(piece_paths.map { |path| blob + path })
     end
 
     describe "the glue after them" do

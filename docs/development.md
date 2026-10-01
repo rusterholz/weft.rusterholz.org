@@ -157,10 +157,17 @@ else, and nothing else lives there with it.
 
 Two reasons, and the second is the one that bites.
 
-**Namespacing keeps the catalog from colliding with itself.** Two of the
-twenty-one examples define a `ContactsTable` and two define a `PEOPLE`, while weft
-validates a single global route table. The namespace keeps them apart and gives
-each component an unsurprising route: `/_components/click_to_edit/contact_card`.
+**Namespacing keeps the catalog from colliding with itself.** Several examples
+define a `ContactData`, while weft validates a single global route table. The
+namespace keeps them apart and gives each component an unsurprising route:
+`/_components/click_to_edit/contact_card`.
+
+**A builder name is the one thing a namespace does not cover.** Arbre defines
+each `builder_method` on a module every element shares, so two classes declaring
+`contacts_table` leave one name for both, and whichever loaded last renders on
+both pages. Delete Row's table is therefore `ContactBookTable`, and Updating
+Other Content keeps `ContactsTable`. A spec reads every `builder_method` out of
+`app/` and `examples/` and fails on a name claimed twice.
 
 **A constant that belongs to a class goes inside it.** An example's seed data is
 `ClickToEdit::ContactData::SEED`, not `ClickToEdit::SEED`, which under this rule would
@@ -198,31 +205,49 @@ variable there. Reloaded, the class is a new object with an empty cache, and
 every request in development would look like a first visit. The price is that
 changing something in `app/data` needs a restart.
 
-**Components never touch the store.** The example's data class does, and exposes
-the two or three verbs its components need:
+**Components never touch the store.** The example's data class does, standing
+in for the model class your ORM would give you. It subclasses `SiteData::Records`
+and declares where its records live and what they start as:
 
 ```ruby
 module ClickToEdit
-  class ContactData
+  class ContactData < SiteData::Records
     SEED = { "1" => { first_name: "Joe", last_name: "Blow" } }.freeze
 
-    class << self
-      def all = store.fetch
-
-      private
-
-      def store = SiteData::Store.for("click_to_edit", seed: SEED)
-    end
+    stored_in "click_to_edit", seed: SEED
   end
 end
 ```
 
+From there it reads the way a model does. `ContactData.find("1")` answers a
+record, or `Weft::NotFound` for an id the visitor does not have; `all` lists them
+in order; `create(**fields)` keeps a new one under the next id. A record reads a
+field with `contact[:first_name]`, and changes itself with `update(**fields)`,
+where a field left out stays as it was, or `destroy`. So a component derives its
+record once, and its actions work on that:
+
+```ruby
+derives(:contact) do |p|
+  ContactData.find(p.contact_id)
+end
+
+transfers :save, to: ContactCard do |params|
+  params.contact.update(first_name: params.first_name)
+  nil
+end
+```
+
+`update` changes the record it was called on as well as the store. That is what
+the card rendered after the transfer shows, since weft hands it the record the
+block already derived rather than finding it again.
+
 That is the "bring your own persistence" lesson in the shape weft's
 [application patterns](https://github.com/rusterholz/weft/blob/v0.2.0/docs/app-patterns.md)
-prescribe for service classes. `SiteData::Store.for` hands back the example's
-`SiteData::Store::ExampleSlice`: that example's data for the current visitor. The seed is
-declared once, where the slice is asked for, so a read and a write cannot
-disagree about where an example starts.
+prescribe for service classes: swap `SiteData::Records` for your own model and
+the components read the same. Underneath, `SiteData::Store.for` hands back the
+example's `SiteData::Store::ExampleSlice`: that example's data for the current
+visitor. The seed is declared once, where the slice is asked for, so a read and
+a write cannot disagree about where an example starts.
 
 **A page declares nothing but its prose and its composition.** Its URL, heading
 and document title all come from the catalog, found from the page's own class
@@ -230,6 +255,11 @@ name, so the two can never drift. `ExamplePage` supplies the frame and calls the
 page's `walkthrough`; a page that forgets to define one says so. The walkthrough
 wraps what it renders live in `live { ... }`, which frames it apart from the prose;
 whatever the component swaps in stays inside the frame.
+
+After the live example comes one section, "How It Works". Its paragraphs follow
+the path of one click, from what renders first to what answers, and end with
+what someone copying the code needs to know, such as a button's type or a token
+the site sends for them.
 
 The URL half of that reaches into the gem: `ExamplePage` overrides
 `default_page_path`, which weft declares **private**. It is the right seam, since
@@ -498,13 +528,32 @@ Three paths, deliberately different:
 
 The real secret appears for the first time at deploy, and only there.
 
-### Every Form That Writes Carries the Session's Token
+### Every Write Carries the Session's Token
 
 `Rack::Protection::AuthenticityToken` sits between the session and
-`SiteData::VisitorScope`, and answers `403` to any POST without the session's
-CSRF token, before weft sees it. `VisitorScope` publishes the token as
-`SiteData::Current.csrf_token`, and each form that writes carries it in one hidden field, rendered by the
-`AuthenticityTokenField` component:
+`SiteData::VisitorScope`, and answers `403` to any write (a POST, a DELETE,
+any method but GET, HEAD, OPTIONS and TRACE) without the session's CSRF token, before weft sees it.
+`VisitorScope` publishes the token as `SiteData::Current.csrf_token`, and it
+reaches a write by two paths.
+
+**As a header, on every htmx request.** `ApplicationPage` puts the token on the
+page's `<html>` element as `hx-headers`, a plain JSON object:
+
+```html
+<html lang="en" hx-headers='{"X-CSRF-Token":"..."}'>
+```
+
+htmx inherits the attribute from any ancestor, so every request it sends from
+the page carries an `X-CSRF-Token` header, which `AuthenticityToken` accepts in
+place of a field. This is the path for a write with no form at all, such as Delete
+Row's button, whose DELETE has no fields to carry anything. Copying an example
+like that into an app of your own means copying this attribute too. Being JSON,
+it asks htmx to evaluate nothing, so the content security policy's eval guard
+has no quarrel with it.
+
+**As a field, in every form that writes.** A form submitted without JavaScript
+sends no htmx headers, so each form carries the token in one hidden field,
+rendered by the `AuthenticityTokenField` component:
 
 ```ruby
 form(action: :save) do
@@ -513,11 +562,11 @@ form(action: :save) do
 end
 ```
 
-That one field serves both transports, since htmx sends a form's fields and so
-does a plain submit. This is the recipe from weft 0.2.0's `docs/app-patterns.md`,
-with its hidden input folded into a component as the guide suggests. A new form
-that writes needs the line; a GET action does not. In request specs,
-`post_form` fetches a token the way a browser would and posts with it.
+This is the recipe from weft 0.2.0's `docs/app-patterns.md`, with its hidden
+input folded into a component as the guide suggests. A new form that writes
+needs the line; a GET action does not. In request specs, `post_form` fetches a
+token the way a browser would and posts with it, and `bin/smoke` checks both
+paths against the deployed site.
 
 Ahead of the session, `Rack::Protection::HttpOrigin` answers `403` to a write
 whose `Origin` header names another site, token or no token. Weft's router runs
@@ -702,7 +751,8 @@ fly auth token | tr -d '\n' | docker login registry.fly.io -u x --password-stdin
 `bin/smoke` walks the site as a visitor would, and needs nothing but Ruby. It
 checks that `/` sets a secure session cookie, that the pages, a fragment and the
 static files answer, that a save carrying the token and this site's `Origin`
-persists to the next request, and that a save without the token, or from another
+persists to the next request, whether the token rides as a form field or as the
+header htmx sends, and that a save without the token, or from another
 `Origin`, is refused without touching the visitor's earlier edit.
 
 The image is worth running by hand when the Dockerfile or the middleware

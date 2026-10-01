@@ -30,7 +30,8 @@ module SiteData
       Entry["edit-row", "Edit Row", "The same pattern per table row"],
       Entry["delete-row", "Delete Row", "Remove a row with a confirmation -- dismisses"],
       Entry["bulk-update", "Bulk Update", "One form updating many rows -- performs + array params"],
-      Entry["inline-validation", "Inline Validation", "Per-field validation as the user types -- performs + recovers"],
+      Entry["inline-validation", "Inline Validation",
+            "Per-field validation as the user leaves each field -- performs + recovers"],
       Entry["file-upload", "File Upload", "Multipart upload through a component action"],
       Entry["reset-user-input", "Reset User Input", "Clearing a form after submit -- free in Weft"],
       Entry["click-to-load", "Click to Load", "Load the next page of rows on demand -- load_more:"],
@@ -47,7 +48,7 @@ module SiteData
       Entry["progress-bar", "Progress Bar", "A job-runner progress bar -- refreshes every:"],
       Entry["live-ticker", "Live Ticker", "Server-pushed updates over SSE -- pushes every:"],
       Entry["updating-other-content", "Updating Other Content",
-            "One action updating several regions -- includes + triggers"]
+            "One action updating several regions -- includes + triggers (brings + announces in weft 0.3)"]
     ].freeze
 
     private_constant :ENTRIES

@@ -13,6 +13,8 @@ EXAMPLES_ROOT = File.join(APP_ROOT, "examples", "v#{Weft::VERSION.split('.').fir
 
 WEFT_REPO_URL = "https://github.com/rusterholz/weft"
 WEFT_CHANGELOG_URL = "#{WEFT_REPO_URL}/blob/v#{Weft::VERSION}/CHANGELOG.md".freeze
+# Where weft's next release is written up before it ships; a rename note links here.
+WEFT_NEXT_CHANGELOG_URL = "#{WEFT_REPO_URL}/blob/main/CHANGELOG.md".freeze
 SITE_REPO_URL = "https://github.com/rusterholz/weft.rusterholz.org"
 
 # The site's own support code, apart from anything weft: app/data/store.rb

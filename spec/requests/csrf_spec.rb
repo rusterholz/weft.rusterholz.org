@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "json"
 require "nokogiri"
 
 # Every form that writes carries the session's token, and a POST without it is
@@ -48,6 +49,43 @@ RSpec.describe "cross-site request forgery" do
       post path, fields.merge(authenticity_token: token)
 
       expect(last_response.status).to be < 400, path
+    end
+  end
+
+  describe "as a header, for htmx writes that have no form" do
+    # The header every htmx request inherits from the page, as the page sets it.
+    def page_headers
+      get "/examples/click-to-edit"
+      JSON.parse(Nokogiri::HTML5(last_response.body).at("html")["hx-headers"])
+    end
+
+    # Masked afresh on each render, so it matches the form field on the same page.
+    it "gives every page the session's token for htmx to send on each request" do
+      get "/"
+      page = Nokogiri::HTML5(last_response.body)
+
+      expect(JSON.parse(page.at("html")["hx-headers"])).to eq(
+        "X-CSRF-Token" => page.at("input[name=authenticity_token]")["value"]
+      )
+    end
+
+    it "accepts a write whose only token is the header" do
+      headers = page_headers
+
+      post "/_components/click_to_edit/contact_editor/save", { contact_id: "1", first_name: "Joseph" },
+           "HTTP_X_CSRF_TOKEN" => headers.fetch("X-CSRF-Token")
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to include("Joseph")
+    end
+
+    it "refuses a header token that is not the session's" do
+      get "/"
+
+      post "/_components/click_to_edit/contact_editor/save", { contact_id: "1", first_name: "Mallory" },
+           "HTTP_X_CSRF_TOKEN" => "forged"
+
+      expect(last_response.status).to eq(403)
     end
   end
 
