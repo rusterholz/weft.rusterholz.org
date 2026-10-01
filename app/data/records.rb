@@ -61,7 +61,9 @@ module SiteData
         new(id, attributes, slice)
       end
 
-      # Under the next id after the highest held, so it lands after the rest.
+      # Stores the fields as given, with no check against the seed's shape; an
+      # example that refuses blanks says so before calling. Under the next id
+      # after the highest held, so it lands after the rest.
       def create(**attributes)
         records = slice.update do |held|
           next_id = ((held.keys.map(&:to_i).max || 0) + 1).to_s
