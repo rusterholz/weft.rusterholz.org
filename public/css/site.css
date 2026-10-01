@@ -47,6 +47,8 @@
   --hairline: #D5DAD2;
   --field: #F6F7F3;
   --field-rule: #C5CCC3;
+  --invalid: #A8322B;
+  --valid: #2F7A4A;
 
   color-scheme: light;
 }
@@ -66,6 +68,8 @@
   --hairline: #2B3742;
   --field: #1B242D;
   --field-rule: #2B3742;
+  --invalid: #EC8F85;
+  --valid: #7FC79A;
 
   color-scheme: dark;
 }
@@ -84,6 +88,8 @@
     --hairline: #2B3742;
     --field: #1B242D;
     --field-rule: #2B3742;
+    --invalid: #EC8F85;
+    --valid: #7FC79A;
 
     color-scheme: dark;
   }
@@ -452,7 +458,7 @@ article :is(button, a, span):is([hx-get], [hx-post], [hx-delete]):hover { color:
 
 article form { display: flex; flex-direction: column; gap: 10px; }
 article form label { display: inline-block; width: 140px; font-size: 15px; color: var(--muted); }
-article input[type="text"] {
+article input:is([type="text"], [type="email"]) {
   width: 260px;
   padding: 4px 6px;
   border: 0;
@@ -475,6 +481,10 @@ article input[type="submit"] {
 }
 article form button[hx-get] { align-self: flex-start; font-size: 15px; color: var(--muted); }
 article div > strong { display: inline-block; width: 140px; font-size: 15px; font-weight: 400; color: var(--muted); }
+
+/* A field's verdict, from the class its component sets on itself. */
+article .invalid > p { color: var(--invalid); }
+article .valid > p { color: var(--valid); }
 
 /* Tables: rules between rows, room between columns. */
 article table { border-collapse: collapse; }
