@@ -45,7 +45,7 @@ class ExamplePage < ApplicationPage
 
   def article_body
     h1 entry.title
-    reset_example slug: entry.slug
+    reset_example slug: entry.slug if self.class.example_classes.any? { |klass| klass.respond_to?(:reset!) }
     walkthrough
     pieces_you_need
     pagination

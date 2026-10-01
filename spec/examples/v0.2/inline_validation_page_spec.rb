@@ -16,6 +16,12 @@ RSpec.describe InlineValidationPage do
     expect(page.at("title").text).to eq("Inline Validation · weft")
   end
 
+  # Nothing here is kept, so a reset would do nothing.
+  it "offers no Reset This Example" do
+    expect(page.css(".reset-example")).to be_empty
+    expect(page.at("article > h1").next_element.name).to eq("p")
+  end
+
   it "frames one How It Works between the heading and the source" do
     expect(page.css("h2").map(&:text)).to eq(["How It Works", "Pieces You Need"])
   end
