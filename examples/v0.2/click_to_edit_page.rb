@@ -12,7 +12,6 @@ class ClickToEditPage < ExamplePage
     live { contact_card contact_id: "1" }
     log_warning
     how_it_works
-    worth_noticing
   end
 
   private
@@ -57,12 +56,7 @@ class ClickToEditPage < ExamplePage
       A button or a form names its transfer with action:, and Weft fills in the rest: the URL,
       the verb and where the response lands, and for a button, the params too. That is why
       nothing here spells out a URL or a target.
-    TEXT
-  end
 
-  def worth_noticing
-    h2 "Worth Noticing"
-    prose <<~TEXT
       Form fields pair with declared params. The editor declares first_name, last_name and
       email so its fields reach the save callable as params.first_name and friends, while
       contact_id rides along as a hidden input, because it is part of the component's

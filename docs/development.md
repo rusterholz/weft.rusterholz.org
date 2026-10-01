@@ -249,6 +249,11 @@ page's `walkthrough`; a page that forgets to define one says so. The walkthrough
 wraps what it renders live in `live { ... }`, which frames it apart from the prose;
 whatever the component swaps in stays inside the frame.
 
+After the live example comes one section, "How It Works". Its paragraphs follow
+the path of one click, from what renders first to what answers, and end with
+what someone copying the code needs to know, such as a button's type or a token
+the site sends for them.
+
 The URL half of that reaches into the gem: `ExamplePage` overrides
 `default_page_path`, which weft declares **private**. It is the right seam, since
 it makes every subclass derive its own path with nothing to remember to call, and

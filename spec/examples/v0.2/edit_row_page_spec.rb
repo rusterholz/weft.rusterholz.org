@@ -19,7 +19,14 @@ RSpec.describe EditRowPage do
   end
 
   it "frames the walkthrough between the heading and the source" do
-    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Pieces You Need"])
+    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Pieces You Need"])
+  end
+
+  it "walks How It Works from the table's first render to what one row's edit leaves alone" do
+    paragraphs = page.xpath("//h2[.='How It Works']/following-sibling::*").take_while { |node| node.name == "p" }
+
+    expect(paragraphs.first.text).to start_with("Each row is a component that renders as a table row.")
+    expect(paragraphs.last.text).to start_with("Rows edit independently.")
   end
 
   it "embeds the visitor's own people, live, in a frame of their own, ahead of the explanation" do

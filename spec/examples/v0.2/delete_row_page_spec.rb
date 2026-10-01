@@ -18,7 +18,15 @@ RSpec.describe DeleteRowPage do
   end
 
   it "frames the walkthrough between the heading and the source" do
-    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Pieces You Need"])
+    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Pieces You Need"])
+  end
+
+  # The path of one click first, then what to know before copying it.
+  it "ends How It Works on the token a copied example needs" do
+    paragraphs = page.xpath("//h2[.='How It Works']/following-sibling::*").take_while { |node| node.name == "p" }
+
+    expect(paragraphs.first.text).to start_with("The row is the component.")
+    expect(paragraphs.last.text).to start_with("This site sends every htmx request the visitor's CSRF token")
   end
 
   it "embeds the visitor's own contacts, live, in a frame of their own, ahead of the explanation" do

@@ -11,7 +11,6 @@ class DeleteRowPage < ExamplePage
     introduction
     live { contact_book_table }
     how_it_works
-    worth_noticing
   end
 
   private
@@ -39,20 +38,19 @@ class DeleteRowPage < ExamplePage
       real table row, and it takes its DOM id from contact_id, its first param. The first
       contact's row is delete-row-contact-row-1, which is exactly what its delete removes.
 
+      The table hands each row its contact with contact_row contact_id: contact.id, since every
+      row needs a different value, which is what receives is for. ContactRow declares contact_id
+      as a param too, so the id rides along with its Delete button.
+
+      The confirmation is one keyword. confirm: has htmx show the browser's own confirm dialog
+      before sending anything, and choosing Cancel sends nothing at all.
+
       dismisses is the delete-shaped verb: an action that sends a DELETE and, when it succeeds,
       removes its component from the page. The button names it with action: :destroy, the block
       deletes the contact, and htmx takes the row out. The row's contact_id travels with the
       button, because an action button carries its component's params. Plain HTML has no DELETE,
       so this one needs JavaScript; that is the nature of the pattern.
 
-      The confirmation is one keyword. confirm: has htmx show the browser's own confirm dialog
-      before sending anything, and choosing Cancel sends nothing at all.
-    TEXT
-  end
-
-  def worth_noticing
-    h2 "Worth Noticing"
-    prose <<~TEXT
       A successful delete answers with nothing. htmx removes the row itself, so Weft does not
       render the component it just helped remove, and build never has to cope with a contact
       that is gone. If the block raises, Weft keeps the row in place and shows the error there,
@@ -63,10 +61,6 @@ class DeleteRowPage < ExamplePage
       with nil: a hash returned from an action becomes params for everything the response
       renders, companions included, so a block run only for what it changes returns nothing.
       In weft 0.3, includes becomes brings.
-
-      The table hands each row its contact with contact_row contact_id: id, since every row needs
-      a different value, which is what receives is for. ContactRow declares contact_id as a
-      param too, so the id rides along with its Delete button.
 
       This site sends every htmx request the visitor's CSRF token as a header, and that is how
       the DELETE carries it, with no form to hold a field. An app of your own needs the same, or

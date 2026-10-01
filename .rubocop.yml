@@ -50,6 +50,8 @@ Metrics/ClassLength:
 
 Metrics/MethodLength:
   Max: 20
+  # A page's prose goes through `prose <<~TEXT`; one heredoc is one statement, not a paragraph of code.
+  CountAsOne: ["heredoc"]
 
 Metrics/ModuleLength:
   Max: 150

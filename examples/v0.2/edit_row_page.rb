@@ -13,7 +13,6 @@ class EditRowPage < ExamplePage
     live { people_table }
     log_warning
     how_it_works
-    worth_noticing
   end
 
   private
@@ -52,30 +51,26 @@ class EditRowPage < ExamplePage
       set their tag_name to tr, and each takes its DOM id from person_id, its first param, so
       every row can be addressed on its own.
 
+      The table hands each row its person. Every row needs a different person_id, so PeopleTable
+      passes each one in with person_row person_id: person.id, which is what receives is for: a
+      value shared down the render tree would be the same for every row. PersonRow declares
+      person_id as a param as well, so its Edit button carries the id, and the row can render on
+      its own.
+
       The buttons hand the row back and forth, as in Click to Edit. The display row's Edit
       transfers to the editor, and the editor's Save and Cancel transfer back to the display row.
       Save updates the person first, so the row it hands back shows the edit. Edit and Cancel
       change nothing on the server, so they declare method: :get and are honest GETs.
+
+      The editor is never in the table's first render. It arrives through Edit, whose request
+      carries person_id, and it declares person_id as a param so its own Save and Cancel carry
+      the id onward.
 
       A form cannot wrap table cells, so the cells point at the form. HTML does not let a form
       span the cells of a row, so the editor puts its form in the last cell, and the name and
       email inputs in the other cells join it through the standard form attribute. Fields joined
       that way are submitted with the form, so htmx sends all three, and so does a plain submit
       without JavaScript.
-    TEXT
-  end
-
-  def worth_noticing
-    h2 "Worth Noticing"
-    prose <<~TEXT
-      The table hands each row its person. Every row needs a different person_id, so PeopleTable
-      passes each one in with person_row person_id: id, which is what receives is for: a value
-      shared down the render tree would be the same for every row. PersonRow declares person_id
-      as a param as well, so its Edit button carries the id, and the row can render on its own.
-
-      The editor is never in the table's first render. It arrives through Edit, whose request
-      carries person_id, and it declares person_id as a param so its own Save and Cancel carry
-      the id onward.
 
       Rows edit independently. Each row has ids of its own (edit-row-person-row-2,
       save-person-2, and so on), so opening one editor leaves the others as they are.

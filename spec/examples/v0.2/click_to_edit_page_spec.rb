@@ -19,7 +19,15 @@ RSpec.describe ClickToEditPage do
   end
 
   it "frames the walkthrough between the heading and the source" do
-    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Worth Noticing", "Pieces You Need"])
+    expect(page.css("h2").map(&:text)).to eq(["How It Works", "Pieces You Need"])
+  end
+
+  # The path of one click first, then what to know before copying it.
+  it "ends How It Works on the note about Cancel's button type" do
+    paragraphs = page.xpath("//h2[.='How It Works']/following-sibling::*").take_while { |node| node.name == "p" }
+
+    expect(paragraphs.first.text).to start_with("Every button here hands this piece of the page")
+    expect(paragraphs.last.text).to start_with('Note type: "button" on Cancel')
   end
 
   it "embeds the visitor's own contact, live, ahead of the explanation" do
