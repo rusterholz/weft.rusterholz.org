@@ -23,7 +23,7 @@ RSpec.describe BulkUpdatePage do
 
     frame = page.at(".live-example")
 
-    expect(frame.element_children.map { |child| child["id"] }).to eq(["member-roster"])
+    expect(frame.element_children.map { |child| child["id"] }).to eq(["bulk-update-member-roster"])
     expect(frame.css("input[type=checkbox][checked]").size).to eq(4)
   end
 

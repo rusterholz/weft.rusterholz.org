@@ -7,7 +7,7 @@ RSpec.describe "the Bulk Update example" do
 
   def bulk_update(ids) = post_form("#{roster_path}/update", ids.nil? ? {} : { active_ids: ids })
 
-  def roster = Nokogiri::HTML5.fragment(last_response.body).at("#member-roster")
+  def roster = Nokogiri::HTML5.fragment(last_response.body).at("#bulk-update-member-roster")
 
   def checked_ids = roster.css("input[type=checkbox][checked]").map { |box| box["value"] }
 

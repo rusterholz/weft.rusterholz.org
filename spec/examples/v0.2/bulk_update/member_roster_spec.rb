@@ -31,11 +31,13 @@ RSpec.describe BulkUpdate::MemberRoster do
     expect(boxes.map { |box| box["value"] }).to eq(%w[1 2 3 4])
   end
 
-  # An array cannot anchor a DOM id, so the roster pins its own.
-  it "keeps one id, which its update aims at" do
-    expect(roster["id"]).to eq("member-roster")
+  # Weft leaves an array out of the id, so the boxes ticked never change it.
+  it "keeps one id whatever is ticked, which its update aims at" do
+    ticked = Nokogiri::HTML5.fragment(described_class.render(active_ids: %w[1 2])).at("div")
+
+    expect([roster["id"], ticked["id"]]).to eq(%w[bulk-update-member-roster bulk-update-member-roster])
     expect(form.to_h).to include("hx-post" => update_path, "action" => update_path, "method" => "post",
-                                 "hx-target" => "#member-roster", "hx-swap" => "outerHTML")
+                                 "hx-target" => "#bulk-update-member-roster", "hx-swap" => "outerHTML")
   end
 
   it "submits with a Bulk Update button, carrying the visitor's CSRF token" do

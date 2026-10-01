@@ -50,10 +50,10 @@ class BulkUpdatePage < ExamplePage
       { status: ... } is how the count reaches the status line. On the first render
       params.status is nil, and the line is not there.
 
-      An array cannot anchor a DOM id. Weft builds a component's DOM id from its first param,
-      which suits a record's id and not an array. So the roster names its own by defining
-      weft_dom_id, and Weft uses that name everywhere it would have used the derived one: on the
-      roster's element, as the target of its update, and on an error that lands in its place.
+      The roster's DOM id stays put. Weft builds a component's DOM id from its first param, but
+      only from a single value, such as a record's id: an array is left out. So the roster is
+      always bulk-update-member-roster, whichever boxes are ticked, and its update lands back in
+      the same place every time.
 
       The checkboxes show what was saved. build ticks each box from the stored member, not from
       what was submitted, so the response reflects the store. And because form(action: :update)

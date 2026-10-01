@@ -21,10 +21,6 @@ module BulkUpdate
       { status: "Activated #{activated} and deactivated #{deactivated} members." }
     end
 
-    # Weft would take the id from the first param, which is an array here and
-    # cannot name an element. A fixed one is where the update aims.
-    def weft_dom_id = "member-roster"
-
     def build(attributes = {})
       super
       form(action: :update) do
