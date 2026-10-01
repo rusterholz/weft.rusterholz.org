@@ -12,6 +12,13 @@ RSpec.describe SiteData::Catalog do
     expect(slugs.last).to eq("updating-other-content")
   end
 
+  # The check fires on change, not as each key is typed.
+  it "says Inline Validation checks a field as the visitor leaves it" do
+    expect(described_class.find("inline-validation").summary).to eq(
+      "Per-field validation as the user leaves each field -- performs + recovers"
+    )
+  end
+
   it "names includes and triggers in the summary with the names weft 0.3 gives them" do
     expect(described_class.find("updating-other-content").summary).to eq(
       "One action updating several regions -- includes + triggers (brings + announces in weft 0.3)"
