@@ -59,7 +59,7 @@ RSpec.describe DeleteRowPage do
 
     it "lists every piece in reading order, the page last, each named and described" do
       expect(pieces.map { |piece| piece.at(".about").text }).to eq(
-        ["ContactData -- where a visitor's contacts are kept, standing in for your database",
+        ["ContactData -- where a visitor's contacts are kept, standing in for your ORM model (SiteData::Records)",
          "ContactBookTable -- the table, handing each row the contact it shows",
          "ContactRow -- one contact, and the button that deletes it",
          "DeleteRowPage -- a page to put it on (yours needs only the contact_book_table call; " \

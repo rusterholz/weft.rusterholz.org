@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class EditRowPage < ExamplePage
-  describes person_data: "where a visitor's people are kept, standing in for your database",
+  describes person_data: "where a visitor's people are kept, standing in for your ORM model",
             people_table: "the table, handing each row the person it shows",
             person_row: "one person at rest, and the button that opens the row for editing",
             person_row_editor: "the row in its editable state, its fields tied to a form in the last cell",

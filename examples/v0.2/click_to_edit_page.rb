@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ClickToEditPage < ExamplePage
-  describes contact_data: "where a visitor's contact is kept, standing in for your database",
+  describes contact_data: "where a visitor's contact is kept, standing in for your ORM model",
             contact_card: "the contact at rest, and the button that opens it for editing",
             contact_editor: "the form in its editable expanded view",
             click_to_edit_page: "a page to put it on (yours needs only the contact_card call; " \

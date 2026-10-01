@@ -62,7 +62,7 @@ RSpec.describe EditRowPage do
 
     it "lists every piece in reading order, the page last, each named and described" do
       expect(pieces.map { |piece| piece.at(".about").text }).to eq(
-        ["PersonData -- where a visitor's people are kept, standing in for your database",
+        ["PersonData -- where a visitor's people are kept, standing in for your ORM model (SiteData::Records)",
          "PeopleTable -- the table, handing each row the person it shows",
          "PersonRow -- one person at rest, and the button that opens the row for editing",
          "PersonRowEditor -- the row in its editable state, its fields tied to a form in the last cell",

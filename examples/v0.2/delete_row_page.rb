@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DeleteRowPage < ExamplePage
-  describes contact_data: "where a visitor's contacts are kept, standing in for your database",
+  describes contact_data: "where a visitor's contacts are kept, standing in for your ORM model",
             contact_book_table: "the table, handing each row the contact it shows",
             contact_row: "one contact, and the button that deletes it",
             delete_row_page: "a page to put it on (yours needs only the contact_book_table call; " \

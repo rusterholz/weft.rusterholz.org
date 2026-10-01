@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class BulkUpdatePage < ExamplePage
-  describes member_data: "where a visitor's members are kept, standing in for your database",
+  describes member_data: "where a visitor's members are kept, standing in for your ORM model",
             member_roster: "the whole roster as one form, its checkboxes and its status line",
             bulk_update_page: "a page to put it on (yours needs only the member_roster call; " \
                               "the rest is this walkthrough)"

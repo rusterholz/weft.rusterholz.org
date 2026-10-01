@@ -76,7 +76,7 @@ RSpec.describe ClickToEditPage do
     # names the class and says what it is for.
     it "lists every piece in reading order, the page last, each named and described" do
       expect(pieces.map { |piece| piece.at(".about").text }).to eq(
-        ["ContactData -- where a visitor's contact is kept, standing in for your database",
+        ["ContactData -- where a visitor's contact is kept, standing in for your ORM model (SiteData::Records)",
          "ContactCard -- the contact at rest, and the button that opens it for editing",
          "ContactEditor -- the form in its editable expanded view",
          "ClickToEditPage -- a page to put it on (yours needs only the contact_card call; " \
@@ -104,7 +104,10 @@ RSpec.describe ClickToEditPage do
     end
 
     it "links each piece's file on GitHub" do
-      expect(pieces.map { |piece| piece.at("a")["href"] }).to eq(piece_paths.map { |path| blob + path })
+      links = pieces.map { |piece| piece.at("> a") }
+
+      expect(links.map(&:text).uniq).to eq(["View on GitHub"])
+      expect(links.map { |link| link["href"] }).to eq(piece_paths.map { |path| blob + path })
     end
 
     describe "the glue after them" do

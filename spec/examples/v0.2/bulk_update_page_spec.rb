@@ -38,7 +38,7 @@ RSpec.describe BulkUpdatePage do
     pieces = page.css("h2:contains('Pieces You Need') + ul > li.piece")
 
     expect(pieces.map { |piece| piece.at(".about").text }).to eq(
-      ["MemberData -- where a visitor's members are kept, standing in for your database",
+      ["MemberData -- where a visitor's members are kept, standing in for your ORM model (SiteData::Records)",
        "MemberRoster -- the whole roster as one form, its checkboxes and its status line",
        "BulkUpdatePage -- a page to put it on (yours needs only the member_roster call; " \
        "the rest is this walkthrough)"]
