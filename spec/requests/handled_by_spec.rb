@@ -145,6 +145,21 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(declarations).to include(handled)
   end
 
+  it "names only what the example's margin can light, through the whole Reset User Input flow" do
+    get "/examples/reset-user-input"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/reset_user_input/comment_section"
+    rendered = handled
+    post_form "/_components/reset_user_input/comment_section/post", author: "Elena", body: "Hi"
+
+    expect(last_response.status).to eq(200)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("ResetUserInput::CommentSection#post")
+    expect(declarations).to include(handled)
+  end
+
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra
   # decodes it, and the header has to name what the router served, no more.
   describe "at the edges of a path, agreeing with weft's router" do
