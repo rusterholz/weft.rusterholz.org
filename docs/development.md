@@ -532,7 +532,7 @@ The real secret appears for the first time at deploy, and only there.
 
 `Rack::Protection::AuthenticityToken` sits between the session and
 `SiteData::VisitorScope`, and answers `403` to any write (a POST, a DELETE,
-anything but a GET) without the session's CSRF token, before weft sees it.
+any method but GET, HEAD, OPTIONS and TRACE) without the session's CSRF token, before weft sees it.
 `VisitorScope` publishes the token as `SiteData::Current.csrf_token`, and it
 reaches a write by two paths.
 

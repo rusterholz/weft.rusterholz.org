@@ -58,6 +58,8 @@ RSpec.describe "the Updating Other Content example" do
     post "#{form_path}/add", name: "Mallory", email: "m@example.com"
 
     expect(last_response.status).to eq(403)
+    get "/examples/updating-other-content"
+    expect(table_names(Nokogiri::HTML5(last_response.body).at(".live-example"))).to eq(["Joe Smith"])
   end
 
   it "shows the next visitor only Joe" do

@@ -14,14 +14,14 @@ module UpdatingOtherContent
           end
         end
         tbody do
-          ContactData.all.each { |contact| contact_row(contact) }
+          ContactData.all.each { |contact| row_for(contact) }
         end
       end
     end
 
     private
 
-    def contact_row(contact)
+    def row_for(contact)
       tr do
         td contact[:name]
         td contact[:email]
