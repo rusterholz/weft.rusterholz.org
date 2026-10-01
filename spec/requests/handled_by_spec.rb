@@ -115,6 +115,21 @@ RSpec.describe "the Weft-Site-Handled header" do
     expect(declarations).to include(handled)
   end
 
+  it "names only what the example's margin can light, through the whole Bulk Update flow" do
+    get "/examples/bulk-update"
+    blocks = margin_marks("data-component")
+    declarations = margin_marks("data-handles")
+
+    get "/_components/bulk_update/member_roster"
+    rendered = handled
+    post_form "/_components/bulk_update/member_roster/update", active_ids: %w[1]
+
+    expect(last_response.status).to eq(200)
+    expect(blocks).to include(rendered)
+    expect(handled).to eq("BulkUpdate::MemberRoster#update")
+    expect(declarations).to include(handled)
+  end
+
   # Weft's router sees the path after Rack::Protection cleans it and Sinatra
   # decodes it, and the header has to name what the router served, no more.
   describe "at the edges of a path, agreeing with weft's router" do
