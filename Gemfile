@@ -18,7 +18,7 @@ gem "zeitwerk"               # app/data's own loader; weft's floor governs the v
 
 group :development, :test do
   gem "nokogiri", "~> 1.18"
-  gem "rack-test", "~> 2.1"
+  gem "rack-test", "~> 2.3"
   gem "rspec", "~> 3.13"
   gem "rubocop", "~> 1.66"
   gem "rubocop-rake", "~> 0.6"
