@@ -17,7 +17,7 @@ gem "rouge", "~> 5.1"        # server-side highlighting for the code each exampl
 gem "zeitwerk"               # app/data's own loader; weft's floor governs the version
 
 group :development, :test do
-  gem "nokogiri", "~> 1.18"
+  gem "nokogiri", "~> 1.19"
   gem "rack-test", "~> 2.1"
   gem "rspec", "~> 3.13"
   gem "rubocop", "~> 1.66"
